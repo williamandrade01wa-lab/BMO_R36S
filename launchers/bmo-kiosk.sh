@@ -3,6 +3,22 @@
 export DISPLAY=:0
 export HOME=/home/r36s
 
+BMO_KIOSK_DEFAULT="/etc/default/bmo-kiosk"
+BMO_UI_ENTRY="index.html"
+
+if [ -r "$BMO_KIOSK_DEFAULT" ]; then
+    # shellcheck disable=SC1090
+    . "$BMO_KIOSK_DEFAULT"
+fi
+
+case "${BMO_UI_ENTRY:-index.html}" in
+    index.html|index.bmo-next.html)
+        ;;
+    *)
+        BMO_UI_ENTRY="index.html"
+        ;;
+esac
+
 for i in $(seq 1 100); do
     xdpyinfo >/dev/null 2>&1 && break
     sleep 0.1
@@ -36,4 +52,4 @@ exec dbus-run-session -- chromium --remote-debugging-address=127.0.0.1 --remote-
   --window-size=640,480 \
   --window-position=0,0 \
   --user-data-dir=/home/r36s/.config/r36s-kiosk \
-  "http://127.0.0.1:8090/index.bmo-next.html?v=$(date +%s)"
+  "http://127.0.0.1:8090/${BMO_UI_ENTRY}?v=$(date +%s)"

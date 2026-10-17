@@ -24,6 +24,8 @@ required=(
   "launchers/bmo-kiosk.sh"
   "launchers/bmo-moonlight-launch.sh"
   "launchers/bmo-moonlight-hotkeys.py"
+  "deploy/r36s/bmo-deploy-helper"
+  "deploy/r36s/bmo-kiosk.default"
 )
 
 for file in "${required[@]}"; do
@@ -68,8 +70,41 @@ done < <(
     -print0
 )
 
+bash -n deploy/r36s/bmo-deploy-helper
+echo "SHELL_OK  : deploy/r36s/bmo-deploy-helper"
+
 echo
-echo "[55%] Marcadores funcionais do candidate..."
+echo "[50%] Runtime candidate/producao..."
+
+grep -Fq 'BMO_UI_ENTRY="index.html"' launchers/bmo-kiosk.sh || {
+  echo "ERRO: kiosk sem fallback seguro para producao" >&2
+  exit 1
+}
+
+grep -Fq 'index.html|index.bmo-next.html' launchers/bmo-kiosk.sh || {
+  echo "ERRO: kiosk sem allowlist de runtime" >&2
+  exit 1
+}
+
+grep -Fxq 'BMO_UI_ENTRY=index.html' deploy/r36s/bmo-kiosk.default || {
+  echo "ERRO: default do kiosk deve apontar para producao" >&2
+  exit 1
+}
+
+grep -Fq 'use-candidate' deploy/r36s/bmo-deploy-helper || {
+  echo "ERRO: helper sem transicao para candidate" >&2
+  exit 1
+}
+
+grep -Fq 'use-production' deploy/r36s/bmo-deploy-helper || {
+  echo "ERRO: helper sem transicao para producao" >&2
+  exit 1
+}
+
+echo "RUNTIME_MODE_OK"
+
+echo
+echo "[60%] Marcadores funcionais do candidate..."
 
 candidate="frontend/index.bmo-next.html"
 
@@ -92,7 +127,7 @@ for marker in "${markers[@]}"; do
 done
 
 echo
-echo "[70%] Arquivos proibidos rastreados..."
+echo "[75%] Arquivos proibidos rastreados..."
 
 if git ls-files | grep -E '(^|/)(Moonlight\.conf|SAVEDATA/|CACHE/|content_history\.lpl$|favorites\.json$)|\.(gba|gb|gbc|sfc|smc|nes|iso|cso|pbp)$' >/tmp/bmo-forbidden-tracked.txt; then
   echo "ERRO: arquivos proibidos encontrados no Git:" >&2
@@ -103,7 +138,7 @@ fi
 echo "TRACKED_FILES_OK"
 
 echo
-echo "[85%] Diff..."
+echo "[90%] Diff..."
 
 if git rev-parse --verify origin/main >/dev/null 2>&1; then
   base="$(git merge-base HEAD origin/main)"

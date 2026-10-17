@@ -52,23 +52,34 @@ bmo_log "50%" "Restaurando frontend do backup $BACKUP_ID..."
 bmo_ssh \
   "sudo -n '$BMO_REMOTE_HELPER' rollback-frontend '$BACKUP_ID'"
 
-bmo_log "75%" "Reiniciando somente kiosk..."
+bmo_log "70%" "Reiniciando kiosk em producao restaurada..."
 
 bmo_ssh \
   "sudo -n '$BMO_REMOTE_HELPER' restart-kiosk"
 
-bmo_log "90%" "Health checks..."
+bmo_log "85%" "Validando runtime..."
+
+RUNTIME_ENTRY="$(
+  bmo_ssh \
+    "sudo -n '$BMO_REMOTE_HELPER' kiosk-entry"
+)"
+
+[ "$RUNTIME_ENTRY" = "index.html" ] ||
+  bmo_die "rollback nao voltou o runtime para producao"
+
+bmo_log "92%" "Health checks..."
 
 bmo_ssh \
-  "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/index.bmo-next.html', timeout=3).read(1)\""
+  "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/index.html', timeout=3).read(1)\""
 
 bmo_ssh \
   "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/health', timeout=3).read(1)\""
 
-bmo_log "100%" "Rollback concluido."
+bmo_log "100%" "Rollback concluido em producao."
 
 echo
 echo "============================================================"
 echo " BMO_ROLLBACK_OK"
 echo " BACKUP_ID=$BACKUP_ID"
+echo " KIOSK_ENTRY=$RUNTIME_ENTRY"
 echo "============================================================"

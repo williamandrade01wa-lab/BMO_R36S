@@ -1,0 +1,3 @@
+# BMO kiosk runtime entry.
+# Normal operation must use production. Candidate is enabled only during a test deploy.
+BMO_UI_ENTRY=index.html

@@ -7,10 +7,59 @@ BACKUPS="/home/r36s/.bmo-deploy/backups"
 
 PRODUCTION="/opt/bmo-ui/index.html"
 CANDIDATE="/opt/bmo-ui/index.bmo-next.html"
+KIOSK_DEFAULT="/etc/default/bmo-kiosk"
 
 fail() {
   echo "ERRO: $*" >&2
   exit 1
+}
+
+kiosk_entry() {
+  local entry="index.html"
+
+  if [ -r "$KIOSK_DEFAULT" ]; then
+    entry="$(
+      sed -n 's/^BMO_UI_ENTRY=//p' "$KIOSK_DEFAULT" |
+      tail -n1
+    )"
+  fi
+
+  case "$entry" in
+    index.html|index.bmo-next.html)
+      printf '%s\n' "$entry"
+      ;;
+    *)
+      printf '%s\n' "index.html"
+      ;;
+  esac
+}
+
+set_kiosk_entry() {
+  local entry="$1"
+  local tmp
+
+  case "$entry" in
+    index.html|index.bmo-next.html)
+      ;;
+    *)
+      fail "kiosk entry invalido"
+      ;;
+  esac
+
+  tmp="$(mktemp)"
+
+  printf 'BMO_UI_ENTRY=%s\n' "$entry" > "$tmp"
+
+  install \
+    -o root \
+    -g root \
+    -m 0644 \
+    "$tmp" \
+    "$KIOSK_DEFAULT"
+
+  rm -f "$tmp"
+
+  echo "KIOSK_ENTRY=$entry"
 }
 
 backup_frontend() {
@@ -75,6 +124,28 @@ case "${1:-}" in
     ls -lh \
       "$PRODUCTION" \
       "$CANDIDATE"
+
+    echo
+    echo "RUNTIME:"
+    echo "KIOSK_ENTRY=$(kiosk_entry)"
+    ;;
+
+  kiosk-entry)
+    kiosk_entry
+    ;;
+
+  use-candidate)
+    [ -f "$CANDIDATE" ] ||
+      fail "candidate inexistente"
+
+    set_kiosk_entry "index.bmo-next.html"
+    ;;
+
+  use-production)
+    [ -f "$PRODUCTION" ] ||
+      fail "producao inexistente"
+
+    set_kiosk_entry "index.html"
     ;;
 
   backup-frontend)
@@ -125,6 +196,8 @@ case "${1:-}" in
       "$CANDIDATE" \
       "$PRODUCTION"
 
+    set_kiosk_entry "index.html"
+
     echo "PRODUCTION_PROMOTE_OK"
     ;;
 
@@ -173,6 +246,8 @@ case "${1:-}" in
         "$PRODUCTION"
     fi
 
+    set_kiosk_entry "index.html"
+
     echo "FRONTEND_ROLLBACK_OK"
     ;;
 
@@ -181,6 +256,9 @@ case "${1:-}" in
     echo
     echo "Comandos permitidos:"
     echo "  status"
+    echo "  kiosk-entry"
+    echo "  use-candidate"
+    echo "  use-production"
     echo "  backup-frontend"
     echo "  install-candidate <arquivo>"
     echo "  restart-kiosk"

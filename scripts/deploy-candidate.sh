@@ -52,7 +52,7 @@ REMOTE_SHA="$(
 
 echo "SHA256_OK=$LOCAL_SHA"
 
-bmo_log "70%" "Instalando candidate com backup automatico..."
+bmo_log "68%" "Instalando candidate com backup automatico..."
 
 INSTALL_OUTPUT="$(
   bmo_ssh \
@@ -70,12 +70,25 @@ BACKUP_ID="$(
 [ -n "$BACKUP_ID" ] ||
   bmo_die "helper nao retornou BACKUP_ID"
 
-bmo_log "82%" "Reiniciando somente kiosk..."
+bmo_log "78%" "Ativando runtime candidate..."
+
+bmo_ssh \
+  "sudo -n '$BMO_REMOTE_HELPER' use-candidate"
+
+bmo_log "84%" "Reiniciando somente kiosk..."
 
 bmo_ssh \
   "sudo -n '$BMO_REMOTE_HELPER' restart-kiosk"
 
 bmo_log "92%" "Health checks..."
+
+RUNTIME_ENTRY="$(
+  bmo_ssh \
+    "sudo -n '$BMO_REMOTE_HELPER' kiosk-entry"
+)"
+
+[ "$RUNTIME_ENTRY" = "index.bmo-next.html" ] ||
+  bmo_die "runtime nao esta apontando para candidate"
 
 bmo_ssh \
   "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/index.bmo-next.html', timeout=3).read(1)\""
@@ -91,11 +104,12 @@ REMOTE_INSTALLED_SHA="$(
 [ "$REMOTE_INSTALLED_SHA" = "$LOCAL_SHA" ] ||
   bmo_die "candidate instalado nao corresponde ao Git"
 
-bmo_log "100%" "Candidate implantado."
+bmo_log "100%" "Candidate implantado e ativo no kiosk."
 
 echo
 echo "BACKUP_ID=$BACKUP_ID"
 echo "CANDIDATE_SHA256=$LOCAL_SHA"
+echo "KIOSK_ENTRY=$RUNTIME_ENTRY"
 echo
 echo "TESTE FISICO OBRIGATORIO NO R36S."
 echo "NAO PROMOVER PRODUCAO AUTOMATICAMENTE."
