@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+INCOMING="/home/r36s/.bmo-deploy/incoming"
+BACKUPS="/home/r36s/.bmo-deploy/backups"
+
+PRODUCTION="/opt/bmo-ui/index.html"
+CANDIDATE="/opt/bmo-ui/index.bmo-next.html"
+
+fail() {
+  echo "ERRO: $*" >&2
+  exit 1
+}
+
+backup_frontend() {
+  local stamp
+
+  stamp="$(date +%Y%m%d-%H%M%S)"
+
+  mkdir -p "$BACKUPS"
+
+  if [ -f "$PRODUCTION" ]; then
+    cp -a \
+      "$PRODUCTION" \
+      "$BACKUPS/index.html.$stamp"
+  fi
+
+  if [ -f "$CANDIDATE" ]; then
+    cp -a \
+      "$CANDIDATE" \
+      "$BACKUPS/index.bmo-next.html.$stamp"
+  fi
+
+  chown -R r36s:r36s "$BACKUPS"
+
+  echo "BACKUP_ID=$stamp"
+}
+
+validate_source() {
+  local src="$1"
+  local real
+
+  [ -f "$src" ] ||
+    fail "arquivo de origem inexistente"
+
+  real="$(realpath "$src")"
+
+  case "$real" in
+    "$INCOMING"/*)
+      ;;
+    *)
+      fail "origem fora da area autorizada"
+      ;;
+  esac
+}
+
+case "${1:-}" in
+
+  status)
+    echo "HOST=$(hostname)"
+    echo "USER=$(whoami)"
+
+    echo
+    echo "SERVICES:"
+
+    systemctl is-active \
+      bmo-ui.service \
+      bmo-kiosk.service \
+      bmo-control-api.service
+
+    echo
+    echo "FRONTEND:"
+
+    ls -lh \
+      "$PRODUCTION" \
+      "$CANDIDATE"
+    ;;
+
+  backup-frontend)
+    backup_frontend
+    ;;
+
+  install-candidate)
+    [ "$#" -eq 2 ] ||
+      fail "uso: install-candidate <arquivo>"
+
+    src="$2"
+
+    validate_source "$src"
+
+    backup_frontend
+
+    install \
+      -o root \
+      -g root \
+      -m 0644 \
+      "$src" \
+      "$CANDIDATE"
+
+    echo "CANDIDATE_INSTALL_OK"
+    ;;
+
+  restart-kiosk)
+    systemctl restart \
+      bmo-kiosk.service
+
+    systemctl is-active \
+      --quiet \
+      bmo-kiosk.service
+
+    echo "KIOSK_RESTART_OK"
+    ;;
+
+  promote-production)
+    [ -f "$CANDIDATE" ] ||
+      fail "candidate inexistente"
+
+    backup_frontend
+
+    install \
+      -o root \
+      -g root \
+      -m 0644 \
+      "$CANDIDATE" \
+      "$PRODUCTION"
+
+    echo "PRODUCTION_PROMOTE_OK"
+    ;;
+
+  list-backups)
+    if [ ! -d "$BACKUPS" ]; then
+      exit 0
+    fi
+
+    find "$BACKUPS" \
+      -maxdepth 1 \
+      -type f \
+      -name 'index.bmo-next.html.*' \
+      -printf '%f\n' |
+      sed 's/^index\.bmo-next\.html\.//' |
+      sort -r
+    ;;
+
+  rollback-frontend)
+    [ "$#" -eq 2 ] ||
+      fail "uso: rollback-frontend <backup-id>"
+
+    id="$2"
+
+    [[ "$id" =~ ^[0-9]{8}-[0-9]{6}$ ]] ||
+      fail "backup-id invalido"
+
+    candidate_backup="$BACKUPS/index.bmo-next.html.$id"
+    production_backup="$BACKUPS/index.html.$id"
+
+    [ -f "$candidate_backup" ] ||
+      fail "backup candidate nao encontrado"
+
+    install \
+      -o root \
+      -g root \
+      -m 0644 \
+      "$candidate_backup" \
+      "$CANDIDATE"
+
+    if [ -f "$production_backup" ]; then
+      install \
+        -o root \
+        -g root \
+        -m 0644 \
+        "$production_backup" \
+        "$PRODUCTION"
+    fi
+
+    echo "FRONTEND_ROLLBACK_OK"
+    ;;
+
+  *)
+    echo "BMO DEPLOY HELPER"
+    echo
+    echo "Comandos permitidos:"
+    echo "  status"
+    echo "  backup-frontend"
+    echo "  install-candidate <arquivo>"
+    echo "  restart-kiosk"
+    echo "  promote-production"
+    echo "  list-backups"
+    echo "  rollback-frontend <backup-id>"
+    exit 2
+    ;;
+
+esac
