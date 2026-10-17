@@ -1,0 +1,50 @@
+# Backups and archives
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.bak
+*.backup
+*.log
+
+# Credentials / keys
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+Moonlight.conf
+
+# ROMs / games / saves / states
+roms/
+ROMs/
+games/
+Games/
+saves/
+states/
+*.gba
+*.gb
+*.gbc
+*.sfc
+*.smc
+*.nes
+*.iso
+*.cso
+*.pbp
+
+# Runtime/local artifacts
+.cache/
+.tmp/
+tmp/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Local deployment material
+.deploy/
+backups/
+checkpoint*/
