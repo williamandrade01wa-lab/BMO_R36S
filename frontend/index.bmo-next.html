@@ -2333,6 +2333,50 @@
 
 </style>
 
+
+<style id="bmoSystemControlV2Css">
+  /* BMO_SYSTEM_CONTROL_V2 */
+
+  .r36-system-v2 .app-topbar {
+    height: 42px;
+    margin-bottom: 8px;
+  }
+
+  .r36-system-v2 .stats-grid {
+    gap: 8px 10px;
+  }
+
+  .r36-system-v2 .stat-card {
+    min-height: 55px;
+    padding: 7px 9px;
+  }
+
+  .r36-system-v2 .stat-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .r36-system-v2 .stat-value {
+    font-size: 14px;
+    line-height: 1.12;
+  }
+
+  .r36-system-v2 .stat-value small {
+    font-size: 10px;
+    opacity: .72;
+  }
+
+  #r36Services.system-health-ok,
+  #ctlDiagnosticsValue.system-health-ok {
+    color: #9CFFB7;
+  }
+
+  #r36Services.system-health-bad,
+  #ctlDiagnosticsValue.system-health-bad {
+    color: #FF8C8C;
+  }
+</style>
+
 </head>
 <body class="state-happy" id="bmoBody">
 
@@ -2440,7 +2484,7 @@
   </section>
 
 
-  <section class="app-screen app-dark" id="r36StatusApp">
+  <section class="app-screen app-dark r36-system-v2" id="r36StatusApp">
     <div class="app-topbar">
       <div class="app-title">R36S // LOCAL</div>
       <div class="app-back">B = VOLTAR</div>
@@ -2454,6 +2498,23 @@
       <div class="stat-card"><div class="stat-label">DISCO</div><div class="stat-value" id="r36Disk">---</div></div>
       <div class="stat-card"><div class="stat-label">UPTIME</div><div class="stat-value" id="r36Uptime">---</div></div>
       <div class="stat-card"><div class="stat-label">LOAD / BRILHO</div><div class="stat-value"><span id="r36Load">---</span><br><span id="r36Brightness">---</span></div></div>
+
+      <!-- BMO_SYSTEM_CONTROL_V2 -->
+      <div class="stat-card">
+        <div class="stat-label">WI-FI / SINAL</div>
+        <div class="stat-value">
+          <span id="r36Wifi">---</span><br>
+          <small id="r36Signal">---</small>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">RUNTIME / SAÚDE</div>
+        <div class="stat-value">
+          <span id="r36Runtime">---</span><br>
+          <small id="r36Services">---</small>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -2703,7 +2764,7 @@
       <div class="ctl-header">
         <div>
           <div class="ctl-title">BMO CONTROL</div>
-          <div class="ctl-subtitle">R36S SYSTEM</div>
+          <div class="ctl-subtitle">SYSTEM + WI-FI</div>
         </div>
 
         <div class="ctl-status" id="ctlStatus">
@@ -2754,7 +2815,7 @@
           <div class="ctl-card" data-ctl="diagnostics">
             <div class="ctl-icon">◆</div>
             <div class="ctl-label">DIAGNÓSTICO</div>
-            <div class="ctl-value">STATUS</div>
+            <div class="ctl-value" id="ctlDiagnosticsValue">VERIFICAR</div>
           </div>
 
           <div class="ctl-card" data-ctl="kiosk_restart">
@@ -3483,10 +3544,57 @@
           const battExtra = d.battery_voltage_v != null ? ` · ${d.battery_voltage_v}V` : '';
           const battStatus = d.battery_status ? ` ${d.battery_status.toUpperCase()}` : '';
           document.getElementById('r36Battery').textContent = `${d.battery_percent ?? '--'}%${battStatus}${battExtra}`;
-          document.getElementById('r36Ram').textContent = `${d.ram_used_mb ?? '--'} / ${d.ram_total_mb ?? '--'} MB`;
-          document.getElementById('r36Disk').textContent = `${d.disk_percent ?? '--'}%`;
-          document.getElementById('r36Uptime').textContent = d.uptime ?? '---';
-          document.getElementById('r36Load').textContent = d.load ?? '---';
+          const memoryPercent =
+            d.system &&
+            d.system.memory &&
+            d.system.memory.percent != null
+              ? ` · ${d.system.memory.percent}%`
+              : '';
+
+          document.getElementById('r36Ram').textContent =
+            `${d.ram_used_mb ?? '--'} / ${d.ram_total_mb ?? '--'} MB${memoryPercent}`;
+
+          document.getElementById('r36Disk').textContent =
+            `${d.disk_percent ?? '--'}%`;
+
+          document.getElementById('r36Uptime').textContent =
+            d.uptime ?? '---';
+
+          const systemLoad =
+            d.system &&
+            d.system.load
+              ? d.system.load
+              : null;
+
+          document.getElementById('r36Load').textContent =
+            systemLoad
+              ? `${systemLoad.load_1m ?? '--'} / ${systemLoad.load_5m ?? '--'} / ${systemLoad.load_15m ?? '--'}`
+              : (d.load ?? '---');
+
+          const net =
+            d.network || {};
+
+          document.getElementById('r36Wifi').textContent =
+            net.connected
+              ? (net.ssid || 'CONECTADO')
+              : 'OFFLINE';
+
+          document.getElementById('r36Signal').textContent =
+            net.connected
+              ? `${net.signal ?? '--'}% · ${net.interface || '--'}`
+              : 'SEM REDE';
+
+          document.getElementById('r36Ip').textContent =
+            net.ip
+              ? `${net.ip}${net.interface ? ' · ' + net.interface : ''}`
+              : (d.ip ?? '---');
+
+          document.getElementById('r36Runtime').textContent =
+            window.location.pathname.includes(
+              'index.bmo-next.html'
+            )
+              ? 'CANDIDATE'
+              : 'PRODUCTION';
         } catch (e) {
           document.getElementById('r36Host').textContent = 'API OFFLINE';
         }
@@ -9216,9 +9324,19 @@
         },
 
         9: () => { // START
-          APPS.close();
+          /*
+           * BMO_SYSTEM_CONTROL_V2
+           * START agora abre o mesmo painel de sistema
+           * usado pelo menu R36S.
+           */
+          if (APPS.current === 'r36status') {
+            APPS.close();
+            return;
+          }
+
           MAIN_MENU.hide();
-          SYSTEM_PANEL.toggle();
+          SYSTEM_PANEL.hide();
+          APPS.open('r36status');
         },
 
         10: () => { // FN
@@ -11009,6 +11127,249 @@ window.stopBmoSleepMode =
 
   refreshBmoWifiQuick();
   setInterval(refreshBmoWifiQuick, 3000);
+})();
+</script>
+
+
+<script id="bmoSystemControlV2Js">
+(() => {
+  'use strict';
+
+  /* BMO_SYSTEM_CONTROL_V2 */
+
+  const SYSTEM_V2 = {
+
+    async diagnostics(showToast = false) {
+
+      const r36Services =
+        document.getElementById(
+          'r36Services'
+        );
+
+      const ctlDiagnostics =
+        document.getElementById(
+          'ctlDiagnosticsValue'
+        );
+
+      try {
+
+        const response =
+          await fetch(
+            BMO_CONTROL.API +
+            '/api/control/diagnostics?t=' +
+            Date.now(),
+            {
+              cache: 'no-store'
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !data.ok
+        ) {
+          throw new Error(
+            data.error ||
+            'diagnostico falhou'
+          );
+        }
+
+        const services =
+          data.services || {};
+
+        const names =
+          Object.keys(
+            services
+          );
+
+        const healthy =
+          names.filter(
+            name =>
+              services[name] === true
+          ).length;
+
+        const total =
+          names.length;
+
+        const allOk =
+          total > 0 &&
+          healthy === total;
+
+        const summary =
+          total
+            ? `${healthy}/${total} ${allOk ? 'OK' : 'ATIVOS'}`
+            : 'SEM DADOS';
+
+        if (r36Services) {
+
+          r36Services.textContent =
+            summary;
+
+          r36Services.classList.toggle(
+            'system-health-ok',
+            allOk
+          );
+
+          r36Services.classList.toggle(
+            'system-health-bad',
+            !allOk
+          );
+        }
+
+        if (ctlDiagnostics) {
+
+          ctlDiagnostics.textContent =
+            summary;
+
+          ctlDiagnostics.classList.toggle(
+            'system-health-ok',
+            allOk
+          );
+
+          ctlDiagnostics.classList.toggle(
+            'system-health-bad',
+            !allOk
+          );
+        }
+
+        if (showToast) {
+
+          const networks =
+            data.networks ?? '--';
+
+          BMO_CONTROL.toast(
+            `${summary} · ${networks} REDES`
+          );
+        }
+
+        return data;
+
+      } catch (err) {
+
+        if (r36Services) {
+
+          r36Services.textContent =
+            'API OFFLINE';
+
+          r36Services.classList.remove(
+            'system-health-ok'
+          );
+
+          r36Services.classList.add(
+            'system-health-bad'
+          );
+        }
+
+        if (ctlDiagnostics) {
+
+          ctlDiagnostics.textContent =
+            'ERRO';
+
+          ctlDiagnostics.classList.remove(
+            'system-health-ok'
+          );
+
+          ctlDiagnostics.classList.add(
+            'system-health-bad'
+          );
+        }
+
+        if (showToast) {
+
+          BMO_CONTROL.toast(
+            'DIAGNÓSTICO FALHOU'
+          );
+        }
+
+        return null;
+      }
+    }
+  };
+
+
+  /*
+   * Toda abertura do R36S SYSTEM faz
+   * uma verificacao real dos services.
+   */
+  const openBeforeSystemV2 =
+    APPS.open.bind(
+      APPS
+    );
+
+  APPS.open =
+    function(name) {
+
+      openBeforeSystemV2(
+        name
+      );
+
+      if (
+        name ===
+        'r36status'
+      ) {
+
+        SYSTEM_V2.diagnostics(
+          false
+        );
+      }
+    };
+
+
+  /*
+   * Ao entrar no CONTROL também atualizamos
+   * o card DIAGNOSTICO uma unica vez.
+   */
+  const controlOpenBeforeSystemV2 =
+    BMO_CONTROL.open.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.open =
+    function() {
+
+      controlOpenBeforeSystemV2();
+
+      SYSTEM_V2.diagnostics(
+        false
+      );
+    };
+
+
+  /*
+   * DIAGNOSTICO agora consulta
+   * /api/control/diagnostics de verdade.
+   */
+  const controlActivateBeforeSystemV2 =
+    BMO_CONTROL.activate.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.activate =
+    function() {
+
+      if (
+        this.view === 'main' &&
+        this.mainActions[
+          this.index
+        ] === 'diagnostics'
+      ) {
+
+        SYSTEM_V2.diagnostics(
+          true
+        );
+
+        return;
+      }
+
+      controlActivateBeforeSystemV2();
+    };
+
+
+  window.BMO_SYSTEM_CONTROL_V2 =
+    SYSTEM_V2;
+
 })();
 </script>
 
