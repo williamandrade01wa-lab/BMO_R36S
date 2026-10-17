@@ -42,6 +42,14 @@ REMOTE_CANDIDATE_SHA="$(
 [ "$LOCAL_SHA" = "$REMOTE_CANDIDATE_SHA" ] ||
   bmo_die "candidate remoto nao corresponde ao candidate deste checkout"
 
+RUNTIME_BEFORE="$(
+  bmo_ssh \
+    "sudo -n '$BMO_REMOTE_HELPER' kiosk-entry"
+)"
+
+[ "$RUNTIME_BEFORE" = "index.bmo-next.html" ] ||
+  bmo_die "promocao exige runtime candidate ativo"
+
 bmo_log "55%" "Promovendo candidate validado..."
 
 OUTPUT="$(
@@ -60,7 +68,12 @@ BACKUP_ID="$(
 [ -n "$BACKUP_ID" ] ||
   bmo_die "helper nao retornou BACKUP_ID"
 
-bmo_log "80%" "Verificando producao..."
+bmo_log "72%" "Reiniciando kiosk em producao..."
+
+bmo_ssh \
+  "sudo -n '$BMO_REMOTE_HELPER' restart-kiosk"
+
+bmo_log "85%" "Verificando producao/runtime..."
 
 REMOTE_PRODUCTION_SHA="$(
   bmo_ssh \
@@ -70,11 +83,26 @@ REMOTE_PRODUCTION_SHA="$(
 [ "$REMOTE_PRODUCTION_SHA" = "$LOCAL_SHA" ] ||
   bmo_die "producao nao corresponde ao candidate"
 
-bmo_log "100%" "Promocao concluida."
+RUNTIME_AFTER="$(
+  bmo_ssh \
+    "sudo -n '$BMO_REMOTE_HELPER' kiosk-entry"
+)"
+
+[ "$RUNTIME_AFTER" = "index.html" ] ||
+  bmo_die "runtime nao voltou para producao"
+
+bmo_ssh \
+  "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/index.html', timeout=3).read(1)\""
+
+bmo_ssh \
+  "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/health', timeout=3).read(1)\""
+
+bmo_log "100%" "Promocao concluida; kiosk voltou para producao."
 
 echo
 echo "BACKUP_ID=$BACKUP_ID"
 echo "PRODUCTION_SHA256=$REMOTE_PRODUCTION_SHA"
+echo "KIOSK_ENTRY=$RUNTIME_AFTER"
 
 echo
 echo "============================================================"
