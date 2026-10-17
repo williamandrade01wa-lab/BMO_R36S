@@ -1,0 +1,2401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BMO Display OS</title>
+
+  <style>
+    /* ==========================================================================
+       BMO DISPLAY OS - TELA CHEIA NATIVA
+       ========================================================================== */
+    :root {
+      /* Cor da Tela BMO (Menta pastel idêntico ao cartoon) */
+      --bmo-bg: #AEE8CA;
+      --bmo-face: #0E362F;
+      --bmo-face-soft: rgba(14, 54, 47, 0.4);
+      --bmo-blush: #FF7B89;
+
+      /* Tipografia */
+      --font-subtitle: Arial, Helvetica, sans-serif;
+      --font-mono: 'Courier New', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bmo-bg);
+      font-family: var(--font-subtitle);
+      cursor: none;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Container de Tela Cheia */
+    .bmo-viewport {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       ROSTO DO BMO (VETORIAL CENTRALIZADO)
+       ========================================================================== */
+    .face-stage {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      position: relative;
+    }
+
+    .face-svg {
+      width: min(88vw, 560px);
+      height: min(64vh, 310px);
+      display: block;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .face-part {
+      fill: var(--bmo-face);
+      stroke: var(--bmo-face);
+      transition: all 0.15s ease-out;
+    }
+
+    /* ==========================================================================
+       ANIMAÇÕES DE EXPRESSÃO
+       ========================================================================== */
+
+    /* 1. Piscar Natural (Usado na maioria das expressões ativas) */
+    .blink-eye {
+      transform-origin: center;
+      animation: bmo-blink 4s infinite ease-in-out;
+    }
+
+    @keyframes bmo-blink {
+      0%, 88%, 94%, 100% { transform: scaleY(1); }
+      90%, 92% { transform: scaleY(0.08); }
+    }
+
+    /* 2. Modo Fala (Boca se movimentando dinamicamente ao falar) */
+    .is-talking .talking-mouth {
+      transform-origin: 220px 145px;
+      animation: bmo-talk-mouth 0.22s infinite alternate ease-in-out;
+    }
+
+    @keyframes bmo-talk-mouth {
+      0% {
+        transform: scaleY(0.4) scaleX(0.9);
+      }
+      50% {
+        transform: scaleY(1.3) scaleX(1.08);
+      }
+      100% {
+        transform: scaleY(0.8) scaleX(1);
+      }
+    }
+
+    /* Leve balanço do rosto durante a fala */
+    .is-talking .face-svg {
+      animation: bmo-talk-bob 0.44s infinite alternate ease-in-out;
+    }
+    @keyframes bmo-talk-bob {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px); }
+    }
+
+    /* 3. Chocado */
+    .state-shocked .face-svg {
+      animation: bmo-shocked-shake 0.12s infinite alternate ease-in-out;
+    }
+    @keyframes bmo-shocked-shake {
+      from { transform: translate(-1.5px, -1px); }
+      to { transform: translate(1.5px, 1px); }
+    }
+
+    /* 4. Dormindo / Standby */
+    .state-sleep .face-svg {
+      animation: bmo-sleep-breath 4.5s infinite ease-in-out;
+    }
+    @keyframes bmo-sleep-breath {
+      0%, 100% {
+        transform: translateY(0px) scale(0.97);
+        opacity: 0.85;
+      }
+      50% {
+        transform: translateY(12px) scale(1.02);
+        opacity: 1;
+      }
+    }
+
+    /* 5. Erro Crítico / Glitch */
+    .state-glitch {
+      background-color: #9cd6ba !important;
+    }
+    .state-glitch .face-svg {
+      animation: bmo-glitch-shake 0.18s infinite steps(2);
+      filter: drop-shadow(-4px 0px #ff0055) drop-shadow(4px 0px #00e5ff);
+    }
+    @keyframes bmo-glitch-shake {
+      0% { transform: translate(0, 0) skew(0deg); }
+      25% { transform: translate(-4px, 2px) skewX(3deg); }
+      50% { transform: translate(4px, -2px) skewX(-3deg); }
+      75% { transform: translate(-2px, -2px); }
+      100% { transform: translate(3px, 2px); }
+    }
+
+    /* 6. Apaixonado (Love) */
+    .state-love .face-svg {
+      animation: bmo-heartbeat 1.6s infinite ease-in-out;
+    }
+    @keyframes bmo-heartbeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.06); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.04); }
+    }
+
+    /* 7. Bravo (Angry) */
+    .state-angry .face-svg {
+      animation: bmo-angry-rumble 2s infinite ease-in-out;
+    }
+    @keyframes bmo-angry-rumble {
+      0%, 90%, 100% { transform: translate(0, 0); }
+      92% { transform: translate(-2px, 1px); }
+      94% { transform: translate(2px, -1px); }
+      96% { transform: translate(-1px, -1px); }
+    }
+
+    /* 8. Rindo (Laugh) */
+    .state-laugh .face-svg {
+      animation: bmo-giggle 0.2s infinite alternate ease-in-out;
+    }
+    @keyframes bmo-giggle {
+      from { transform: translateY(0); }
+      to { transform: translateY(-5px); }
+    }
+
+    /* ==========================================================================
+       LEGENDA CUSTOMIZÁVEL INFERIOR (SUBTITLE / CAPTION DOCK)
+       ========================================================================== */
+    .subtitle-dock {
+      width: 100%;
+      max-width: 900px;
+      padding: 0 18px 22px 18px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .subtitle-box {
+      background: rgba(14, 54, 47, 0.94);
+      color: #AEE8CA;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 3px solid #000000;
+      box-shadow: 4px 4px 0px #000000;
+      font-size: clamp(0.9rem, 2.7vw, 1.15rem);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1.35;
+      max-width: 100%;
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      word-wrap: break-word;
+    }
+
+    /* Estado visível da legenda */
+    .subtitle-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  
+    /* ==========================================================================
+       R36S SYSTEM PANEL
+       ========================================================================== */
+    .system-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      background: #081814;
+      color: #AEE8CA;
+      padding: 22px;
+      font-family: var(--font-mono);
+    }
+
+    .system-panel.visible {
+      display: block;
+    }
+
+    .system-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #AEE8CA;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+
+    .system-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .system-live {
+      font-size: 12px;
+      opacity: .75;
+    }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 18px;
+    }
+
+    .system-card {
+      border: 2px solid #AEE8CA;
+      padding: 12px;
+      min-height: 78px;
+      box-shadow: 4px 4px 0 #000;
+      background: rgba(174, 232, 202, 0.05);
+    }
+
+    .system-label {
+      font-size: 11px;
+      opacity: .68;
+      margin-bottom: 6px;
+      letter-spacing: .08em;
+    }
+
+    .system-value {
+      font-size: 18px;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .system-footer {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      opacity: .7;
+    }
+
+    .sys-ok { color: #9CFFB7; }
+    .sys-bad { color: #FF8C8C; }
+
+  
+    /* ==========================================================================
+       BMO MAIN MENU
+       ========================================================================== */
+    .bmo-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      background: #AEE8CA;
+      color: #0E362F;
+      padding: 22px;
+      font-family: var(--font-mono);
+    }
+    .bmo-menu.visible { display: block; }
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 18px;
+      border-bottom: 3px solid #0E362F;
+      padding-bottom: 10px;
+    }
+    .menu-title { font-size: 26px; font-weight: 900; letter-spacing: .08em; }
+    .menu-hint { font-size: 11px; opacity: .65; }
+    .menu-list { display: flex; flex-direction: column; gap: 10px; }
+    .menu-item {
+      border: 3px solid #0E362F;
+      background: rgba(14,54,47,.04);
+      padding: 12px 14px;
+      min-height: 52px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 900;
+      box-shadow: 4px 4px 0 #0E362F;
+    }
+    .menu-item.active {
+      background: #0E362F;
+      color: #AEE8CA;
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 #000;
+    }
+    .menu-item small { font-size: 11px; opacity: .7; font-weight: 700; }
+    .menu-footer {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      opacity: .65;
+    }
+
+
+    /* ==========================================================================
+       BMO APPS
+       ========================================================================== */
+    .app-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: none;
+      background: #AEE8CA;
+      color: #0E362F;
+      padding: 20px;
+      font-family: var(--font-mono);
+    }
+
+    .app-screen.visible { display: block; }
+
+    .app-dark {
+      background: #081814;
+      color: #AEE8CA;
+    }
+
+    .app-topbar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid currentColor;
+      margin-bottom: 16px;
+    }
+
+    .app-title {
+      font-size: 23px;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
+
+    .app-back {
+      font-size: 11px;
+      opacity: .7;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-card {
+      border: 2px solid currentColor;
+      padding: 11px;
+      min-height: 76px;
+      box-shadow: 4px 4px 0 rgba(0,0,0,.75);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      opacity: .65;
+      margin-bottom: 6px;
+      letter-spacing: .08em;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .clock-wrap {
+      height: calc(100% - 70px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clock-time {
+      font-size: 84px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.06em;
+    }
+
+    .clock-date {
+      margin-top: 18px;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .weather-main {
+      height: calc(100% - 70px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+    }
+
+    .weather-icon {
+      font-size: 90px;
+      line-height: 1;
+    }
+
+    .weather-temp {
+      font-size: 64px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .weather-desc {
+      margin-top: 12px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .weather-meta {
+      margin-top: 12px;
+      font-size: 13px;
+      opacity: .72;
+      line-height: 1.7;
+    }
+
+    .pet-wrap {
+      height: calc(100% - 70px);
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .pet-face {
+      min-height: 260px;
+      border: 3px solid #0E362F;
+      box-shadow: 6px 6px 0 #0E362F;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .pet-eyes {
+      display: flex;
+      gap: 80px;
+      font-size: 54px;
+      font-weight: 900;
+    }
+
+    .pet-mouth {
+      font-size: 65px;
+      line-height: .8;
+      margin-top: 10px;
+    }
+
+    .pet-msg {
+      margin-top: 18px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .pet-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .meter {
+      border: 2px solid #0E362F;
+      padding: 8px;
+    }
+
+    .meter-label {
+      font-size: 10px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .meter-track {
+      height: 15px;
+      border: 2px solid #0E362F;
+      padding: 2px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      background: #0E362F;
+      width: 50%;
+      transition: width .25s ease;
+    }
+
+    .pet-help {
+      font-size: 10px;
+      line-height: 1.6;
+      opacity: .72;
+      margin-top: 5px;
+    }
+
+</style>
+
+<style id="bmo-sleep-style">
+
+#bmoSleepZzz {
+    position: fixed;
+
+    /* posição inicial próxima ao rosto */
+    left: calc(50% + 72px);
+    top: 78px;
+
+    width: 100px;
+    height: 120px;
+
+    pointer-events: none;
+    z-index: 9999;
+
+    opacity: 1;
+}
+
+#bmoSleepZzz.hidden {
+    display: none;
+}
+
+#bmoSleepZzz .bmo-z {
+    position: absolute;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    font-weight: 800;
+    line-height: 1;
+
+    color: rgba(255,255,255,.92);
+
+    text-shadow:
+        0 2px 4px rgba(0,0,0,.20);
+
+    opacity: 0;
+
+    animation:
+        bmoSleepZFloat 1.5s ease-out infinite;
+}
+
+
+/* primeiro Z */
+#bmoSleepZzz .z1 {
+    left: 0px;
+    top: 58px;
+    font-size: 17px;
+
+    animation-delay: .38s;
+}
+
+
+/* segundo Z */
+#bmoSleepZzz .z2 {
+    left: 21px;
+    top: 35px;
+    font-size: 22px;
+
+    animation-delay: .70s;
+}
+
+
+/* terceiro Z */
+#bmoSleepZzz .z3 {
+    left: 49px;
+    top: 5px;
+    font-size: 29px;
+
+    animation-delay: 1.00s;
+}
+
+
+@keyframes bmoSleepZFloat {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translate(0, 4px)
+            scale(.72)
+            rotate(-4deg);
+    }
+
+    18% {
+        opacity: .95;
+    }
+
+    55% {
+        opacity: 1;
+
+        transform:
+            translate(5px, -10px)
+            scale(1)
+            rotate(2deg);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(13px, -27px)
+            scale(1.18)
+            rotate(7deg);
+    }
+}
+
+</style>
+
+</head>
+<body class="state-happy" id="bmoBody">
+
+  <div class="bmo-viewport" id="bmoViewport">
+    <!-- Palco das Expressões Vetoriais -->
+    <section class="face-stage" aria-label="Rosto do BMO">
+      <svg class="face-svg" viewBox="0 0 440 280" id="bmoSvg" xmlns="http://www.w3.org/2000/svg">
+        <!-- SVG montado dinamicamente pelo backend / funções internas -->
+      </svg>
+    </section>
+
+    <!-- Legenda Customizável Embutida -->
+    <footer class="subtitle-dock" aria-live="polite">
+      <div class="subtitle-box" id="bmoSubtitle"></div>
+    </footer>
+  </div>
+
+
+  <section class="system-panel" id="systemPanel" aria-label="Painel do sistema">
+    <div class="system-header">
+      <div class="system-title">BMO // SYSTEM</div>
+      <div class="system-live">START = VOLTAR</div>
+    </div>
+
+    <div class="system-grid">
+      <div class="system-card">
+        <div class="system-label">HOST</div>
+        <div class="system-value" id="sysHost">---</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">CPU TEMP</div>
+        <div class="system-value" id="sysTemp">-- °C</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">IP LAN</div>
+        <div class="system-value" id="sysIp">---</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">INTERNET</div>
+        <div class="system-value" id="sysInternet">---</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">MEMÓRIA</div>
+        <div class="system-value" id="sysRam">---</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">DISCO</div>
+        <div class="system-value" id="sysDisk">---</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">UPTIME</div>
+        <div class="system-value" id="sysUptime">---</div>
+      </div>
+
+      <div class="system-card">
+        <div class="system-label">LOAD</div>
+        <div class="system-value" id="sysLoad">---</div>
+      </div>
+    </div>
+
+    <div class="system-footer">
+      <span>LE POTATO</span>
+      <span>BMO DISPLAY OS</span>
+    </div>
+  </section>
+
+
+
+  <section class="bmo-menu" id="bmoMenu" aria-label="Menu principal">
+    <div class="menu-header">
+      <div class="menu-title">BMO MENU</div>
+      <div class="menu-hint">↑↓ NAV · A OK · B VOLTAR</div>
+    </div>
+    <div class="menu-list" id="menuList">
+      <div class="menu-item active" data-action="r36status"><span>R36S</span><small>STATUS LOCAL</small></div>
+      <div class="menu-item" data-action="lepotato"><span>LE POTATO</span><small>STATUS SERVER</small></div>
+      <div class="menu-item" data-action="clock"><span>RELÓGIO</span><small>HORA + DATA</small></div>
+      <div class="menu-item" data-action="weather"><span>CLIMA</span><small>BRASÍLIA</small></div>
+      <div class="menu-item" data-action="companion"><span>COMPANION</span><small>BMO PET</small></div>
+      <div class="menu-item" data-action="face"><span>ROSTO</span><small>VOLTAR AO BMO</small></div>
+    </div>
+
+    <div class="menu-footer">
+      <span>SELECT = FECHAR</span>
+      <span>BMO DISPLAY OS</span>
+    </div>
+  </section>
+
+
+  <section class="app-screen app-dark" id="r36StatusApp">
+    <div class="app-topbar">
+      <div class="app-title">R36S // LOCAL</div>
+      <div class="app-back">B = VOLTAR</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">HOST</div><div class="stat-value" id="r36Host">---</div></div>
+      <div class="stat-card"><div class="stat-label">CPU TEMP</div><div class="stat-value" id="r36Temp">-- °C</div></div>
+      <div class="stat-card"><div class="stat-label">IP</div><div class="stat-value" id="r36Ip">---</div></div>
+      <div class="stat-card"><div class="stat-label">BATERIA</div><div class="stat-value" id="r36Battery">--%</div></div>
+      <div class="stat-card"><div class="stat-label">RAM</div><div class="stat-value" id="r36Ram">---</div></div>
+      <div class="stat-card"><div class="stat-label">DISCO</div><div class="stat-value" id="r36Disk">---</div></div>
+      <div class="stat-card"><div class="stat-label">UPTIME</div><div class="stat-value" id="r36Uptime">---</div></div>
+      <div class="stat-card"><div class="stat-label">LOAD / BRILHO</div><div class="stat-value"><span id="r36Load">---</span><br><span id="r36Brightness">---</span></div></div>
+    </div>
+  </section>
+
+  <section class="app-screen" id="clockApp">
+    <div class="app-topbar">
+      <div class="app-title">BMO // CLOCK</div>
+      <div class="app-back">B = VOLTAR</div>
+    </div>
+    <div class="clock-wrap">
+      <div class="clock-time" id="clockTime">--:--</div>
+      <div class="clock-date" id="clockDate">---</div>
+    </div>
+  </section>
+
+  <section class="app-screen" id="weatherApp">
+    <div class="app-topbar">
+      <div class="app-title">BMO // CLIMA</div>
+      <div class="app-back">B = VOLTAR</div>
+    </div>
+    <div class="weather-main">
+      <div class="weather-icon" id="weatherIcon">☁</div>
+      <div>
+        <div class="weather-temp" id="weatherTemp">--°</div>
+        <div class="weather-desc" id="weatherDesc">CARREGANDO...</div>
+        <div class="weather-meta" id="weatherMeta">Brasília · --</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="app-screen" id="companionApp">
+    <div class="app-topbar">
+      <div class="app-title">BMO // COMPANION</div>
+      <div class="app-back">A = BRINCAR · X = COMER · B = VOLTAR</div>
+    </div>
+    <div class="pet-wrap">
+      <div class="pet-face">
+        <div class="pet-eyes"><span>●</span><span>●</span></div>
+        <div class="pet-mouth" id="petMouth">⌣</div>
+        <div class="pet-msg" id="petMessage">BMO ESTÁ DE BOA.</div>
+      </div>
+      <div class="pet-stats">
+        <div class="meter">
+          <div class="meter-label">FELICIDADE</div>
+          <div class="meter-track"><div class="meter-fill" id="petHappy"></div></div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">ENERGIA</div>
+          <div class="meter-track"><div class="meter-fill" id="petEnergy"></div></div>
+        </div>
+        <div class="meter">
+          <div class="meter-label">FOME</div>
+          <div class="meter-track"><div class="meter-fill" id="petFood"></div></div>
+        </div>
+        <div class="pet-help">O estado fica salvo neste navegador.</div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /**
+     * =========================================================================
+     * BMO DISPLAY OS - CORE CONTROLLER API
+     * Desenvolvido para controle 100% via Backend / WebSocket / PostMessage
+     * =========================================================================
+     */
+
+    // Dicionário completo de Expressões do BMO fiéis ao traço original
+    const BMO_EXPRESSIONS = {
+      // 1. Feliz / Padrão
+      happy: {
+        id: 'happy',
+        className: 'state-happy',
+        render: (isTalking) => `
+          <circle class="face-part blink-eye" cx="120" cy="130" r="19" />
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
+            : `<path class="face-part" d="M 195 138 Q 220 166 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
+          }
+          <circle class="face-part blink-eye" cx="320" cy="130" r="19" />
+        `
+      },
+
+      // 2. Modo Fala Dedicado
+      talking: {
+        id: 'talking',
+        className: 'state-talking',
+        render: (isTalking) => `
+          <circle class="face-part blink-eye" cx="120" cy="130" r="19" />
+          <ellipse class="face-part talking-mouth" cx="220" cy="145" rx="22" ry="20" />
+          <circle class="face-part blink-eye" cx="320" cy="130" r="19" />
+        `
+      },
+
+      // 3. Chocado / Surpreso
+      shocked: {
+        id: 'shocked',
+        className: 'state-shocked',
+        render: (isTalking) => `
+          <circle class="face-part" cx="115" cy="120" r="24" />
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="150" rx="24" ry="34" />`
+            : `<ellipse class="face-part" cx="220" cy="150" rx="22" ry="34" />`
+          }
+          <circle class="face-part" cx="325" cy="120" r="24" />
+        `
+      },
+
+      // 4. Standby / Dormindo
+      sleep: {
+        id: 'sleep',
+        className: 'state-sleep',
+        render: () => `
+          <path class="face-part" d="M 95 132 Q 120 154 145 132" fill="none" stroke-width="12" stroke-linecap="round" />
+          <path class="face-part" d="M 198 144 Q 220 166 242 144" fill="none" stroke-width="11" stroke-linecap="round" />
+          <path class="face-part" d="M 295 132 Q 320 154 345 132" fill="none" stroke-width="12" stroke-linecap="round" />
+        `
+      },
+
+      // 5. Erro Crítico / Glitch
+      glitch: {
+        id: 'glitch',
+        className: 'state-glitch',
+        render: (isTalking) => `
+          <line class="face-part" x1="95" y1="105" x2="145" y2="155" stroke-width="14" stroke-linecap="round" />
+          <line class="face-part" x1="145" y1="105" x2="95" y2="155" stroke-width="14" stroke-linecap="round" />
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="22" ry="16" />`
+            : `<line class="face-part" x1="185" y1="145" x2="255" y2="145" stroke-width="12" stroke-linecap="round" />`
+          }
+          <line class="face-part" x1="295" y1="105" x2="345" y2="155" stroke-width="14" stroke-linecap="round" />
+          <line class="face-part" x1="345" y1="105" x2="295" y2="155" stroke-width="14" stroke-linecap="round" />
+        `
+      },
+
+      // 6. Apaixonado / Love (Corações nos olhos)
+      love: {
+        id: 'love',
+        className: 'state-love',
+        render: (isTalking) => `
+          <!-- Coração Esquerdo -->
+          <path class="face-part" d="M 120 138 A 12 12 0 0 0 102 120 A 12 12 0 0 0 120 144 A 12 12 0 0 0 138 120 A 12 12 0 0 0 120 138 Z" transform="rotate(45 120 130) scale(1.6) translate(-40, -40)" />
+          <!-- Sorriso -->
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
+            : `<path class="face-part" d="M 195 138 Q 220 168 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
+          }
+          <!-- Coração Direito -->
+          <path class="face-part" d="M 320 138 A 12 12 0 0 0 302 120 A 12 12 0 0 0 320 144 A 12 12 0 0 0 338 120 A 12 12 0 0 0 320 138 Z" transform="rotate(45 320 130) scale(1.6) translate(-85, 20)" />
+        `
+      },
+
+      // 7. Bravo / Irritado
+      angry: {
+        id: 'angry',
+        className: 'state-angry',
+        render: (isTalking) => `
+          <!-- Sobrancelha & Olho Esquerdo -->
+          <line class="face-part" x1="90" y1="105" x2="145" y2="128" stroke-width="12" stroke-linecap="round" />
+          <circle class="face-part blink-eye" cx="120" cy="142" r="16" />
+          <!-- Boca Reta / Irritada -->
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="22" ry="18" />`
+            : `<line class="face-part" x1="190" y1="155" x2="250" y2="155" stroke-width="12" stroke-linecap="round" />`
+          }
+          <!-- Sobrancelha & Olho Direito -->
+          <line class="face-part" x1="350" y1="105" x2="295" y2="128" stroke-width="12" stroke-linecap="round" />
+          <circle class="face-part blink-eye" cx="320" cy="142" r="16" />
+        `
+      },
+
+      // 8. Triste
+      sad: {
+        id: 'sad',
+        className: 'state-sad',
+        render: (isTalking) => `
+          <!-- Sobrancelhas caídas -->
+          <line class="face-part" x1="95" y1="118" x2="145" y2="105" stroke-width="10" stroke-linecap="round" />
+          <circle class="face-part blink-eye" cx="120" cy="135" r="18" />
+          <!-- Boca para baixo -->
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="20" ry="16" />`
+            : `<path class="face-part" d="M 195 158 Q 220 135 245 158" fill="none" stroke-width="12" stroke-linecap="round" />`
+          }
+          <line class="face-part" x1="345" y1="118" x2="295" y2="105" stroke-width="10" stroke-linecap="round" />
+          <circle class="face-part blink-eye" cx="320" cy="135" r="18" />
+        `
+      },
+
+      // 9. Rindo / Gargalhada (Laugh)
+      laugh: {
+        id: 'laugh',
+        className: 'state-laugh',
+        render: (isTalking) => `
+          <!-- Olhos Fechados de Felicidade ^ ^ -->
+          <path class="face-part" d="M 95 138 Q 120 110 145 138" fill="none" stroke-width="12" stroke-linecap="round" />
+          <!-- Boca Aberta Sorrindo 'D' -->
+          <path class="face-part ${isTalking ? 'talking-mouth' : ''}" d="M 190 135 Q 220 130 250 135 Q 220 185 190 135 Z" stroke-width="6" />
+          <path class="face-part" d="M 295 138 Q 320 110 345 138" fill="none" stroke-width="12" stroke-linecap="round" />
+        `
+      },
+
+      // 10. Piscadela / Travesso (Wink)
+      wink: {
+        id: 'wink',
+        className: 'state-wink',
+        render: (isTalking) => `
+          <!-- Olho Fechado piscando -->
+          <line class="face-part" x1="95" y1="130" x2="145" y2="130" stroke-width="13" stroke-linecap="round" />
+          <!-- Boca sorrindo de lado -->
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="225" cy="145" rx="20" ry="18" />`
+            : `<path class="face-part" d="M 195 138 Q 225 170 248 138" fill="none" stroke-width="12" stroke-linecap="round" />`
+          }
+          <!-- Olho Aberto -->
+          <circle class="face-part blink-eye" cx="320" cy="130" r="19" />
+        `
+      },
+
+      // 11. Pensando / Suspeito (Thinking)
+      thinking: {
+        id: 'thinking',
+        className: 'state-thinking',
+        render: (isTalking) => `
+          <ellipse class="face-part blink-eye" cx="120" cy="130" rx="19" ry="14" />
+          ${isTalking 
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="148" rx="18" ry="16" />`
+            : `<path class="face-part" d="M 195 150 Q 220 144 245 148" fill="none" stroke-width="12" stroke-linecap="round" />`
+          }
+          <circle class="face-part blink-eye" cx="320" cy="124" r="21" />
+        `
+      }
+    };
+
+    // Estados internos
+    let currentExpression = 'happy';
+    let isTalking = false;
+    let speechTimer = null;
+
+    const bodyEl = document.getElementById('bmoBody');
+    const svgEl = document.getElementById('bmoSvg');
+    const subtitleEl = document.getElementById('bmoSubtitle');
+
+    /**
+     * Atualiza o render vetorial da tela
+     */
+    function renderFace() {
+      const expr = BMO_EXPRESSIONS[currentExpression] || BMO_EXPRESSIONS.happy;
+      
+      // Classes do body (para transição de animações)
+      bodyEl.className = `${expr.className} ${isTalking ? 'is-talking' : ''}`;
+      
+      // Renderização do SVG
+      svgEl.innerHTML = expr.render(isTalking);
+    }
+
+    /**
+     * =========================================================================
+     * FUNÇÕES PÚBLICAS DO BACKEND / CONTROLE INTERNO
+     * =========================================================================
+     */
+    const BMO = {
+      /**
+       * Define a expressão facial do BMO
+       * @param {string} name - 'happy', 'talking', 'shocked', 'sleep', 'glitch', 'love', 'angry', 'sad', 'laugh', 'wink', 'thinking'
+       */
+      setExpression(name) {
+        if (!BMO_EXPRESSIONS[name]) {
+          console.warn(`[BMO OS] Expressão '${name}' não encontrada. Opções:`, Object.keys(BMO_EXPRESSIONS));
+          return false;
+        }
+        currentExpression = name;
+        renderFace();
+        console.log(`[BMO OS] Expressão: ${name}`);
+        return true;
+      },
+
+      /**
+       * Ativa / Desativa o modo fala (animação da boca)
+       * @param {boolean} talking
+       */
+      setTalking(talking) {
+        isTalking = Boolean(talking);
+        renderFace();
+      },
+
+      /**
+       * Define o texto da legenda na parte inferior
+       * @param {string} text - Texto da legenda (ou vazio/null para esconder)
+       */
+      setSubtitle(text) {
+        if (!text || text.trim() === '') {
+          subtitleEl.classList.remove('visible');
+          setTimeout(() => {
+            subtitleEl.innerText = '';
+          }, 250);
+        } else {
+          subtitleEl.innerText = text;
+          subtitleEl.classList.add('visible');
+        }
+      },
+
+      /**
+       * Limpa a legenda
+       */
+      clearSubtitle() {
+        this.setSubtitle('');
+      },
+
+      /**
+       * MODO FALA COMPLETO:
+       * Mostra a legenda, move a boca do BMO durante a duração e encerra ao final.
+       * 
+       * @param {string} text - Mensagem a ser falada
+       * @param {object} [options]
+       * @param {number} [options.duration] - Duração em ms (se omitido, calcula automaticamente pelo tamanho do texto)
+       * @param {string} [options.expression] - Expressão opcional para assumir durante a fala
+       * @param {boolean} [options.keepSubtitle=false] - Se deve manter a legenda ao terminar de falar
+       */
+      say(text, options = {}) {
+        if (speechTimer) {
+          clearTimeout(speechTimer);
+          speechTimer = null;
+        }
+
+        // Calcula duração baseada no tamanho do texto (~70ms por caractere, mín 1800ms)
+        const duration = options.duration || Math.max(1800, text.length * 75);
+
+        // Se uma expressão for especificada, aplica
+        if (options.expression) {
+          this.setExpression(options.expression);
+        }
+
+        // Ativa fala e legenda
+        this.setSubtitle(text);
+        this.setTalking(true);
+
+        // Timer de término
+        speechTimer = setTimeout(() => {
+          this.setTalking(false);
+          if (!options.keepSubtitle) {
+            this.clearSubtitle();
+          }
+          if (options.onComplete && typeof options.onComplete === 'function') {
+            options.onComplete();
+          }
+        }, duration);
+
+        return { duration };
+      },
+
+      /**
+       * Retorna lista de expressões disponíveis
+       */
+      getExpressions() {
+        return Object.keys(BMO_EXPRESSIONS);
+      },
+
+      /**
+       * Retorna o estado atual
+       */
+      getState() {
+        return {
+          expression: currentExpression,
+          isTalking: isTalking,
+          subtitle: subtitleEl.innerText
+        };
+      }
+    };
+
+    // Exposição global no window
+    window.BMO = BMO;
+    window.setExpression = (name) => BMO.setExpression(name);
+    window.say = (text, opts) => BMO.say(text, opts);
+    window.setSubtitle = (text) => BMO.setSubtitle(text);
+
+    /**
+     * =========================================================================
+     * INTEGRAÇÃO COM BACKEND VIA POSTMESSAGE (IFRAME / ELECTRON / WEBVIEW)
+     * =========================================================================
+     * O backend ou container pode disparar:
+     * window.postMessage({ type: 'BMO_EXPRESSION', expression: 'happy' }, '*')
+     * window.postMessage({ type: 'BMO_SAY', text: 'Olá amigo!', duration: 3000 }, '*')
+     * window.postMessage({ type: 'BMO_SUBTITLE', text: 'Legenda direta' }, '*')
+     */
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      switch (data.type) {
+        case 'BMO_EXPRESSION':
+        case 'EXPRESSION':
+          if (data.expression) BMO.setExpression(data.expression);
+          break;
+        case 'BMO_SAY':
+        case 'SAY':
+          if (data.text) BMO.say(data.text, data);
+          break;
+        case 'BMO_TALKING':
+          BMO.setTalking(Boolean(data.talking));
+          break;
+        case 'BMO_SUBTITLE':
+        case 'SUBTITLE':
+          BMO.setSubtitle(data.text || '');
+          break;
+        case 'BMO_CLEAR':
+          BMO.clearSubtitle();
+          BMO.setTalking(false);
+          break;
+      }
+    });
+
+    /**
+     * =========================================================================
+     * INTEGRAÇÃO VIA QUERY PARAMS DE URL
+     * Permite abrir a página com:
+     * ?expr=love&say=Eu+amo+você!&duration=4000
+     * =========================================================================
+     */
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialExpr = urlParams.get('expr') || urlParams.get('expression') || 'happy';
+    const initialSay = urlParams.get('say') || urlParams.get('speech');
+    const initialSubtitle = urlParams.get('subtitle');
+
+    BMO.setExpression(initialExpr);
+
+    if (initialSay) {
+      const duration = parseInt(urlParams.get('duration')) || undefined;
+      BMO.say(decodeURIComponent(initialSay), { duration });
+    } else if (initialSubtitle) {
+      BMO.setSubtitle(decodeURIComponent(initialSubtitle));
+    }
+
+    /**
+     * Atalhos de teclado internos (apenas para desenvolvedor/testes rápidos)
+     */
+    const exprKeys = BMO.getExpressions();
+    window.addEventListener('keydown', (e) => {
+      // Tecla Espaço alterna falar/parar
+      if (e.code === 'Space') {
+        e.preventDefault();
+        BMO.setTalking(!isTalking);
+        if (!subtitleEl.innerText) {
+          BMO.setSubtitle('BMO está falando...');
+        }
+      }
+      // Teclas 1 a 9 alternam expressões
+      const num = parseInt(e.key);
+      if (!isNaN(num) && num >= 1 && num <= exprKeys.length) {
+        BMO.setExpression(exprKeys[num - 1]);
+      }
+      // Tecla T ativa fala de teste
+      if (e.key.toLowerCase() === 't') {
+        BMO.say('Quem quer jogar videogame comigo?');
+      }
+      // Tecla C limpa legenda
+      if (e.key.toLowerCase() === 'c') {
+        BMO.clearSubtitle();
+      }
+    });
+  
+
+    /* =========================================================================
+       SYSTEM PANEL CONTROLLER
+       ========================================================================= */
+    const SYSTEM_PANEL = {
+      visible: false,
+      el: document.getElementById('systemPanel'),
+      timer: null,
+
+      async refresh() {
+        try {
+          const res = await fetch('/api/status?t=' + Date.now(), { cache: 'no-store' });
+          const d = await res.json();
+
+          document.getElementById('sysHost').textContent = d.hostname ?? '---';
+          document.getElementById('sysTemp').textContent =
+            d.temperature !== undefined ? `${Number(d.temperature).toFixed(1)} °C` : '-- °C';
+          document.getElementById('sysIp').textContent = d.ip ?? '---';
+          document.getElementById('sysRam').textContent =
+            (d.ram_used !== undefined && d.ram_total !== undefined)
+              ? `${d.ram_used} / ${d.ram_total}`
+              : '---';
+          document.getElementById('sysDisk').textContent =
+            d.disk_percent !== undefined ? `${d.disk_percent}%` : '---';
+          document.getElementById('sysUptime').textContent = d.uptime ?? '---';
+          document.getElementById('sysLoad').textContent = d.load ?? '---';
+
+          const internetEl = document.getElementById('sysInternet');
+          const online = Boolean(d.internet);
+          internetEl.textContent = online ? 'ONLINE' : 'OFFLINE';
+          internetEl.className = `system-value ${online ? 'sys-ok' : 'sys-bad'}`;
+        } catch (err) {
+          const internetEl = document.getElementById('sysInternet');
+          internetEl.textContent = 'ERRO';
+          internetEl.className = 'system-value sys-bad';
+        }
+      },
+
+      show() {
+        this.visible = true;
+        this.el.classList.add('visible');
+        this.refresh();
+        clearInterval(this.timer);
+        this.timer = setInterval(() => this.refresh(), 2000);
+      },
+
+      hide() {
+        this.visible = false;
+        this.el.classList.remove('visible');
+        clearInterval(this.timer);
+        this.timer = null;
+      },
+
+      toggle() {
+        this.visible ? this.hide() : this.show();
+      }
+    };
+
+
+    const MAIN_MENU = {
+      visible: false,
+      index: 0,
+      el: document.getElementById('bmoMenu'),
+      items: Array.from(document.querySelectorAll('.menu-item')),
+
+      render() {
+        this.items.forEach((item, i) => item.classList.toggle('active', i === this.index));
+      },
+
+      show() {
+        SYSTEM_PANEL.hide();
+        this.visible = true;
+        this.el.classList.add('visible');
+        this.render();
+      },
+
+      hide() {
+        this.visible = false;
+        this.el.classList.remove('visible');
+      },
+
+      toggle() {
+        this.visible ? this.hide() : this.show();
+      },
+
+      up() {
+        this.index = (this.index - 1 + this.items.length) % this.items.length;
+        this.render();
+      },
+
+      down() {
+        this.index = (this.index + 1) % this.items.length;
+        this.render();
+      },
+
+      select() {
+        const action = this.items[this.index]?.dataset.action;
+        this.hide();
+
+        if (action === 'r36status') APPS.open('r36status');
+        else if (action === 'lepotato') SYSTEM_PANEL.show();
+        else if (action === 'clock') APPS.open('clock');
+        else if (action === 'weather') APPS.open('weather');
+        else if (action === 'companion') APPS.open('companion');
+        else if (action === 'face') APPS.close();
+      }
+    };
+
+
+    /* =========================================================================
+       BMO APPS CONTROLLER
+       ========================================================================= */
+    const R36S_API = 'http://127.0.0.1:8086/api/status';
+
+    const APPS = {
+      current: null,
+      timer: null,
+
+      screens: {
+        r36status: document.getElementById('r36StatusApp'),
+        clock: document.getElementById('clockApp'),
+        weather: document.getElementById('weatherApp'),
+        companion: document.getElementById('companionApp')
+      },
+
+      hideAll() {
+        Object.values(this.screens).forEach(el => el.classList.remove('visible'));
+        clearInterval(this.timer);
+        this.timer = null;
+      },
+
+      open(name) {
+        MAIN_MENU.hide();
+        SYSTEM_PANEL.hide();
+        this.hideAll();
+        this.current = name;
+
+        const el = this.screens[name];
+        if (!el) return;
+        el.classList.add('visible');
+
+        if (name === 'r36status') {
+          this.updateR36();
+          this.timer = setInterval(() => this.updateR36(), 2000);
+        } else if (name === 'clock') {
+          this.updateClock();
+          this.timer = setInterval(() => this.updateClock(), 1000);
+        } else if (name === 'weather') {
+          this.updateWeather();
+          this.timer = setInterval(() => this.updateWeather(), 10 * 60 * 1000);
+        } else if (name === 'companion') {
+          COMPANION.render();
+        }
+      },
+
+      close() {
+        this.hideAll();
+        this.current = null;
+      },
+
+      async updateR36() {
+        try {
+          const res = await fetch(R36S_API + '?t=' + Date.now(), { cache: 'no-store' });
+          const d = await res.json();
+          document.getElementById('r36Host').textContent = d.hostname ?? '---';
+          document.getElementById('r36Temp').textContent = d.temperature_c != null ? `${d.temperature_c.toFixed(1)} °C` : '-- °C';
+          document.getElementById('r36Ip').textContent = d.ip ?? '---';
+          document.getElementById('r36Brightness').textContent = `BR ${d.brightness ?? '--'} / ${d.max_brightness ?? '--'}`;
+          const battExtra = d.battery_voltage_v != null ? ` · ${d.battery_voltage_v}V` : '';
+          const battStatus = d.battery_status ? ` ${d.battery_status.toUpperCase()}` : '';
+          document.getElementById('r36Battery').textContent = `${d.battery_percent ?? '--'}%${battStatus}${battExtra}`;
+          document.getElementById('r36Ram').textContent = `${d.ram_used_mb ?? '--'} / ${d.ram_total_mb ?? '--'} MB`;
+          document.getElementById('r36Disk').textContent = `${d.disk_percent ?? '--'}%`;
+          document.getElementById('r36Uptime').textContent = d.uptime ?? '---';
+          document.getElementById('r36Load').textContent = d.load ?? '---';
+        } catch (e) {
+          document.getElementById('r36Host').textContent = 'API OFFLINE';
+        }
+      },
+
+      updateClock() {
+        const now = new Date();
+        document.getElementById('clockTime').textContent =
+          now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('clockDate').textContent =
+          now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase();
+      },
+
+      weatherText(code) {
+        if (code === 0) return ['☀', 'CÉU LIMPO'];
+        if ([1,2].includes(code)) return ['⛅', 'PARCIALMENTE NUBLADO'];
+        if (code === 3) return ['☁', 'NUBLADO'];
+        if ([45,48].includes(code)) return ['≋', 'NEBLINA'];
+        if ([51,53,55,56,57].includes(code)) return ['☂', 'GAROA'];
+        if ([61,63,65,66,67,80,81,82].includes(code)) return ['☂', 'CHUVA'];
+        if ([71,73,75,77,85,86].includes(code)) return ['✻', 'NEVE'];
+        if ([95,96,99].includes(code)) return ['ϟ', 'TEMPESTADE'];
+        return ['☁', 'TEMPO'];
+      },
+
+      async updateWeather() {
+        try {
+          // Brasília - configuração inicial; pode ser trocada depois.
+          const url = 'https://api.open-meteo.com/v1/forecast?latitude=-15.7939&longitude=-47.8828&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&timezone=America%2FSao_Paulo';
+          const res = await fetch(url);
+          const d = await res.json();
+          const c = d.current;
+          const [icon, desc] = this.weatherText(c.weather_code);
+          document.getElementById('weatherIcon').textContent = icon;
+          document.getElementById('weatherTemp').textContent = `${Math.round(c.temperature_2m)}°`;
+          document.getElementById('weatherDesc').textContent = desc;
+          document.getElementById('weatherMeta').innerHTML =
+            `BRASÍLIA<br>SENSAÇÃO ${Math.round(c.apparent_temperature)}° · UMIDADE ${c.relative_humidity_2m}%<br>VENTO ${Math.round(c.wind_speed_10m)} km/h`;
+        } catch (e) {
+          document.getElementById('weatherDesc').textContent = 'SEM CONEXÃO';
+          document.getElementById('weatherMeta').textContent = 'TENTE NOVAMENTE DEPOIS';
+        }
+      }
+    };
+
+    const COMPANION = {
+      state: JSON.parse(localStorage.getItem('bmoCompanion') || '{"happy":72,"energy":76,"food":68}'),
+
+      save() {
+        localStorage.setItem('bmoCompanion', JSON.stringify(this.state));
+      },
+
+      clamp() {
+        for (const k of ['happy','energy','food']) {
+          this.state[k] = Math.max(0, Math.min(100, this.state[k]));
+        }
+      },
+
+      render() {
+        this.clamp();
+        document.getElementById('petHappy').style.width = this.state.happy + '%';
+        document.getElementById('petEnergy').style.width = this.state.energy + '%';
+        document.getElementById('petFood').style.width = this.state.food + '%';
+
+        const avg = (this.state.happy + this.state.energy + this.state.food) / 3;
+        document.getElementById('petMouth').textContent = avg > 65 ? '⌣' : avg > 35 ? '—' : '⌢';
+      },
+
+      play() {
+        this.state.happy += 12;
+        this.state.energy -= 7;
+        this.state.food -= 4;
+        document.getElementById('petMessage').textContent = 'ISSO FOI DIVERTIDO!';
+        this.save(); this.render();
+      },
+
+      feed() {
+        this.state.food += 16;
+        this.state.happy += 3;
+        document.getElementById('petMessage').textContent = 'NHAM NHAM!';
+        this.save(); this.render();
+      }
+    };
+
+
+    /* =========================================================================
+       BMO EVENT ENGINE
+       Reage a mudanças reais do R36S sem sobrescrever constantemente o usuário.
+       ========================================================================= */
+    const BMO_EVENTS = {
+      lastBatteryBand: null,
+      lastChargeState: null,
+      lastTempBand: null,
+      busyUntil: 0,
+
+      isBusy() {
+        return Date.now() < this.busyUntil ||
+               MAIN_MENU.visible ||
+               SYSTEM_PANEL.visible ||
+               APPS.current !== null;
+      },
+
+      react(expression, text, duration = 3200) {
+        if (this.isBusy()) return;
+
+        this.busyUntil = Date.now() + duration + 1200;
+
+        BMO.say(text, {
+          expression,
+          duration,
+          keepSubtitle: false,
+          onComplete: () => {
+            setTimeout(() => {
+              if (!MAIN_MENU.visible && !SYSTEM_PANEL.visible && !APPS.current) {
+                BMO.setExpression('happy');
+              }
+            }, 300);
+          }
+        });
+      },
+
+      batteryBand(percent) {
+        if (percent == null) return null;
+        if (percent <= 5) return 'critical';
+        if (percent <= 15) return 'verylow';
+        if (percent <= 30) return 'low';
+        if (percent >= 95) return 'full';
+        return 'normal';
+      },
+
+      tempBand(temp) {
+        if (temp == null) return null;
+        if (temp >= 80) return 'critical';
+        if (temp >= 70) return 'hot';
+        return 'normal';
+      },
+
+      async poll() {
+        try {
+          const res = await fetch(R36S_API + '?t=' + Date.now(), { cache: 'no-store' });
+          const d = await res.json();
+
+          // BATERIA
+          const band = this.batteryBand(d.battery_percent);
+          if (band && band !== this.lastBatteryBand) {
+            const previous = this.lastBatteryBand;
+            this.lastBatteryBand = band;
+
+            if (previous !== null) {
+              if (band === 'critical') {
+                this.react('shocked', `BMO precisa de energia! Bateria em ${d.battery_percent}%.`, 4200);
+              } else if (band === 'verylow') {
+                this.react('sad', `Minha bateria está bem baixa... ${d.battery_percent}%.`, 3600);
+              } else if (band === 'low') {
+                this.react('thinking', `Energia em ${d.battery_percent}%. Melhor procurar um carregador.`, 3800);
+              } else if (band === 'full') {
+                this.react('happy', 'Energia restaurada! BMO está pronto!', 3400);
+              }
+            }
+          }
+
+          // CARREGAMENTO / DESCARGA
+          const charge = String(d.battery_status || '').toLowerCase();
+          if (charge && charge !== this.lastChargeState) {
+            const previousCharge = this.lastChargeState;
+            this.lastChargeState = charge;
+
+            if (previousCharge !== null) {
+              if (charge === 'charging') {
+                this.react('love', 'Ahhh! Energia chegando!', 3000);
+              } else if (previousCharge === 'charging' && charge !== 'charging') {
+                this.react('happy', `Desconectado. Bateria em ${d.battery_percent ?? '--'}%.`, 3000);
+              }
+            }
+          }
+
+          // TEMPERATURA
+          const tempBand = this.tempBand(d.temperature_c);
+          if (tempBand && tempBand !== this.lastTempBand) {
+            const previousTemp = this.lastTempBand;
+            this.lastTempBand = tempBand;
+
+            if (previousTemp !== null) {
+              if (tempBand === 'critical') {
+                this.react('shocked', `Uau! Estou muito quente: ${Math.round(d.temperature_c)} graus!`, 4200);
+              } else if (tempBand === 'hot') {
+                this.react('thinking', `Estou um pouco quente... ${Math.round(d.temperature_c)} graus.`, 3600);
+              } else if (previousTemp !== 'normal' && tempBand === 'normal') {
+                this.react('happy', 'Temperatura normal novamente!', 3000);
+              }
+            }
+          }
+
+        } catch (e) {
+          // O motor de eventos falha silenciosamente para não incomodar o usuário.
+        }
+      },
+
+      start() {
+        this.poll();
+        setInterval(() => this.poll(), 15000);
+      }
+    };
+
+    BMO_EVENTS.start();
+
+    /* =========================================================================
+       R36S GAMEPAD BRIDGE
+       Lê o GO-Super Gamepad diretamente pela Gamepad API do Chromium.
+       ========================================================================= */
+
+    function setExpressionAndSound(expression) {
+      BMO.setExpression(expression);
+
+      if (typeof window.playBmoSound === "function") {
+        window.playBmoSound(expression);
+      }
+    }
+
+    const R36S_GAMEPAD = {
+      previous: [],
+      connected: false,
+      statusTimer: null,
+
+      actions: {
+        0: () => { // B
+          if (APPS.current) APPS.close();
+          else if (MAIN_MENU.visible) MAIN_MENU.hide();
+          else setExpressionAndSound('shocked');
+        },
+
+        1: () => { // A
+          if (APPS.current === 'companion') COMPANION.play();
+          else if (MAIN_MENU.visible) MAIN_MENU.select();
+          else setExpressionAndSound('happy');
+        },
+
+        2: () => { // X
+          if (APPS.current === 'companion') COMPANION.feed();
+          else if (!APPS.current) setExpressionAndSound('love');
+        },
+
+        3: () => { // Y
+          if (!APPS.current) setExpressionAndSound('glitch');
+        },
+
+        4: () => { // L1
+          if (!APPS.current) setExpressionAndSound('thinking');
+        },
+
+        5: () => { // R1
+          if (!APPS.current) setExpressionAndSound('wink');
+        },
+
+        6: () => { // L2
+          if (!APPS.current) setExpressionAndSound('sad');
+        },
+
+        7: () => { // R2
+          if (!APPS.current) setExpressionAndSound('angry');
+        },
+
+        8: () => { // SELECT
+          if (APPS.current) APPS.close();
+          else MAIN_MENU.toggle();
+        },
+
+        9: () => { // START
+          APPS.close();
+          MAIN_MENU.hide();
+          SYSTEM_PANEL.toggle();
+        },
+
+        10: () => { // FN
+          if (!APPS.current) setExpressionAndSound('talking');
+        },
+
+        11: () => { // L3
+          if (!APPS.current) setExpressionAndSound('laugh');
+        },
+
+        12: () => { // R3
+          if (!APPS.current) setExpressionAndSound('sleep');
+        },
+
+        13: () => { // DPAD UP
+          if (MAIN_MENU.visible) MAIN_MENU.up();
+          else if (!APPS.current) setExpressionAndSound('happy');
+        },
+
+        14: () => { // DPAD DOWN
+          if (MAIN_MENU.visible) MAIN_MENU.down();
+          else if (!APPS.current) setExpressionAndSound('sad');
+        },
+
+        15: () => { // DPAD LEFT
+          // reservado
+        },
+
+        16: () => { // DPAD RIGHT
+          // reservado
+        }
+      },
+
+      poll() {
+        const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+        let gp = null;
+
+        for (const pad of pads) {
+          if (pad && pad.connected) {
+            gp = pad;
+            break;
+          }
+        }
+
+        if (gp) {
+          if (!this.connected) {
+            this.connected = true;
+            this.previous = new Array(gp.buttons.length).fill(false);
+            BMO.setSubtitle('CONTROLE CONECTADO');
+            clearTimeout(this.statusTimer);
+            this.statusTimer = setTimeout(() => BMO.clearSubtitle(), 1400);
+          }
+
+          gp.buttons.forEach((button, index) => {
+            const pressed = !!button.pressed;
+
+            if (pressed && !this.previous[index]) {
+              const action = this.actions[index];
+
+              if (SYSTEM_PANEL.visible) {
+                if ([0, 8, 9].includes(index) && action) action();
+              } else if (APPS.current) {
+                if ([0, 1, 2, 8, 9].includes(index) && action) action();
+              } else if (MAIN_MENU.visible) {
+                if ([0, 1, 8, 9, 13, 14].includes(index) && action) action();
+              } else if (action) {
+                action();
+              }
+
+              console.log('[R36S] botão:', index, 'valor:', button.value);
+            }
+
+            this.previous[index] = pressed;
+          });
+        } else if (this.connected) {
+          this.connected = false;
+          this.previous = [];
+        }
+
+        requestAnimationFrame(() => this.poll());
+      }
+    };
+
+    window.addEventListener('gamepadconnected', (event) => {
+      console.log('[R36S] Gamepad conectado:', event.gamepad.id,
+                  'mapping:', event.gamepad.mapping,
+                  'buttons:', event.gamepad.buttons.length);
+    });
+
+    window.addEventListener('gamepaddisconnected', (event) => {
+      console.log('[R36S] Gamepad desconectado:', event.gamepad.id);
+    });
+
+    R36S_GAMEPAD.poll();
+
+  </script>
+
+<!-- R36S BATTERY WIDGET -->
+<style>
+  #r36sBattery {
+    position: fixed;
+    top: 12px;
+    right: 14px;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: var(--bmo-face);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 900;
+
+    opacity: .88;
+    pointer-events: none;
+  }
+
+  #r36sBatteryIcon {
+    position: relative;
+    width: 27px;
+    height: 14px;
+
+    border: 2px solid var(--bmo-face);
+    border-radius: 3px;
+
+    overflow: visible;
+  }
+
+  #r36sBatteryIcon::after {
+    content: "";
+    position: absolute;
+
+    right: -5px;
+    top: 3px;
+
+    width: 3px;
+    height: 6px;
+
+    background: var(--bmo-face);
+    border-radius: 0 2px 2px 0;
+  }
+
+  #r36sBatteryFill {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    bottom: 2px;
+
+    width: 0%;
+    max-width: calc(100% - 4px);
+
+    background: var(--bmo-face);
+    border-radius: 1px;
+
+    transition: width .35s ease;
+  }
+
+  #r36sBatteryBolt {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 900;
+
+    color: var(--bmo-bg);
+
+    display: none;
+    z-index: 2;
+  }
+
+  #r36sBattery.charging #r36sBatteryBolt {
+    display: block;
+  }
+
+  #r36sBattery.offline {
+    opacity: .35;
+  }
+</style>
+
+<div id="r36sBattery" class="offline">
+  <div id="r36sBatteryIcon">
+    <div id="r36sBatteryFill"></div>
+    <div id="r36sBatteryBolt">⚡</div>
+  </div>
+  <span id="r36sBatteryText">--%</span>
+</div>
+
+<script>
+(() => {
+  const API = "http://192.168.1.28:8083/api/battery";
+
+  const root = document.getElementById("r36sBattery");
+  const fill = document.getElementById("r36sBatteryFill");
+  const text = document.getElementById("r36sBatteryText");
+
+  let lastState = null;
+
+  async function updateR36SBattery() {
+    try {
+      const response = await fetch(API, {
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+      }
+
+      const data = await response.json();
+
+      const percent = Math.max(
+        0,
+        Math.min(100, Number(data.percent) || 0)
+      );
+
+      root.classList.remove("offline");
+      root.classList.toggle("charging", data.charging === true);
+
+      fill.style.width = percent + "%";
+      text.textContent = percent + "%";
+
+      root.title =
+        `${data.state || "unknown"} | ` +
+        `${data.voltage ?? "?"} V | ` +
+        `${data.current_ma ?? "?"} mA`;
+
+      window.R36S_BATTERY = data;
+
+      const state = data.charging ? "charging" : "discharging";
+
+      if (lastState !== null && state !== lastState) {
+        window.dispatchEvent(new CustomEvent("r36s-battery-state", {
+          detail: data
+        }));
+      }
+
+      lastState = state;
+
+    } catch (err) {
+      root.classList.add("offline");
+      root.classList.remove("charging");
+      text.textContent = "--%";
+
+      window.R36S_BATTERY = null;
+    }
+  }
+
+  updateR36SBattery();
+  setInterval(updateR36SBattery, 5000);
+
+  window.updateR36SBattery = updateR36SBattery;
+})();
+</script>
+
+
+<script>
+
+/* BMO SOUND BRIDGE */
+
+const BMO_SOUND_API =
+    "http://127.0.0.1:8087/api/sound";
+
+const BMO_SOUND_MAP = {
+    happy: "happy",
+    thinking: "thinking",
+    sad: "sad",
+    angry: "angry",
+    love: "love",
+    shocked: "shocked",
+    wink: "wink",
+    sleep: "sleep",
+
+    glitch: "error",
+    error: "error",
+
+    laugh: "laugh",
+    talking: "talking",
+
+    success: "success"
+};
+
+let lastBmoSound = "";
+let lastBmoSoundAt = 0;
+
+let bmoSleepTimer = null;
+
+
+/* =========================================================
+   ZZZ VISUAL
+   ========================================================= */
+
+function ensureBmoSleepZzz() {
+
+    let zzz =
+        document.getElementById(
+            "bmoSleepZzz"
+        );
+
+    if (zzz)
+        return zzz;
+
+
+    zzz =
+        document.createElement("div");
+
+    zzz.id =
+        "bmoSleepZzz";
+
+    zzz.className =
+        "hidden";
+
+    zzz.innerHTML = `
+        <span class="bmo-z z1">Z</span>
+        <span class="bmo-z z2">Z</span>
+        <span class="bmo-z z3">Z</span>
+    `;
+
+    document.body.appendChild(zzz);
+
+    return zzz;
+}
+
+
+/* =========================================================
+   PLAYER REAL
+   ========================================================= */
+
+function triggerBmoSound(sound) {
+
+    fetch(
+        BMO_SOUND_API,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                sound: sound
+            })
+        }
+    ).catch(error => {
+
+        console.warn(
+            "[BMO SOUND]",
+            error
+        );
+
+    });
+}
+
+
+/* =========================================================
+   SLEEP
+   ========================================================= */
+
+function startBmoSleepMode() {
+
+    const zzz =
+        ensureBmoSleepZzz();
+
+
+    zzz.classList.remove(
+        "hidden"
+    );
+
+
+    /*
+     * Se o loop já existe,
+     * não cria outro.
+     */
+    if (bmoSleepTimer)
+        return;
+
+
+    console.log(
+        "[BMO SLEEP] iniciado"
+    );
+
+
+    /*
+     * Reinicia animação visual
+     * para sincronizar com o áudio.
+     */
+    zzz.style.animation = "none";
+
+    void zzz.offsetHeight;
+
+    zzz.style.animation = "";
+
+
+    /*
+     * Primeiro ciclo imediatamente.
+     */
+    triggerBmoSound("sleep");
+
+
+    /*
+     * Nosso WAV tem aproximadamente
+     * 1,5 segundo.
+     */
+    bmoSleepTimer =
+        setInterval(
+            () => {
+
+                triggerBmoSound(
+                    "sleep"
+                );
+
+            },
+            4900
+        );
+}
+
+
+function stopBmoSleepMode() {
+
+    const zzz =
+        document.getElementById(
+            "bmoSleepZzz"
+        );
+
+
+    if (zzz) {
+
+        zzz.classList.add(
+            "hidden"
+        );
+    }
+
+
+    if (bmoSleepTimer) {
+
+        clearInterval(
+            bmoSleepTimer
+        );
+
+        bmoSleepTimer = null;
+
+        console.log(
+            "[BMO SLEEP] finalizado"
+        );
+    }
+}
+
+
+/* =========================================================
+   EXPRESSÃO -> SOM
+   ========================================================= */
+
+function playBmoSound(expression) {
+
+    const sound =
+        BMO_SOUND_MAP[expression];
+
+
+    if (!sound)
+        return;
+
+
+    /*
+     * SLEEP é um estado contínuo.
+     */
+    if (sound === "sleep") {
+
+        startBmoSleepMode();
+
+        return;
+    }
+
+
+    /*
+     * Qualquer outro som acorda o BMO.
+     */
+    stopBmoSleepMode();
+
+
+    const now =
+        Date.now();
+
+
+    /*
+     * Proteção contra evento duplicado.
+     */
+    if (
+        sound === lastBmoSound
+        &&
+        now - lastBmoSoundAt < 250
+    ) {
+        return;
+    }
+
+
+    lastBmoSound =
+        sound;
+
+    lastBmoSoundAt =
+        now;
+
+
+    triggerBmoSound(
+        sound
+    );
+}
+
+
+/*
+ * Deixamos explícito no window
+ * porque os controles físicos também
+ * consultam essa função.
+ */
+window.playBmoSound =
+    playBmoSound;
+
+window.startBmoSleepMode =
+    startBmoSleepMode;
+
+window.stopBmoSleepMode =
+    stopBmoSleepMode;
+
+
+/* BMO HUB BRIDGE - SSE */
+
+(() => {
+
+    const HUB_EVENTS =
+        "http://192.168.1.50:8084/api/events";
+
+    let lastEventTimestamp = 0;
+
+    function setExpression(expression) {
+
+        if (!window.BMO)
+            return;
+
+        try {
+
+            if (typeof window.BMO.setExpression === "function") {
+                window.BMO.setExpression(expression);
+                return;
+            }
+
+            if (typeof window.BMO.expression === "function") {
+                window.BMO.expression(expression);
+                return;
+            }
+
+        } catch (e) {
+            console.warn("[BMO SSE] expressão:", e);
+        }
+    }
+
+
+    function applyEvent(data) {
+
+        if (!data)
+            return;
+
+        const eventTimestamp =
+            Number(data.timestamp || 0);
+
+        if (
+            eventTimestamp > 0
+            && eventTimestamp <= lastEventTimestamp
+        )
+            return;
+
+        if (eventTimestamp > 0)
+            lastEventTimestamp = eventTimestamp;
+
+
+        // ------------------------------------------
+        // BMO começa a pensar imediatamente
+        // ------------------------------------------
+
+        if (data.source === "pending") {
+
+            console.log(
+                "[BMO SSE] THINKING:",
+                data.question || ""
+            );
+
+            setExpression("thinking");
+            playBmoSound("thinking");
+
+            return;
+        }
+
+
+        // ------------------------------------------
+        // Resposta pronta
+        // ------------------------------------------
+
+        const fala =
+            String(data.fala || "").trim();
+
+        const expressao =
+            String(data.expressao || "thinking").trim();
+
+
+        if (!fala)
+            return;
+
+
+        console.log(
+            "[BMO SSE] RESPONSE:",
+            expressao,
+            fala
+        );
+
+
+        if (!window.BMO)
+            return;
+
+
+        try {
+
+            if (typeof window.BMO.say === "function") {
+
+                const duration = Math.max(
+                    1800,
+                    Math.min(
+                        7000,
+                        fala.length * 65
+                    )
+                );
+
+                window.BMO.say(
+                    fala,
+                    {
+                        expression: expressao,
+                        duration: duration
+                    }
+                );
+
+                playBmoSound(expressao);
+
+            } else {
+
+                setExpression(expressao);
+                playBmoSound(expressao);
+            }
+
+        } catch (e) {
+
+            console.warn(
+                "[BMO SSE] erro aplicando resposta:",
+                e
+            );
+        }
+    }
+
+
+    function connect() {
+
+        console.log("[BMO SSE] conectando ao Hub...");
+
+        const source =
+            new EventSource(HUB_EVENTS);
+
+
+        source.onopen = () => {
+
+            console.log("[BMO SSE] conectado");
+        };
+
+
+        source.onmessage = event => {
+
+            try {
+
+                applyEvent(
+                    JSON.parse(event.data)
+                );
+
+            } catch (e) {
+
+                console.warn(
+                    "[BMO SSE] JSON inválido:",
+                    e
+                );
+            }
+        };
+
+
+        source.onerror = () => {
+
+            console.warn(
+                "[BMO SSE] conexão perdida; EventSource tentará reconectar"
+            );
+        };
+
+
+        window.BMO_HUB_EVENTS = source;
+    }
+
+
+    connect();
+
+})();
+</script>
+
+</body>
+</html>

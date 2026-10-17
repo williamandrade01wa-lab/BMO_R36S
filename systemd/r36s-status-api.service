@@ -1,0 +1,13 @@
+[Unit]
+Description=R36S Status API
+After=r36s-battery-api.service NetworkManager.service
+Wants=r36s-battery-api.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/r36s-status-api.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

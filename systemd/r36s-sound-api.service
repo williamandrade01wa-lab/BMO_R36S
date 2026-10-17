@@ -1,0 +1,12 @@
+[Unit]
+Description=R36S Sound API
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/r36s-sound-api.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
