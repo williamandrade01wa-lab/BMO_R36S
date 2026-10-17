@@ -2375,6 +2375,85 @@
   #ctlDiagnosticsValue.system-health-bad {
     color: #FF8C8C;
   }
+
+
+  /* BMO_DIAGNOSTICS_VIEW_V2 */
+
+  #ctlDiagnostics {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ctl-diagnostics-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ctl-diagnostics-title {
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: .06em;
+  }
+
+  .ctl-diagnostics-services {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  .ctl-diag-service {
+    min-height: 43px;
+    border: 2px solid rgba(174,232,202,.28);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+  }
+
+  .ctl-diag-service.ok {
+    color: #9CFFB7;
+    border-color: rgba(156,255,183,.55);
+  }
+
+  .ctl-diag-service.bad {
+    color: #FF8C8C;
+    border-color: rgba(255,140,140,.55);
+  }
+
+  .ctl-diagnostics-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  .ctl-diagnostics-meta > div {
+    border: 1px solid rgba(174,232,202,.22);
+    border-radius: 8px;
+    padding: 7px 9px;
+  }
+
+  .ctl-diagnostics-meta small {
+    display: block;
+    opacity: .6;
+    font-size: 8px;
+    margin-bottom: 3px;
+  }
+
+  .ctl-diagnostics-meta strong {
+    display: block;
+    font-size: 12px;
+  }
+
+  .ctl-diagnostics-help {
+    margin-top: auto;
+    text-align: center;
+    font-size: 10px;
+    opacity: .68;
+  }
 </style>
 
 </head>
@@ -2873,6 +2952,78 @@
           </div>
 
           <div class="ctl-brightness-screen-back">
+            B VOLTAR
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- BMO_DIAGNOSTICS_VIEW_V2 -->
+      <div id="ctlDiagnostics" class="hidden">
+
+        <div class="ctl-diagnostics-screen">
+
+          <div class="ctl-diagnostics-title">
+            BMO // DIAGNÓSTICO
+          </div>
+
+          <div class="ctl-diagnostics-services">
+
+            <div class="ctl-diag-service" id="diagUi">
+              UI ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagKiosk">
+              KIOSK ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagControl">
+              CONTROL ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagStatus">
+              STATUS ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagSound">
+              SOUND ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagBattery">
+              BATTERY ---
+            </div>
+
+          </div>
+
+          <div class="ctl-diagnostics-meta">
+
+            <div>
+              <small>RUNTIME</small>
+              <strong id="diagRuntime">---</strong>
+            </div>
+
+            <div>
+              <small>WI-FI</small>
+              <strong id="diagWifi">---</strong>
+            </div>
+
+            <div>
+              <small>REDES</small>
+              <strong id="diagNetworks">---</strong>
+            </div>
+
+            <div>
+              <small>BRILHO</small>
+              <strong id="diagBrightness">---</strong>
+            </div>
+
+          </div>
+
+          <div class="ctl-diagnostics-help">
+            A ATUALIZAR
+            &nbsp;&nbsp;·&nbsp;&nbsp;
             B VOLTAR
           </div>
 
@@ -9245,6 +9396,7 @@
             if (
               BMO_CONTROL.view === 'wifi' ||
               BMO_CONTROL.view === 'brightness' ||
+              BMO_CONTROL.view === 'diagnostics' ||
               BMO_CONTROL.view === 'power_confirm'
             ) {
               BMO_CONTROL.setView('main');
@@ -11202,6 +11354,138 @@ window.stopBmoSleepMode =
             ? `${healthy}/${total} ${allOk ? 'OK' : 'ATIVOS'}`
             : 'SEM DADOS';
 
+
+        /* BMO_DIAGNOSTICS_VIEW_V2 */
+
+        const serviceElements = {
+          ui: 'diagUi',
+          kiosk: 'diagKiosk',
+          control: 'diagControl',
+          status: 'diagStatus',
+          sound: 'diagSound',
+          battery: 'diagBattery'
+        };
+
+        const serviceLabels = {
+          ui: 'UI',
+          kiosk: 'KIOSK',
+          control: 'CONTROL',
+          status: 'STATUS',
+          sound: 'SOUND',
+          battery: 'BATTERY'
+        };
+
+        Object.keys(
+          serviceElements
+        ).forEach(
+          key => {
+
+            const element =
+              document.getElementById(
+                serviceElements[key]
+              );
+
+            if (!element) return;
+
+            const ok =
+              services[key] === true;
+
+            element.textContent =
+              `${serviceLabels[key]} ${ok ? 'OK' : 'OFF'}`;
+
+            element.classList.toggle(
+              'ok',
+              ok
+            );
+
+            element.classList.toggle(
+              'bad',
+              !ok
+            );
+          }
+        );
+
+
+        const diagRuntime =
+          document.getElementById(
+            'diagRuntime'
+          );
+
+        if (diagRuntime) {
+
+          diagRuntime.textContent =
+            window.location.pathname.includes(
+              'index.bmo-next.html'
+            )
+              ? 'CANDIDATE'
+              : 'PRODUCTION';
+        }
+
+
+        const wifiDevices =
+          Array.isArray(data.wifi)
+            ? data.wifi
+            : [];
+
+        const connectedWifi =
+          wifiDevices.find(
+            item =>
+              item &&
+              item.state ===
+                'connected'
+          );
+
+        const diagWifi =
+          document.getElementById(
+            'diagWifi'
+          );
+
+        if (diagWifi) {
+
+          diagWifi.textContent =
+            connectedWifi
+              ? (
+                  connectedWifi.connection ||
+                  'CONECTADO'
+                )
+              : 'OFFLINE';
+        }
+
+
+        const diagNetworks =
+          document.getElementById(
+            'diagNetworks'
+          );
+
+        if (diagNetworks) {
+
+          diagNetworks.textContent =
+            data.networks != null
+              ? String(data.networks)
+              : '---';
+        }
+
+
+        const diagBrightness =
+          document.getElementById(
+            'diagBrightness'
+          );
+
+        if (diagBrightness) {
+
+          const pct =
+            data.brightness &&
+            data.brightness.percent != null
+              ? data.brightness.percent
+              : null;
+
+          diagBrightness.textContent =
+            pct != null
+              ? `${pct}%`
+              : '---';
+        }
+
+
         if (r36Services) {
 
           r36Services.textContent =
@@ -11338,6 +11622,110 @@ window.stopBmoSleepMode =
 
 
   /*
+   * BMO_DIAGNOSTICS_VIEW_V2
+   * Render da subview.
+   */
+
+  const controlRenderBeforeDiagnosticsV2 =
+    BMO_CONTROL.render.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.render =
+    function() {
+
+      controlRenderBeforeDiagnosticsV2();
+
+      const screen =
+        document.getElementById(
+          'ctlDiagnostics'
+        );
+
+      if (screen) {
+
+        screen.classList.toggle(
+          'hidden',
+          this.view !==
+            'diagnostics'
+        );
+      }
+    };
+
+
+  /*
+   * Dentro do diagnostico o D-pad
+   * nao possui navegacao.
+   */
+
+  const diagUpBefore =
+    BMO_CONTROL.up.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.up =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagUpBefore();
+    };
+
+
+  const diagDownBefore =
+    BMO_CONTROL.down.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.down =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagDownBefore();
+    };
+
+
+  const diagLeftBefore =
+    BMO_CONTROL.left.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.left =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagLeftBefore();
+    };
+
+
+  const diagRightBefore =
+    BMO_CONTROL.right.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.right =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagRightBefore();
+    };
+
+
+  /*
    * DIAGNOSTICO agora consulta
    * /api/control/diagnostics de verdade.
    */
@@ -11356,12 +11744,30 @@ window.stopBmoSleepMode =
         ] === 'diagnostics'
       ) {
 
+        this.setView(
+          'diagnostics'
+        );
+
+        SYSTEM_V2.diagnostics(
+          false
+        );
+
+        return;
+      }
+
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) {
+
         SYSTEM_V2.diagnostics(
           true
         );
 
         return;
       }
+
 
       controlActivateBeforeSystemV2();
     };
