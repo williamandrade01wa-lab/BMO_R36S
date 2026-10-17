@@ -1,0 +1,13 @@
+[Unit]
+Description=BMO Control API
+After=NetworkManager.service r36s-sound-api.service
+Wants=r36s-sound-api.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/bmo-control-api.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

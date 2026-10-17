@@ -1,0 +1,13 @@
+[Unit]
+Description=BMO Display - switch to tty7
+After=r36s-console.service bmo-xorg.service bmo-x-init.service bmo-kiosk.service
+Requires=bmo-xorg.service bmo-kiosk.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/sleep 6
+ExecStart=/usr/bin/chvt 7
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

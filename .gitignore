@@ -48,3 +48,28 @@ __pycache__/
 .deploy/
 backups/
 checkpoint*/
+
+# ============================================================
+# Runtime / user state
+# ============================================================
+
+configs/bmo/favorites.json
+
+configs/ppsspp/PSP/SAVEDATA/
+configs/ppsspp/PSP/SYSTEM/CACHE/
+
+configs/retroarch/content_history.lpl
+configs/retroarch/content_image_history.lpl
+configs/retroarch/content_music_history.lpl
+configs/retroarch/content_video_history.lpl
+configs/retroarch/playlists/logs/
+
+*.bak
+*.bak-*
+*.log
+*.pid
+*.tmp
+
+# Never version private Moonlight identity
+Moonlight.conf
+**/Moonlight.conf

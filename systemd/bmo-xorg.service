@@ -1,0 +1,13 @@
+[Unit]
+Description=BMO Xorg
+After=systemd-user-sessions.service
+Conflicts=getty@tty7.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/Xorg :0 -configdir /etc/X11/xorg.conf.d -nolisten tcp -noreset vt7
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
