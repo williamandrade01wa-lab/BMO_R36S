@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+rm -f /etc/systemd/system/getty@.service.d/override.conf /etc/systemd/system/serial-getty@.service.d/override.conf
+systemctl daemon-reload
+if [ ! -x /usr/local/sbin/bmo-firstboot ]; then echo "BMO_FIRSTBOOT_BINARY_MISSING" >&2; exit 1; fi
+if ! /usr/local/sbin/bmo-firstboot --apply; then
+    echo; echo "BMO firstboot falhou."; echo "Desligue o aparelho, edite BMO-FIRSTBOOT.txt na particao BOOT e tente novamente."; echo "Consulte BMO-STATUS.txt e logs/firstboot.log na BOOT."; exit 1
+fi
+rm -f /root/.not_logged_in_yet
+if [ -f /var/run/resize2fs-reboot ]; then sync; reboot; fi
+exit 0

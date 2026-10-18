@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BASE_VERSION="0.2.0"
+SOURCE_CONF="/etc/bmo/source.conf"
+BOOT_DIR="/boot/u-boot"; [ -d "$BOOT_DIR" ] || BOOT_DIR="/boot"
+say(){ printf '%s\n' "$*"; }
+die(){ printf 'ERRO: %s\n' "$*" >&2; exit 1; }
+need_root(){ [ "${EUID}" -eq 0 ] || die "execute com sudo: sudo bmo $*"; }
+load_source(){ BMO_REPO_URL="https://github.com/williamandrade01wa-lab/BMO_R36S.git"; BMO_BRANCH="main"; BMO_CHANNEL="stable"; [ ! -r "$SOURCE_CONF" ] || source "$SOURCE_CONF"; }
+valid_repo(){ [[ "$1" =~ ^https://github\.com/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.git$ ]] || [[ "$1" =~ ^git@github\.com:[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.git$ ]] || [[ "$1" =~ ^ssh://git@github\.com/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.git$ ]]; }
+valid_branch(){ [[ "$1" =~ ^[A-Za-z0-9._/-]+$ ]] && [[ "$1" != *".."* ]]; }
+cmd_version(){ say "BMO Linux Base ${BASE_VERSION}"; }
+cmd_ip(){ hostname -I 2>/dev/null || true; ip -br -4 addr show up 2>/dev/null || true; }
+cmd_status(){ say "============================================================"; say " BMO LINUX BASE STATUS"; say "============================================================"; cmd_version; say "HOSTNAME=$(hostname)"; say "KERNEL=$(uname -r)"; [ -f /var/lib/bmo/firstboot.done ] && say "FIRSTBOOT=OK" || say "FIRSTBOOT=PENDING"; say ""; say "=== IP ==="; cmd_ip; say ""; say "=== NETWORK ==="; command -v nmcli >/dev/null 2>&1 && nmcli -f DEVICE,TYPE,STATE,CONNECTION device status || true; say ""; say "=== SSH ==="; systemctl is-active ssh 2>/dev/null || true; [ ! -r "$BOOT_DIR/BMO-STATUS.txt" ] || { say ""; say "=== BOOT STATUS ==="; cat "$BOOT_DIR/BMO-STATUS.txt"; }; }
+cmd_network(){ local action="${1:-status}"; case "$action" in status) nmcli -f DEVICE,TYPE,STATE,CONNECTION device status; say ""; nmcli -f NAME,TYPE,DEVICE,AUTOCONNECT connection show;; scan) nmcli device wifi rescan >/dev/null 2>&1 || true; nmcli device wifi list;; config) [ -r "$BOOT_DIR/BMO-FIRSTBOOT.txt" ] || die "BMO-FIRSTBOOT.txt nao encontrado na BOOT"; sed -E 's/^(USER_PASSWORD|ROOT_PASSWORD|WIFI_PASSWORD)=.*/\1=***REDACTED***/' "$BOOT_DIR/BMO-FIRSTBOOT.txt";; apply) need_root network apply; /usr/local/sbin/bmo-firstboot --network-only;; *) die "uso: bmo network [status|scan|config|apply]";; esac; }
+cmd_firstboot(){ local action="${1:-status}"; case "$action" in status) [ -f /var/lib/bmo/firstboot.done ] && say "FIRSTBOOT=OK" || say "FIRSTBOOT=PENDING"; [ ! -r "$BOOT_DIR/BMO-STATUS.txt" ] || cat "$BOOT_DIR/BMO-STATUS.txt";; apply) need_root firstboot apply; /usr/local/sbin/bmo-firstboot --apply;; *) die "uso: bmo firstboot [status|apply]";; esac; }
+cmd_logs(){ journalctl -u NetworkManager -u ssh --no-pager -n 80 2>/dev/null || true; [ ! -r /var/log/bmo-firstboot.log ] || tail -n 120 /var/log/bmo-firstboot.log; }
+cmd_doctor(){ local fail=0; check(){ local label="$1"; shift; if "$@" >/dev/null 2>&1; then printf '[OK]   %s\n' "$label"; else printf '[FAIL] %s\n' "$label"; fail=1; fi; }; check "BOOT montada" test -d "$BOOT_DIR"; check "BMO-FIRSTBOOT.txt" test -f "$BOOT_DIR/BMO-FIRSTBOOT.txt"; check "NetworkManager" command -v nmcli; check "Git" command -v git; check "SSH server" test -x /usr/sbin/sshd; check "Python 3" command -v python3; check "Input devices" test -d /dev/input; check "DRM" test -d /sys/class/drm; check "Backlight" test -d /sys/class/backlight; check "Audio ALSA" test -d /proc/asound; [ "$fail" -eq 0 ] && say "BMO_DOCTOR_OK" || say "BMO_DOCTOR_WARN"; return "$fail"; }
+cmd_source(){ load_source; local action="${1:-show}"; case "$action" in show) say "BMO_REPO_URL=$BMO_REPO_URL"; say "BMO_BRANCH=$BMO_BRANCH"; say "BMO_CHANNEL=$BMO_CHANNEL";; set) need_root source set; local url="${2:-}" branch="${3:-main}"; [ -n "$url" ] || die "uso: sudo bmo source set <github-url> [branch]"; valid_repo "$url" || die "origem permitida: github.com via HTTPS ou SSH"; valid_branch "$branch" || die "branch invalida"; install -d -o root -g root -m 0755 /etc/bmo; printf 'BMO_REPO_URL=%s\nBMO_BRANCH=%s\nBMO_CHANNEL=stable\n' "$url" "$branch" > "$SOURCE_CONF"; chmod 0644 "$SOURCE_CONF"; say "BMO_SOURCE_OK";; *) die "uso: bmo source [show|set]";; esac; }
+cmd_install(){ need_root install; load_source; valid_repo "$BMO_REPO_URL" || die "BMO_REPO_URL invalida"; valid_branch "$BMO_BRANCH" || die "BMO_BRANCH invalida"; command -v git >/dev/null 2>&1 || die "git nao instalado"; local tmp; tmp="$(mktemp -d /var/tmp/bmo-install.XXXXXX)"; trap 'rm -rf "$tmp"' EXIT; say "Clonando BMO: $BMO_REPO_URL [$BMO_BRANCH]"; git clone --depth 1 --single-branch --branch "$BMO_BRANCH" "$BMO_REPO_URL" "$tmp/repo" || die "nao foi possivel acessar o Git. Se o repo ainda estiver privado, configure SSH manualmente e use sudo bmo source set git@github.com:OWNER/REPO.git BRANCH"; [ -x "$tmp/repo/install/install.sh" ] || die "install/install.sh nao encontrado no repositorio"; (cd "$tmp/repo" && ./install/install.sh); }
+usage(){ cat <<'EOF'
+BMO Linux Base
+
+Comandos:
+  bmo status
+  bmo version
+  bmo ip
+  bmo network [status|scan|config]
+  sudo bmo network apply
+  bmo firstboot status
+  sudo bmo firstboot apply
+  bmo logs
+  bmo doctor
+  bmo source show
+  sudo bmo source set <github-url> [branch]
+  sudo bmo install
+EOF
+}
+case "${1:-}" in status) shift; cmd_status "$@";; version) shift; cmd_version "$@";; ip) shift; cmd_ip "$@";; network) shift; cmd_network "$@";; firstboot) shift; cmd_firstboot "$@";; logs) shift; cmd_logs "$@";; doctor) shift; cmd_doctor "$@";; source) shift; cmd_source "$@";; install) shift; cmd_install "$@";; -h|--help|help|'') usage;; *) usage; exit 2;; esac

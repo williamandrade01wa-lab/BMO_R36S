@@ -1,70 +1,66 @@
 name: Build BMO Linux Base
-
 on:
   workflow_dispatch:
   push:
-    branches:
-      - feat/bmo-linux-base-v1
-    paths:
-      - 'image/armbian/**'
-      - '.github/workflows/build-bmo-linux-base.yml'
-
+    branches: [feat/bmo-linux-base-v1]
+    paths: ['image/armbian/**', '.github/workflows/build-bmo-linux-base.yml']
 permissions:
   contents: read
-
 jobs:
   build:
-    name: R36S Trixie minimal
+    name: R36S Trixie minimal v0.2
     runs-on: ubuntu-24.04
     timeout-minutes: 120
-
     steps:
       - name: Checkout BMO
         uses: actions/checkout@v4
-
       - name: Free runner disk space
         shell: bash
         run: |
-          sudo rm -rf /usr/local/lib/android || true
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /usr/local/.ghcup || true
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup || true
           docker system prune -af || true
           df -h
-
       - name: Install host prerequisites
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            git \
-            qemu-user-static \
-            binfmt-support \
-            xz-utils \
-            ca-certificates
+          sudo apt-get install -y git qemu-user-static binfmt-support xz-utils ca-certificates
           sudo update-binfmts --enable || true
-
       - name: Build minimal image
         shell: bash
+        run: bash image/armbian/build-bmo-linux-base.sh
+      - name: Validate image contents
+        shell: bash
         run: |
-          bash image/armbian/build-bmo-linux-base.sh
-
+          set -euo pipefail
+          IMG="image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img"
+          LOOP="$(sudo losetup --find --show --partscan "$IMG")"
+          BOOT_MNT="$(mktemp -d)"; ROOT_MNT="$(mktemp -d)"
+          cleanup(){ sudo umount "$BOOT_MNT" 2>/dev/null || true; sudo umount "$ROOT_MNT" 2>/dev/null || true; sudo losetup -d "$LOOP" 2>/dev/null || true; rmdir "$BOOT_MNT" "$ROOT_MNT" 2>/dev/null || true; }
+          trap cleanup EXIT
+          sleep 2
+          BOOT_PART="$(lsblk -lnpo NAME,FSTYPE "$LOOP" | awk '$2 ~ /vfat|fat/ {print $1; exit}')"
+          ROOT_PART="$(lsblk -lnpo NAME,FSTYPE "$LOOP" | awk '$2 == "ext4" {print $1; exit}')"
+          test -n "$BOOT_PART"; test -n "$ROOT_PART"
+          sudo mount -o ro "$BOOT_PART" "$BOOT_MNT"; sudo mount -o ro "$ROOT_PART" "$ROOT_MNT"
+          test -f "$BOOT_MNT/BMO-FIRSTBOOT.txt"; test -f "$BOOT_MNT/README-FIRST-BOOT.txt"
+          test -x "$ROOT_MNT/usr/local/bin/bmo"; test -x "$ROOT_MNT/usr/local/sbin/bmo-firstboot"
+          test -f "$ROOT_MNT/etc/bmo/source.conf"; test -f "$ROOT_MNT/etc/NetworkManager/conf.d/20-bmo.conf"
+          test -f "$ROOT_MNT/etc/netplan/90-bmo-networkmanager.yaml"; test -f "$ROOT_MNT/etc/udev/rules.d/99-bmo-usb-power.rules"
+          echo "BMO_IMAGE_CONTENTS_OK"
       - name: Compress image and checksum
         shell: bash
         run: |
           cd image/armbian/output
-          xz -T0 -6 --extreme bmo-linux-base-r36s-trixie-v0.1.img
-          sha256sum bmo-linux-base-r36s-trixie-v0.1.img.xz \
-            > bmo-linux-base-r36s-trixie-v0.1.img.xz.sha256
-          ls -lh
-          cat bmo-linux-base-r36s-trixie-v0.1.img.xz.sha256
-
+          xz -T0 -6 --extreme bmo-linux-base-r36s-trixie-v0.2.img
+          sha256sum bmo-linux-base-r36s-trixie-v0.2.img.xz > bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
+          ls -lh; cat bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
       - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bmo-linux-base-r36s-trixie-v0.1
+          name: bmo-linux-base-r36s-trixie-v0.2
           if-no-files-found: error
           retention-days: 7
           path: |
-            image/armbian/output/bmo-linux-base-r36s-trixie-v0.1.img.xz
-            image/armbian/output/bmo-linux-base-r36s-trixie-v0.1.img.xz.sha256
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img.xz
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
