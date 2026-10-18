@@ -4,6 +4,50 @@
 
 Este repositório mantém o código e a configuração versionável do BMO para R36S.
 
+## Continuidade obrigatória entre chats/agentes
+
+O projeto **não pode depender da memória de uma conversa**.
+
+Antes de qualquer alteração significativa, ler nesta ordem:
+
+1. `AGENTS.md`;
+2. `docs/PROJECT-CONTINUITY.md`;
+3. `docs/WORKLOG.md`;
+4. `docs/ROADMAP.md`;
+5. documentação específica da fase atual, especialmente `docs/BMO-LINUX-BASE-DESIGN.md` para a imagem base.
+
+Depois, confirmar no GitHub:
+
+- branch atual;
+- HEAD atual;
+- último GitHub Actions relevante;
+- próximo passo registrado.
+
+### Regra de registro
+
+**Toda etapa significativa deve ser escrita em `docs/WORKLOG.md` antes de avançar para a próxima etapa significativa.**
+
+O registro deve conter, no mínimo:
+
+- data;
+- fase;
+- branch;
+- objetivo;
+- ações realizadas;
+- arquivos alterados;
+- resultado esperado;
+- resultado obtido;
+- validação;
+- `R36S_REQUIRED=YES` ou `R36S_REQUIRED=NO`;
+- pendência/risco;
+- próximo passo exato.
+
+Não é necessário registrar cada comando isolado, mas nenhum diagnóstico, correção, build, teste físico, decisão arquitetural ou promoção pode ficar apenas no chat.
+
+Quando mudar arquitetura, bloqueio principal, branch de trabalho, imagem candidata ou próximo passo, atualizar também `docs/PROJECT-CONTINUITY.md`. Atualizar `docs/ROADMAP.md` somente quando houver evidência para marcar/desmarcar uma fase ou tarefa.
+
+Em um novo chat, continuar do **PRÓXIMO PASSO** de `docs/PROJECT-CONTINUITY.md`; não repetir etapas concluídas e não corrigir falhas no escuro.
+
 ## Fluxo obrigatório
 
 Sempre seguir:
