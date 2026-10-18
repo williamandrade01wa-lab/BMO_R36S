@@ -1,0 +1,5 @@
+# BMO USB HUB - manter ativo
+ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="0a05", ATTR{idProduct}=="7211", TEST=="power/control", ATTR{power/control}="on"
+
+# BMO Wi-Fi Realtek - manter ativo
+ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="0179", TEST=="power/control", ATTR{power/control}="on"

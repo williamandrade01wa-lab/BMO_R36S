@@ -1,0 +1,15 @@
+# BMO Ready v1.0.0
+#
+# Pacotes diretamente confirmados no R36S funcional.
+# Isto NAO representa ainda a lista final de apt install.
+
+python3-minimal
+chromium
+xserver-xorg-core
+retroarch
+libretro-mgba
+libretro-snes9x
+network-manager
+alsa-utils
+x11-xserver-utils
+moonlight-qt

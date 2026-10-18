@@ -1,0 +1,6 @@
+# BMO Ready v1.0.0
+# Instalados, porém DESABILITADOS por padrão.
+
+bmo-usb-ip-watch.service
+bmo-usb-swap-screen.service
+bmo-usb-tether-auto.service
