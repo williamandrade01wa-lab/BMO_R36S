@@ -4,8 +4,24 @@
 
 set -u
 
-HOST="192.168.1.17"
+# BMO_MOONLIGHT_HOST_CONFIG_V1
+HOST_FILE="/etc/bmo/moonlight-host"
+HOST="${BMO_MOONLIGHT_HOST:-}"
 APP="${1:-Desktop}"
+
+if [ -z "$HOST" ] && [ -f "$HOST_FILE" ]; then
+    HOST="$(
+        grep -Ev '^[[:space:]]*(#|$)' "$HOST_FILE" 2>/dev/null |
+        head -n1 || true
+    )"
+fi
+
+if [ -z "$HOST" ]; then
+    echo "ERRO: Sunshine host nao configurado"
+    echo "Configure /etc/bmo/moonlight-host"
+    echo "ou defina BMO_MOONLIGHT_HOST."
+    exit 19
+fi
 
 DISPLAY_NUM=":0"
 XAUTH="/home/r36s/.Xauthority"

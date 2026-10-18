@@ -81,6 +81,28 @@ echo "PERSONAL_DATA_CLEAN_OK"
 
 
 echo
+echo "[1b/5] Limpando identidade clonavel..."
+
+rm -f     "$TARGET_ROOT/etc/bmo/moonlight-host"     "$TARGET_ROOT/var/lib/systemd/random-seed"     2>/dev/null || true
+
+if [ -f "$TARGET_ROOT/etc/machine-id" ] &&
+   [ ! -L "$TARGET_ROOT/etc/machine-id" ]
+then
+    : > "$TARGET_ROOT/etc/machine-id"
+fi
+
+DBUS_MACHINE_ID="$TARGET_ROOT/var/lib/dbus/machine-id"
+
+if [ -f "$DBUS_MACHINE_ID" ] &&
+   [ ! -L "$DBUS_MACHINE_ID" ]
+then
+    : > "$DBUS_MACHINE_ID"
+fi
+
+echo "GENERIC_IDENTITY_CLEAN_OK"
+
+
+echo
 echo "[2/5] Removendo Wi-Fi salvo..."
 
 NM="$TARGET_ROOT/etc/NetworkManager/system-connections"
