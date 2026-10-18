@@ -7,9 +7,14 @@ set -euo pipefail
 # v1.0.0
 #
 # Estado atual:
-#   DRY-RUN ONLY
+#   DRY-RUN completo
+#   APPLY v1 somente em raiz SANDBOX
 #
-# Nenhuma instalação real é permitida nesta versão.
+# APPLY v1:
+#   - nunca permite TARGET_ROOT=/
+#   - exige marcador .bmo-apply-v1-sandbox
+#   - escreve somente filesystem/frontend
+#   - demais fases permanecem PLAN_ONLY
 # ============================================================
 
 SCRIPT_DIR="$(
@@ -29,6 +34,7 @@ OPTIONAL_SERVICES="$SCRIPT_DIR/manifests/optional-services.txt"
 
 MODE=""
 PPSSPP_RUNTIME=""
+TARGET_ROOT="/"
 
 
 usage() {
@@ -37,20 +43,26 @@ usage() {
 
 BMO Ready R36S Installer v1.0.0
 
-Uso atual:
+Dry-run:
 
   ./install/bmo-install.sh --dry-run
 
-Opcional:
+Sandbox APPLY v1:
 
-  ./install/bmo-install.sh \
-      --dry-run \
+  sudo ./install/bmo-install.sh \
+      --apply \
+      --root /caminho/sandbox \
       --ppsspp-runtime /caminho/runtime.tar.gz
 
 IMPORTANTE:
 
-  Esta versão NÃO possui modo de instalação real.
-  --apply é bloqueado deliberadamente.
+  APPLY v1 NÃO pode usar / como destino.
+  O destino precisa conter:
+
+    .bmo-apply-v1-sandbox
+
+  Somente filesystem/frontend são escritos.
+  As fases seguintes continuam PLAN_ONLY.
 
 EOF
 }
@@ -132,6 +144,48 @@ plan_copy() {
 }
 
 
+target_path() {
+
+    ABSOLUTE_PATH="$1"
+
+    case "$ABSOLUTE_PATH" in
+        /*)
+            ;;
+        *)
+            die "target_path exige caminho absoluto: $ABSOLUTE_PATH"
+            ;;
+    esac
+
+    printf '%s%s\n' \
+        "${TARGET_ROOT%/}" \
+        "$ABSOLUTE_PATH"
+}
+
+
+apply_copy() {
+
+    SOURCE="$1"
+    DESTINATION="$2"
+    MODE_BITS="$3"
+
+    require_file "$REPO_ROOT/$SOURCE"
+
+    TARGET="$(
+        target_path "$DESTINATION"
+    )"
+
+    echo "APPLY  $SOURCE -> $TARGET [$MODE_BITS]"
+
+    install \
+        -D \
+        -o root \
+        -g root \
+        -m "$MODE_BITS" \
+        "$REPO_ROOT/$SOURCE" \
+        "$TARGET"
+}
+
+
 while [ "$#" -gt 0 ]; do
 
     case "$1" in
@@ -152,12 +206,18 @@ while [ "$#" -gt 0 ]; do
             ;;
 
         --apply)
-            echo
-            echo "INSTALACAO REAL BLOQUEADA."
-            echo
-            echo "O instalador v0 aceita somente --dry-run."
-            echo "Nenhuma alteração foi realizada."
-            exit 64
+            MODE="apply"
+            shift
+            ;;
+
+        --root)
+
+            [ "$#" -ge 2 ] || {
+                die "--root requer um caminho"
+            }
+
+            TARGET_ROOT="$2"
+            shift 2
             ;;
 
         -h|--help)
@@ -174,20 +234,84 @@ while [ "$#" -gt 0 ]; do
 done
 
 
-[ "$MODE" = "dry-run" ] || {
-    usage
-    die "use explicitamente --dry-run"
-}
+case "$MODE" in
+
+    dry-run)
+        ;;
+
+    apply)
+
+        [ "$EUID" -eq 0 ] || {
+            die "--apply requer root"
+        }
+
+        case "$TARGET_ROOT" in
+            /*)
+                ;;
+            *)
+                die "--root precisa ser caminho absoluto"
+                ;;
+        esac
+
+        [ -d "$TARGET_ROOT" ] || {
+            die "TARGET_ROOT precisa existir previamente: $TARGET_ROOT"
+        }
+
+        TARGET_ROOT="$(
+            readlink -f -- "$TARGET_ROOT"
+        )"
+
+        [ -n "$TARGET_ROOT" ] || {
+            die "nao foi possivel resolver TARGET_ROOT"
+        }
+
+        [ "$TARGET_ROOT" != "/" ] || {
+            die "APPLY v1 recusa TARGET_ROOT=/"
+        }
+
+        [ -f "$TARGET_ROOT/.bmo-apply-v1-sandbox" ] || {
+            die "marcador .bmo-apply-v1-sandbox ausente em $TARGET_ROOT"
+        }
+
+        ;;
+
+    *)
+        usage
+        die "use --dry-run ou --apply"
+        ;;
+
+esac
 
 
 echo "============================================================"
 echo " BMO READY v1.0.0 INSTALLER"
-echo " MODE=DRY-RUN"
+
+if [ "$MODE" = "dry-run" ]; then
+
+    echo " MODE=DRY-RUN"
+
+else
+
+    echo " MODE=APPLY-v1-SANDBOX"
+
+fi
+
 echo "============================================================"
 
 echo
 echo "SOURCE=$REPO_ROOT"
-echo "NO SYSTEM CHANGES WILL BE PERFORMED"
+
+if [ "$MODE" = "dry-run" ]; then
+
+    echo "NO SYSTEM CHANGES WILL BE PERFORMED"
+
+else
+
+    echo "TARGET_ROOT=$TARGET_ROOT"
+    echo "REAL_ROOT_WRITE=BLOCKED"
+    echo "APPLY_SCOPE=filesystem+frontend"
+
+fi
 
 
 # ============================================================
@@ -304,9 +428,33 @@ PRESERVE bootloader
 PRESERVE existing /etc/fstab
 
 DO NOT COPY system/fstab.r36s over /etc/fstab
-
-STATUS=PLAN_ONLY
 EOF
+
+if [ "$MODE" = "apply" ]; then
+
+    UI_DIR="$(
+        target_path /opt/bmo-ui
+    )"
+
+    echo
+    echo "APPLY v1 filesystem:"
+    echo "CREATE $UI_DIR"
+
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0755 \
+        "$UI_DIR"
+
+    echo "FILESYSTEM_APPLY_V1_OK"
+
+else
+
+    echo
+    echo "STATUS=PLAN_ONLY"
+
+fi
 
 
 # ============================================================
@@ -342,6 +490,48 @@ plan_copy \
     "frontend/index.bmo-next.html" \
     "/opt/bmo-ui/index.bmo-next.html" \
     "0644"
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v1 frontend:"
+
+    apply_copy \
+        "frontend/index.html" \
+        "/opt/bmo-ui/index.html" \
+        "0644"
+
+    apply_copy \
+        "frontend/index.bmo-next.html" \
+        "/opt/bmo-ui/index.bmo-next.html" \
+        "0644"
+
+    TARGET_PROD="$(
+        target_path /opt/bmo-ui/index.html
+    )"
+
+    TARGET_CAND="$(
+        target_path /opt/bmo-ui/index.bmo-next.html
+    )"
+
+    check_sha \
+        "$TARGET_PROD" \
+        "$BMO_FRONTEND_SHA256" \
+        "installed production"
+
+    check_sha \
+        "$TARGET_CAND" \
+        "$BMO_FRONTEND_SHA256" \
+        "installed candidate"
+
+    cmp -s \
+        "$TARGET_PROD" \
+        "$TARGET_CAND" ||
+        die "frontend instalado divergiu"
+
+    echo "FRONTEND_APPLY_V1_OK"
+
+fi
 
 
 # ============================================================
@@ -734,7 +924,20 @@ echo "  no credentials"
 
 echo
 echo "============================================================"
-echo " BMO_READY_INSTALL_DRY_RUN_OK"
-echo "============================================================"
-echo
-echo "No files outside the repository were modified."
+
+if [ "$MODE" = "dry-run" ]; then
+
+    echo " BMO_READY_INSTALL_DRY_RUN_OK"
+    echo "============================================================"
+    echo
+    echo "No files outside the repository were modified."
+
+else
+
+    echo " BMO_READY_INSTALL_APPLY_V1_OK"
+    echo "============================================================"
+    echo
+    echo "Only the sandbox target root was modified:"
+    echo "$TARGET_ROOT"
+
+fi
