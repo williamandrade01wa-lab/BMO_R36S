@@ -76,6 +76,9 @@ bootstrap/firstboot.local.conf
 bootstrap/*.local.conf
 # Local hardware diagnostics - may contain device/network identifiers
 bmo-r36s-baseline-*.txt
+# Local BMO Linux Base build workspace/artifacts
+image/armbian/.work/
+image/armbian/output/
 # Disk / runtime artifacts
 *.img
 *.img.xz
@@ -89,6 +92,6 @@ install/config/bmo.conf
 frontend/bmo-runtime-config.js
 # Official frozen BMO runtime
 !install/runtime/
-!install/runtime/BMO-PPSSPP-R36S-v1.20.4-runtime.tar.gz
+!install/runtime/BMO-PPSSP-R36S-v1.20.4-runtime.tar.gz
 !install/runtime/moonlight-qt_6.2.0-1_arm64.deb
 !install/runtime/SHA256SUMS
