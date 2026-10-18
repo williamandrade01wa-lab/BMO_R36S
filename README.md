@@ -35,7 +35,7 @@ Ela já contém os arquivos necessários para preparar o primeiro boot.
 
 Dentro da partição existe a pasta `ScreenFiles` com variantes de painel.
 
-Entre na pasta correspondente ao painel correto do seu R36S e copie **os arquivos que estão dentro dela** para a raiz da partição `boot`.
+Entre na pasta correspondente ao painel correto do seu R36S e **COPIE os arquivos que estão dentro dela** para a raiz da partição `boot`.
 
 ```text
 boot/
@@ -45,13 +45,19 @@ boot/
 │
 └── ...
 
-          ↓ copiar o conteúdo de Panel X
+          ↓ COPIAR o conteúdo de Panel X
 
 boot/
-├── arquivos do painel  ← aqui
+├── cópia dos arquivos do painel  ← aqui
 ├── ScreenFiles/
+│   └── Panel X/
+│       └── arquivos originais continuam aqui
 └── ...
 ```
+
+> **IMPORTANTE: COPIE, NÃO MOVA.**
+>
+> Use **Copiar + Colar**. Não use **Recortar + Colar**. Os arquivos originais precisam continuar dentro de `ScreenFiles/Panel X/`; mover os arquivos pode causar erro no boot.
 
 > Não copie somente a pasta `Panel X`. Copie os arquivos contidos nela para a raiz do `boot`.
 
@@ -99,13 +105,35 @@ locale=pt_BR.UTF-8
 
 ---
 
-### 3. Ligue o R36S e acesse por SSH
+### 3. Primeiro boot: aguarde o processo automático
 
-No primeiro boot, a imagem deverá criar o usuário `r36s`, aplicar as senhas informadas e tentar conectar ao Wi-Fi configurado em `firstrun_overrides.txt`.
+Depois de preparar o cartão:
+
+1. ejete o microSD corretamente;
+2. coloque-o no TF1 do R36S;
+3. ligue o aparelho;
+4. **aguarde o boot automático concluir**.
+
+> **Podem acontecer reinicializações durante o primeiro boot.** Não interrompa o processo apenas porque o aparelho reiniciou ou a tela mudou. Aguarde a inicialização terminar.
+
+A imagem deverá criar o usuário `r36s`, aplicar as senhas informadas e tentar conectar ao Wi-Fi configurado em `firstrun_overrides.txt`.
 
 O endereço IP normalmente é entregue automaticamente pelo roteador via DHCP.
 
-Descubra o IP na sua rede e acesse:
+#### Se ficar em tela preta
+
+Se a tela permanecer preta e o boot não prosseguir:
+
+1. aguarde primeiro para confirmar que o processo realmente parou;
+2. desligue o R36S pelo botão **POWER**;
+3. retire o microSD;
+4. conecte o cartão novamente ao PC;
+5. abra a partição `boot`;
+6. verifique o erro/arquivo de diagnóstico gerado dentro do diretório `boot` antes de alterar outras coisas.
+
+Confirme também se os arquivos da ScreenFile correta foram **copiados** e se os originais ainda estão dentro de `ScreenFiles/Panel X/`.
+
+Depois que o boot concluir, descubra o IP na sua rede e acesse:
 
 ```bash
 ssh r36s@IP_DO_R36S
@@ -117,7 +145,7 @@ Use a senha configurada em:
 userpass=
 ```
 
-**[🔎 Ver instruções completas de primeiro boot e rede](bootstrap/README.md#5-primeiro-boot)**
+**[🔎 Ver instruções completas de primeiro boot e rede](bootstrap/README.md#5-primeiro-boot--aguarde-o-processo-automático)**
 
 ---
 
@@ -209,13 +237,13 @@ E valide fisicamente:
                ▼
 ┌──────────────────────────────┐
 │ Abrir partição BOOT          │
-│ ScreenFiles + firstrun       │
+│ COPIAR ScreenFiles + firstrun│
 └──────────────┬───────────────┘
                │
                ▼
 ┌──────────────────────────────┐
-│ Primeiro boot                │
-│ usuário + Wi-Fi              │
+│ Primeiro boot automático     │
+│ aguardar reinicializações    │
 └──────────────┬───────────────┘
                │
                ▼
