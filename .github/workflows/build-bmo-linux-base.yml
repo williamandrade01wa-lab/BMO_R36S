@@ -2,6 +2,12 @@ name: Build BMO Linux Base
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat/bmo-linux-base-v1
+    paths:
+      - 'image/armbian/**'
+      - '.github/workflows/build-bmo-linux-base.yml'
 
 permissions:
   contents: read
