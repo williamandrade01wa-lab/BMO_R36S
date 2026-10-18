@@ -1,18 +1,27 @@
 # BMO R36S
 
-Transforme uma **BMO Linux Pure** limpa em um R36S com o BMO completo usando este repositório.
+Transforme uma instalação limpa de **Armbian Trixie para R36S** em um R36S com o BMO completo usando este repositório.
 
 > **Quer instalar do zero?** Você não precisa conhecer o histórico do projeto. Siga o caminho abaixo.
 
 ## 🚀 Quero instalar o BMO do zero
 
-### 1. Baixe e grave a BMO Linux Pure
+### 1. Baixe e grave a imagem-base
 
-Use a imagem base oficial:
+A imagem-base que validamos veio do projeto **ohjhas/armbian-r36s**:
 
-**[⬇️ BMO Linux Pure R36S v1.0.0](../../releases/tag/linux-pure-r36s-v1.0.0)**
+**[⬇️ Abrir a release original Armbian Trixie para R36S](https://github.com/ohjhas/armbian-r36s/releases/tag/trixie-r1)**
+
+Arquivo validado:
+
+```text
+armbian-r36s-trixie-xfce.img.xz
+SHA256: 5f9f35375c88fd945e780577cd92d1a30a58675a7eb043fd4547bcc77895a2e6
+```
 
 Grave a imagem em um microSD destinado ao TF1 do R36S.
+
+**[🙏 Ver créditos e origem da imagem](CREDITS.md)**
 
 ---
 
@@ -33,7 +42,7 @@ firstboot.local.conf
         ↓ editar
 Wi-Fi / senha / DHCP ou IP fixo / usuário
         ↓
-aplicar na BMO Linux Pure
+aplicar na imagem-base
         ↓
 ligar o R36S
 ```
@@ -55,7 +64,7 @@ bootstrap/firstboot.local.conf
 >
 > Arquivos `bootstrap/*.local.conf` são ignorados e também bloqueados pela auditoria de segurança do projeto.
 
-Se você não quiser pré-configurar nada, pode simplesmente iniciar a Pure e configurar rede/usuário manualmente.
+Se você não quiser pré-configurar nada, pode simplesmente iniciar a imagem e configurar rede/usuário manualmente.
 
 ---
 
@@ -84,9 +93,11 @@ ssh r36s@IP_DO_R36S
 
 ---
 
-### 4. Dê acesso ao Git privado e clone o projeto
+### 4. Clone o projeto
 
-Este repositório é privado. O método recomendado é uma **GitHub Deploy Key somente leitura**, exclusiva do aparelho.
+#### Enquanto o projeto estiver privado
+
+O GitHub exige autenticação para ler um repositório privado. Durante o desenvolvimento usamos uma **Deploy Key somente leitura**, exclusiva do aparelho.
 
 **[🔐 Ver como funciona o acesso ao Git privado](bootstrap/README.md#7-clonar-o-git-privado)**
 
@@ -97,9 +108,18 @@ git clone git@github.com:williamandrade01wa-lab/BMO_R36S.git
 cd BMO_R36S
 ```
 
-Durante testes, pode ser necessário selecionar uma branch específica antes de instalar.
+#### Quando existir a versão pública
 
-Na versão estável, o fluxo será pela `main`.
+A instalação normal não precisará de chave, token ou senha do GitHub. O clone será por HTTPS:
+
+```bash
+git clone https://github.com/USUARIO/BMO_R36S.git
+cd BMO_R36S
+```
+
+**[🌐 Entender o plano privado → público](docs/PUBLIC-RELEASE.md)**
+
+Durante testes, pode ser necessário selecionar uma branch específica antes de instalar. Na versão estável, o fluxo será pela `main`.
 
 ---
 
@@ -155,7 +175,8 @@ E valide fisicamente:
 
 ```text
 ┌──────────────────────────┐
-│ BMO Linux Pure R36S      │
+│ Armbian Trixie R36S      │
+│ imagem original          │
 └────────────┬─────────────┘
              │
              ▼
@@ -185,15 +206,42 @@ E valide fisicamente:
 └──────────────────────────┘
 ```
 
+## 📦 O que o BMO instala e o que pertence a terceiros?
+
+O código do BMO é separado dos programas externos que ele usa.
+
+```text
+BMO
+├── frontend / backend / launchers / services
+│
+├── instala Moonlight a partir da fonte oficial
+├── instala PPSSPP a partir da fonte oficial
+├── instala RetroArch/cores pelo sistema
+└── não precisa republicar a imagem Linux original
+```
+
+Durante o desenvolvimento privado ainda mantemos runtimes congelados para reproduzir o primeiro teste da Pure. Eles são temporários e **não fazem parte da estratégia pública final**.
+
+**[📦 Ver política de dependências de terceiros](THIRD_PARTY.md)**
+
+As versões, URLs e hashes upstream ficam registrados em:
+
+**[`install/manifests/upstream-sources.env`](install/manifests/upstream-sources.env)**
+
+---
+
 ## 📚 Atalhos
 
 | Quero... | Abrir |
 |---|---|
 | Fazer tudo do zero | **[Manual completo](bootstrap/README.md)** |
 | Configurar Wi-Fi/IP antes de ligar | **[firstboot.conf.example](bootstrap/firstboot.conf.example)** |
-| Aplicar o preset em uma Pure montada | **[apply-to-rootfs.sh](bootstrap/apply-to-rootfs.sh)** |
+| Aplicar o preset em uma imagem montada | **[apply-to-rootfs.sh](bootstrap/apply-to-rootfs.sh)** |
 | Ver o que roda no primeiro boot | **[provisioning.sh](bootstrap/provisioning.sh)** |
 | Instalar o BMO | **[install/install.sh](install/install.sh)** |
+| Ver créditos/origem da Pure | **[CREDITS.md](CREDITS.md)** |
+| Ver dependências externas | **[THIRD_PARTY.md](THIRD_PARTY.md)** |
+| Entender como ficará público | **[PUBLIC-RELEASE.md](docs/PUBLIC-RELEASE.md)** |
 | Entender regras do projeto/Codex | **[AGENTS.md](AGENTS.md)** |
 
 ## Estrutura do projeto
@@ -205,7 +253,7 @@ backend/     APIs locais
 launchers/   jogos, kiosk e Moonlight
 configs/     configurações versionadas
 systemd/     serviços do sistema
-install/     instalador e runtimes congelados
+install/     instalador, manifests e runtime privado temporário
 scripts/     validação, deploy e utilitários
 docs/        documentação adicional
 ```
@@ -229,3 +277,5 @@ Alterações não devem ir para produção sem validação e teste físico no R3
 O Git não deve conter ROMs, saves, states, backups privados, chaves SSH, tokens, credenciais, senhas reais de Wi-Fi ou o conteúdo privado de `Moonlight.conf`.
 
 Use sempre arquivos locais ignorados pelo Git para dados específicos de cada aparelho/rede.
+
+Antes de uma versão pública, o projeto passará por uma exportação limpa e auditoria específica para evitar levar o histórico privado desnecessário para o repositório público.
