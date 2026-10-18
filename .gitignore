@@ -80,6 +80,10 @@ github_deploy_key.*
 *.deb
 # Installed local configuration
 install/config/bmo.conf
-
 # Generated device-local frontend config
 frontend/bmo-runtime-config.js
+# Official frozen BMO runtime
+!install/runtime/
+!install/runtime/BMO-PPSSPP-R36S-v1.20.4-runtime.tar.gz
+!install/runtime/moonlight-qt_6.2.0-1_arm64.deb
+!install/runtime/SHA256SUMS
