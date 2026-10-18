@@ -1,62 +1,202 @@
 # BMO R36S
 
-Projeto do BMO para R36S.
+Transforme uma **BMO Linux Pure** limpa em um R36S com o BMO completo usando este repositório.
 
-Este repositório é a fonte oficial do código do projeto.
+> **Quer instalar do zero?** Você não precisa conhecer o histórico do projeto. Siga o caminho abaixo.
 
-## Começando do zero
+## 🚀 Quero instalar o BMO do zero
 
-Se você tem um R36S compatível, a imagem **BMO Linux Pure R36S** e acesso a este Git, comece por:
+### 1. Baixe e grave a BMO Linux Pure
 
-[`bootstrap/README.md`](bootstrap/README.md)
+Use a imagem base oficial:
 
-O objetivo desse manual é permitir reproduzir a instalação sem depender do histórico de desenvolvimento do projeto:
+**[⬇️ BMO Linux Pure R36S v1.0.0](../../releases/tag/linux-pure-r36s-v1.0.0)**
+
+Grave a imagem em um microSD destinado ao TF1 do R36S.
+
+---
+
+### 2. Opcional: deixe Wi-Fi, usuário e rede prontos antes do primeiro boot
+
+Se quiser que o R36S já tente conectar sozinho ao ligar, use o bootstrap.
+
+**[📖 Abrir o manual de primeiro boot](bootstrap/README.md)**
+
+**[⚙️ Abrir o arquivo modelo de configuração](bootstrap/firstboot.conf.example)**
+
+O fluxo é:
 
 ```text
-BMO Linux Pure
-      ↓
-primeiro boot / rede / SSH
-      ↓
-git clone BMO_R36S
-      ↓
-sudo ./install/install.sh
-      ↓
-BMO completo
+firstboot.conf.example
+        ↓ copiar
+firstboot.local.conf
+        ↓ editar
+Wi-Fi / senha / DHCP ou IP fixo / usuário
+        ↓
+aplicar na BMO Linux Pure
+        ↓
+ligar o R36S
 ```
 
-O preset de primeiro boot é opcional. O template genérico fica em:
+Crie uma configuração local a partir do modelo:
+
+```bash
+cp bootstrap/firstboot.conf.example bootstrap/firstboot.local.conf
+chmod 600 bootstrap/firstboot.local.conf
+```
+
+Depois edite apenas:
 
 ```text
-bootstrap/firstboot.conf.example
+bootstrap/firstboot.local.conf
 ```
 
-Credenciais reais devem ficar apenas em arquivos locais ignorados pelo Git.
+> **Nunca coloque sua senha de Wi-Fi, senha do usuário, token ou chave privada no Git.**
+>
+> Arquivos `bootstrap/*.local.conf` são ignorados e também bloqueados pela auditoria de segurança do projeto.
 
-## Instalação do BMO
+Se você não quiser pré-configurar nada, pode simplesmente iniciar a Pure e configurar rede/usuário manualmente.
 
-Após clonar o repositório no R36S, a instalação real possui um único ponto de entrada:
+---
+
+### 3. Ligue o R36S e acesse por SSH
+
+Com o bootstrap aplicado, o padrão esperado é:
+
+```text
+hostname: bmo-r36s
+usuario:  r36s
+```
+
+Exemplo:
+
+```bash
+ssh r36s@bmo-r36s
+```
+
+Se sua rede não resolver o hostname, use o IP entregue pelo roteador:
+
+```bash
+ssh r36s@IP_DO_R36S
+```
+
+**[🔎 Ver instruções completas de rede e primeiro boot](bootstrap/README.md#5-primeiro-boot)**
+
+---
+
+### 4. Dê acesso ao Git privado e clone o projeto
+
+Este repositório é privado. O método recomendado é uma **GitHub Deploy Key somente leitura**, exclusiva do aparelho.
+
+**[🔐 Ver como funciona o acesso ao Git privado](bootstrap/README.md#7-clonar-o-git-privado)**
+
+Depois que a chave estiver autorizada:
+
+```bash
+git clone git@github.com:williamandrade01wa-lab/BMO_R36S.git
+cd BMO_R36S
+```
+
+Durante testes, pode ser necessário selecionar uma branch específica antes de instalar.
+
+Na versão estável, o fluxo será pela `main`.
+
+---
+
+### 5. Instale o BMO
+
+Existe **um único comando de instalação**:
 
 ```bash
 sudo ./install/install.sh
 ```
 
-As antigas fases em `install/phases/` são ferramentas de build/sandbox e não devem ser executadas manualmente para instalar o aparelho.
+**[🛠️ Ver o instalador](install/install.sh)**
 
-## Ambientes
+Não execute manualmente os scripts antigos em `install/phases/`. Eles são ferramentas de build/sandbox e não são o instalador do aparelho.
 
-- **Produção no R36S:** `/opt/bmo-ui/index.html`
-- **Candidate no R36S:** `/opt/bmo-ui/index.bmo-next.html`
-- **Le Potato:** servidor de deploy, validação, backup e rollback
-
-## Fluxo de desenvolvimento e promoção
+O final esperado é:
 
 ```text
-editar -> validar -> candidate -> teste físico -> backup -> produção
+BMO_INSTALL_COMPLETE_OK
 ```
 
-Nunca promover alterações diretamente para produção sem teste físico no R36S.
+Depois, reinicie quando o instalador solicitar.
 
-## Estrutura
+---
+
+### 6. Valide o BMO
+
+Após o reboot:
+
+```bash
+bmo status
+bmo verify
+```
+
+E valide fisicamente:
+
+- interface/kiosk do BMO;
+- D-pad e botões;
+- volume e brilho;
+- SYSTEM / CONTROL;
+- GBA;
+- SNES;
+- PSP;
+- PC STREAM / Moonlight;
+- Wi-Fi;
+- retorno ao BMO depois de jogos e streaming.
+
+**[✅ Ver checklist completo pós-instalação](bootstrap/README.md#9-validar-depois-do-reboot)**
+
+---
+
+## 🗺️ Resumo visual
+
+```text
+┌──────────────────────────┐
+│ BMO Linux Pure R36S      │
+└────────────┬─────────────┘
+             │
+             ▼
+┌──────────────────────────┐
+│ Bootstrap (opcional)     │
+│ Wi-Fi / IP / user / SSH  │
+└────────────┬─────────────┘
+             │
+             ▼
+┌──────────────────────────┐
+│ Primeiro boot do R36S    │
+└────────────┬─────────────┘
+             │
+             ▼
+┌──────────────────────────┐
+│ Git clone BMO_R36S       │
+└────────────┬─────────────┘
+             │
+             ▼
+┌──────────────────────────┐
+│ sudo ./install/install.sh│
+└────────────┬─────────────┘
+             │
+             ▼
+┌──────────────────────────┐
+│ BMO completo             │
+└──────────────────────────┘
+```
+
+## 📚 Atalhos
+
+| Quero... | Abrir |
+|---|---|
+| Fazer tudo do zero | **[Manual completo](bootstrap/README.md)** |
+| Configurar Wi-Fi/IP antes de ligar | **[firstboot.conf.example](bootstrap/firstboot.conf.example)** |
+| Aplicar o preset em uma Pure montada | **[apply-to-rootfs.sh](bootstrap/apply-to-rootfs.sh)** |
+| Ver o que roda no primeiro boot | **[provisioning.sh](bootstrap/provisioning.sh)** |
+| Instalar o BMO | **[install/install.sh](install/install.sh)** |
+| Entender regras do projeto/Codex | **[AGENTS.md](AGENTS.md)** |
+
+## Estrutura do projeto
 
 ```text
 bootstrap/   primeiro boot e manual de instalação limpa
@@ -70,10 +210,22 @@ scripts/     validação, deploy e utilitários
 docs/        documentação adicional
 ```
 
+## Desenvolvimento e promoção
+
+No aparelho de desenvolvimento:
+
+```text
+editar → validar → candidate → teste físico → backup → produção
+```
+
+- **Produção no R36S:** `/opt/bmo-ui/index.html`
+- **Candidate no R36S:** `/opt/bmo-ui/index.bmo-next.html`
+- **Le Potato:** deploy, validação, backup e rollback
+
+Alterações não devem ir para produção sem validação e teste físico no R36S.
+
 ## Segurança
 
-Este repositório não deve conter ROMs, saves, states, backups privados, chaves SSH, tokens, credenciais, senhas reais de Wi-Fi ou o conteúdo privado de `Moonlight.conf`.
+O Git não deve conter ROMs, saves, states, backups privados, chaves SSH, tokens, credenciais, senhas reais de Wi-Fi ou o conteúdo privado de `Moonlight.conf`.
 
-Para bootstrap, edite uma cópia local de `bootstrap/firstboot.conf.example`; arquivos `bootstrap/*.local.conf` são ignorados pelo Git.
-
-As regras operacionais detalhadas para agentes e Codex ficam em [`AGENTS.md`](AGENTS.md).
+Use sempre arquivos locais ignorados pelo Git para dados específicos de cada aparelho/rede.
