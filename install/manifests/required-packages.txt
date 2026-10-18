@@ -65,7 +65,6 @@ libxrandr2
 libxrender1
 libxss1
 mawk
-moonlight-qt
 mount
 network-manager
 procps
