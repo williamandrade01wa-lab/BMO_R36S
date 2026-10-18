@@ -11,9 +11,13 @@ abrir partição BOOT no PC
     ↓
 selecionar ScreenFiles corretas
     ↓
+COPIAR arquivos para a raiz do BOOT
+    ↓
 editar firstrun_overrides.txt
     ↓
-primeiro boot do R36S
+primeiro boot automático do R36S
+    ↓
+aguardar reinicializações, se ocorrerem
     ↓
 Wi-Fi + usuário r36s
     ↓
@@ -66,7 +70,11 @@ Você precisa usar a variante correta para o painel do seu R36S.
 
 ### O que copiar
 
-Entre na pasta correspondente ao painel correto e copie **os arquivos que estão dentro dela** para a raiz da partição `boot`.
+Entre na pasta correspondente ao painel correto e **COPIE os arquivos que estão dentro dela** para a raiz da partição `boot`.
+
+> **ATENÇÃO: COPIE, NÃO MOVA.**
+>
+> Os arquivos originais precisam permanecer dentro de `ScreenFiles/Panel X/`. Mover os arquivos para fora da pasta pode causar erro no boot. Use sempre **Copiar + Colar**, nunca **Recortar + Colar**.
 
 Exemplo conceitual:
 
@@ -89,16 +97,20 @@ ESCOLHEU O PAINEL CORRETO
 ScreenFiles/Panel X/
 └── arquivos do painel
 
-              ↓ copiar o CONTEÚDO
+              ↓ COPIAR o conteúdo
 
 boot/
-├── arquivos do painel  ← aqui
+├── cópia dos arquivos do painel  ← aqui
 ├── ScreenFiles/
+│   └── Panel X/
+│       └── arquivos originais continuam aqui
 ├── firstrun_overrides.txt
 └── ...
 ```
 
 **Não copie apenas a pasta `Panel X` para a raiz.** Copie os arquivos que estão dentro dela.
+
+**Não mova nem apague os arquivos originais de `ScreenFiles`.**
 
 Se o Windows perguntar se deseja substituir arquivos existentes, isso pode fazer parte da seleção do painel.
 
@@ -190,14 +202,17 @@ O arquivo de exemplo do Git contém apenas `CHANGE_ME`.
 
 ---
 
-## 5. Primeiro boot
+## 5. Primeiro boot — aguarde o processo automático
 
 Depois de configurar:
 
 1. ejete o cartão corretamente do PC;
 2. coloque-o no TF1 do R36S;
 3. ligue o aparelho;
-4. aguarde o primeiro boot terminar.
+4. **aguarde o boot automático concluir**;
+5. **não interrompa o processo apenas porque a tela mudou ou o aparelho reiniciou**.
+
+> **Durante o primeiro boot podem acontecer reinicializações automáticas.** Isso pode fazer parte da preparação inicial da imagem. Aguarde o aparelho terminar o processo antes de concluir que houve falha.
 
 O script original deverá:
 
@@ -215,6 +230,23 @@ O usuário padrão recomendado pelo BMO é:
 ```text
 r36s
 ```
+
+### Se ficar em tela preta
+
+Se o aparelho permanecer em tela preta e não continuar o boot:
+
+1. aguarde primeiro o tempo suficiente para confirmar que o boot realmente não prosseguiu;
+2. desligue o R36S pelo botão **POWER**;
+3. retire o microSD;
+4. conecte novamente o microSD ao PC;
+5. abra a partição `boot`;
+6. procure o erro/arquivo de diagnóstico gerado dentro do diretório `boot` e use essa informação para identificar o problema antes de alterar outros arquivos.
+
+Também confirme se:
+
+- você usou a `ScreenFiles` correta para o painel;
+- os arquivos foram **copiados**, e não movidos;
+- os arquivos originais ainda existem dentro de `ScreenFiles/Panel X/`.
 
 ---
 
@@ -339,12 +371,15 @@ Os arquivos antigos `firstboot.conf.example`, `apply-to-rootfs.sh` e `provisioni
 ```text
 1. Grave a imagem
 2. Abra a partição BOOT
-3. Copie o conteúdo da ScreenFiles correta para a raiz do BOOT
+3. COPIE o conteúdo da ScreenFiles correta para a raiz do BOOT
+   NÃO MOVA os arquivos originais
 4. Edite firstrun_overrides.txt
 5. Ejete o cartão
 6. Ligue o R36S
-7. Descubra o IP
-8. SSH
-9. Git clone
-10. sudo ./install/install.sh
+7. Aguarde o boot automático e possíveis reinicializações
+8. Se houver tela preta persistente, desligue pelo POWER e verifique a partição BOOT no PC
+9. Descubra o IP
+10. SSH
+11. Git clone
+12. sudo ./install/install.sh
 ```
