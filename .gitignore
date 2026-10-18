@@ -74,6 +74,8 @@ github_deploy_key.*
 # First-boot secrets / local presets
 bootstrap/firstboot.local.conf
 bootstrap/*.local.conf
+# Local hardware diagnostics - may contain device/network identifiers
+bmo-r36s-baseline-*.txt
 # Disk / runtime artifacts
 *.img
 *.img.xz
