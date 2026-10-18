@@ -25,71 +25,99 @@ Grave a imagem em um microSD destinado ao TF1 do R36S.
 
 ---
 
-### 2. Opcional: deixe Wi-Fi, usuário e rede prontos antes do primeiro boot
+### 2. Antes do primeiro boot: tela + Wi-Fi + usuário
 
-Se quiser que o R36S já tente conectar sozinho ao ligar, use o bootstrap.
+Depois da gravação, abra no PC a partição chamada `boot`.
 
-**[📖 Abrir o manual de primeiro boot](bootstrap/README.md)**
+Ela já contém os arquivos necessários para preparar o primeiro boot.
 
-**[⚙️ Abrir o arquivo modelo de configuração](bootstrap/firstboot.conf.example)**
+#### 2.1 Selecione a ScreenFile correta
 
-O fluxo é:
+Dentro da partição existe a pasta `ScreenFiles` com variantes de painel.
 
-```text
-firstboot.conf.example
-        ↓ copiar
-firstboot.local.conf
-        ↓ editar
-Wi-Fi / senha / DHCP ou IP fixo / usuário
-        ↓
-aplicar na imagem-base
-        ↓
-ligar o R36S
-```
-
-Crie uma configuração local a partir do modelo:
-
-```bash
-cp bootstrap/firstboot.conf.example bootstrap/firstboot.local.conf
-chmod 600 bootstrap/firstboot.local.conf
-```
-
-Depois edite apenas:
+Entre na pasta correspondente ao painel correto do seu R36S e copie **os arquivos que estão dentro dela** para a raiz da partição `boot`.
 
 ```text
-bootstrap/firstboot.local.conf
+boot/
+├── ScreenFiles/
+│   └── Panel X/
+│       └── arquivos do painel
+│
+└── ...
+
+          ↓ copiar o conteúdo de Panel X
+
+boot/
+├── arquivos do painel  ← aqui
+├── ScreenFiles/
+└── ...
 ```
 
-> **Nunca coloque sua senha de Wi-Fi, senha do usuário, token ou chave privada no Git.**
->
-> Arquivos `bootstrap/*.local.conf` são ignorados e também bloqueados pela auditoria de segurança do projeto.
+> Não copie somente a pasta `Panel X`. Copie os arquivos contidos nela para a raiz do `boot`.
 
-Se você não quiser pré-configurar nada, pode simplesmente iniciar a imagem e configurar rede/usuário manualmente.
+Usar a variante errada pode resultar em tela apagada ou imagem incorreta.
+
+#### 2.2 Edite `firstrun_overrides.txt`
+
+Na própria raiz da partição `boot` existe:
+
+```text
+firstrun_overrides.txt
+```
+
+A imagem já usa esse arquivo para configurar automaticamente o primeiro login.
+
+Exemplo original:
+
+```text
+rootpass=r36s
+FancyUserName=R36S
+username=r36s
+userpass=r36s
+ssid=WiFi
+wifipass=asuhdude
+```
+
+Antes de ligar, recomendamos alterar pelo menos:
+
+```text
+rootpass=SUA_SENHA_ROOT
+FancyUserName=R36S
+username=r36s
+userpass=SUA_SENHA_R36S
+ssid=SEU_WIFI
+wifipass=SUA_SENHA_WIFI
+timezone=America/Sao_Paulo
+locale=pt_BR.UTF-8
+```
+
+**[📖 Abrir o manual completo de primeiro boot](bootstrap/README.md)**
+
+**[⚙️ Ver um modelo de `firstrun_overrides.txt`](bootstrap/firstrun_overrides.example.txt)**
+
+> O arquivo contém senhas em texto simples. Edite apenas o cartão e nunca envie uma cópia preenchida para o Git.
 
 ---
 
 ### 3. Ligue o R36S e acesse por SSH
 
-Com o bootstrap aplicado, o padrão esperado é:
+No primeiro boot, a imagem deverá criar o usuário `r36s`, aplicar as senhas informadas e tentar conectar ao Wi-Fi configurado em `firstrun_overrides.txt`.
 
-```text
-hostname: bmo-r36s
-usuario:  r36s
-```
+O endereço IP normalmente é entregue automaticamente pelo roteador via DHCP.
 
-Exemplo:
-
-```bash
-ssh r36s@bmo-r36s
-```
-
-Se sua rede não resolver o hostname, use o IP entregue pelo roteador:
+Descubra o IP na sua rede e acesse:
 
 ```bash
 ssh r36s@IP_DO_R36S
 ```
 
-**[🔎 Ver instruções completas de rede e primeiro boot](bootstrap/README.md#5-primeiro-boot)**
+Use a senha configurada em:
+
+```text
+userpass=
+```
+
+**[🔎 Ver instruções completas de primeiro boot e rede](bootstrap/README.md#5-primeiro-boot)**
 
 ---
 
@@ -174,36 +202,36 @@ E valide fisicamente:
 ## 🗺️ Resumo visual
 
 ```text
-┌──────────────────────────┐
-│ Armbian Trixie R36S      │
-│ imagem original          │
-└────────────┬─────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ Bootstrap (opcional)     │
-│ Wi-Fi / IP / user / SSH  │
-└────────────┬─────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ Primeiro boot do R36S    │
-└────────────┬─────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ Git clone BMO_R36S       │
-└────────────┬─────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ sudo ./install/install.sh│
-└────────────┬─────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ BMO completo             │
-└──────────────────────────┘
+┌──────────────────────────────┐
+│ Gravar Armbian Trixie R36S   │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ Abrir partição BOOT          │
+│ ScreenFiles + firstrun       │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ Primeiro boot                │
+│ usuário + Wi-Fi              │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ SSH + Git clone              │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ sudo ./install/install.sh    │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ BMO completo                 │
+└──────────────────────────────┘
 ```
 
 ## 📦 O que o BMO instala e o que pertence a terceiros?
@@ -235,11 +263,10 @@ As versões, URLs e hashes upstream ficam registrados em:
 | Quero... | Abrir |
 |---|---|
 | Fazer tudo do zero | **[Manual completo](bootstrap/README.md)** |
-| Configurar Wi-Fi/IP antes de ligar | **[firstboot.conf.example](bootstrap/firstboot.conf.example)** |
-| Aplicar o preset em uma imagem montada | **[apply-to-rootfs.sh](bootstrap/apply-to-rootfs.sh)** |
-| Ver o que roda no primeiro boot | **[provisioning.sh](bootstrap/provisioning.sh)** |
+| Ver como preparar a partição BOOT | **[Manual de primeiro boot](bootstrap/README.md)** |
+| Ver modelo do `firstrun_overrides.txt` | **[firstrun_overrides.example.txt](bootstrap/firstrun_overrides.example.txt)** |
 | Instalar o BMO | **[install/install.sh](install/install.sh)** |
-| Ver créditos/origem da Pure | **[CREDITS.md](CREDITS.md)** |
+| Ver créditos/origem da imagem | **[CREDITS.md](CREDITS.md)** |
 | Ver dependências externas | **[THIRD_PARTY.md](THIRD_PARTY.md)** |
 | Entender como ficará público | **[PUBLIC-RELEASE.md](docs/PUBLIC-RELEASE.md)** |
 | Entender regras do projeto/Codex | **[AGENTS.md](AGENTS.md)** |
