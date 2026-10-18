@@ -8,20 +8,26 @@
 # script original carrega /boot/u-boot/firstrun_overrides.txt.
 #
 # NUNCA coloque senhas reais neste arquivo versionado no Git.
+#
+# IMPORTANTE:
+# Este arquivo e carregado como Shell. Para evitar que espacos e caracteres
+# especiais sejam interpretados, prefira aspas simples nos valores editaveis.
+# Se sua senha contiver uma aspa simples ('), ela precisa ser escapada de forma
+# apropriada antes do primeiro boot.
 
 # Senha administrativa root
-rootpass="CHANGE_ME_ROOT_PASSWORD"
+rootpass='CHANGE_ME_ROOT_PASSWORD'
 
 # Usuario principal
-FancyUserName="R36S"
-username="r36s"
-userpass="CHANGE_ME_R36S_PASSWORD"
+FancyUserName='R36S'
+username='r36s'
+userpass='CHANGE_ME_R36S_PASSWORD'
 
 # Wi-Fi
-ssid="CHANGE_ME_WIFI_SSID"
-wifipass="CHANGE_ME_WIFI_PASSWORD"
+ssid='CHANGE_ME_WIFI_SSID'
+wifipass='CHANGE_ME_WIFI_PASSWORD'
 
 # Brasil / horario local
 # Estes dois campos sao suportados pelo script de primeiro login da imagem.
-timezone="America/Sao_Paulo"
-locale="pt_BR.UTF-8"
+timezone='America/Sao_Paulo'
+locale='pt_BR.UTF-8'
