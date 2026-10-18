@@ -30,12 +30,15 @@ ROOTFS="$(readlink -f "$ROOTFS")"
 [ -f "$CONFIG" ] || fail "config local ausente: $CONFIG"
 [ -f "$PROVISIONING" ] || fail "provisioning ausente: $PROVISIONING"
 
-if grep -q 'CHANGE_ME_' "$CONFIG"; then
-    fail "preencha todos os CHANGE_ME_ antes de aplicar"
+# Ignora placeholders que estejam apenas em linhas comentadas
+# (por exemplo, os campos de IP estatico quando DHCP esta ativo).
+if grep -Ev '^[[:space:]]*(#|$)' "$CONFIG" |
+    grep -q 'CHANGE_ME_'
+then
+    fail "preencha todos os CHANGE_ME_ ativos antes de aplicar"
 fi
 
-# Nao aceitamos arquivos localmente gravaveis por qualquer usuario.
-# Isso reduz o risco de copiar um preset alterado por terceiros.
+# O destino sempre sera privado, independentemente do modo local.
 MODE="$(stat -c '%a' "$CONFIG")"
 case "$MODE" in
     600|640|644) ;;
