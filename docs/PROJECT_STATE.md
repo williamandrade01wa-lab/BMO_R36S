@@ -61,17 +61,54 @@ Função planejada:
 - rollback
 - armazenamento de checkpoints oficiais
 
-## Próxima etapa
+## BMO Linux Base v0.1 — validação física
 
-Importar o código real do baseline para o repositório com estrutura organizada:
+Primeira imagem mínima compilada pelo GitHub Actions e gravada em microSD de teste.
 
-```text
-frontend/
-backend/
-launchers/
-systemd/
-scripts/
-docs/
-```
+Resultado físico confirmado no R36S em 2026-10-18:
 
-A partir daí, mudanças devem preferencialmente ocorrer em branch/PR antes do deploy no candidate do R36S.
+- boot concluído com sucesso;
+- ScreenFiles corretas copiadas para a partição BOOT;
+- painel/tela funcionando;
+- kernel/DTB/U-Boot suficientes para inicializar o aparelho;
+- console exibido corretamente;
+- ambiente XFCE não presente;
+- objetivo da v0.1 atingido.
+
+A v0.1 serve como prova de que o stack específico do R36S pode ser mantido em uma imagem Trixie mínima, sem depender do desktop original.
+
+### Build validada
+
+Branch:
+
+`feat/bmo-linux-base-v1`
+
+Workflow:
+
+`Build BMO Linux Base`
+
+Run validada:
+
+`#2`
+
+Commit de build:
+
+`a0deea3f5892f67a6fa64943715450e720647985`
+
+## Próxima etapa — BMO Linux Base v0.2
+
+Adicionar sobre a base mínima já validada, sem instalar ainda o BMO completo:
+
+- `BMO-FIRSTBOOT.txt` com parser seguro e chaves permitidas;
+- criação/configuração do usuário `r36s`;
+- hostname, timezone e locale;
+- Wi-Fi opcional com autoconnect;
+- SSH disponível sem desktop;
+- escrita de status/IP na partição BOOT;
+- comando `bmo` presente desde a imagem base;
+- `bmo status`, `bmo ip`, `bmo network`, `bmo logs`, `bmo doctor` e `bmo install`;
+- nenhuma chave SSH, token GitHub ou segredo embutido;
+- fonte Git pública/HTTPS como arquitetura padrão;
+- autenticação SSH privada apenas como configuração manual durante desenvolvimento.
+
+Depois da v0.2, validar hardware complementar e então conectar o bootstrap ao instalador completo do BMO.
