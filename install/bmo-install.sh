@@ -8,11 +8,11 @@ set -euo pipefail
 #
 # Estado atual:
 #   DRY-RUN completo
-#   APPLY v2 somente em raiz SANDBOX
+#   APPLY v3 somente em raiz SANDBOX
 #
-# APPLY v2:
+# APPLY v3:
 #   - nunca permite TARGET_ROOT=/
-#   - exige marcador .bmo-apply-v2-sandbox
+#   - exige marcador .bmo-apply-v3-sandbox
 #   - escreve somente filesystem/frontend
 #   - demais fases permanecem PLAN_ONLY
 # ============================================================
@@ -32,6 +32,7 @@ PACKAGES="$SCRIPT_DIR/packages/audited-runtime.txt"
 ENABLED_SERVICES="$SCRIPT_DIR/manifests/enabled-services.txt"
 OPTIONAL_SERVICES="$SCRIPT_DIR/manifests/optional-services.txt"
 RUNTIME_BIN_MANIFEST="$SCRIPT_DIR/manifests/runtime-bin.sha256"
+EMULATOR_CONFIG_MANIFEST="$SCRIPT_DIR/manifests/emulator-config.sha256"
 
 MODE=""
 PPSSPP_RUNTIME=""
@@ -48,7 +49,7 @@ Dry-run:
 
   ./install/bmo-install.sh --dry-run
 
-Sandbox APPLY v2:
+Sandbox APPLY v3:
 
   sudo ./install/bmo-install.sh \
       --apply \
@@ -57,10 +58,10 @@ Sandbox APPLY v2:
 
 IMPORTANTE:
 
-  APPLY v2 NÃO pode usar / como destino.
+  APPLY v3 NÃO pode usar / como destino.
   O destino precisa conter:
 
-    .bmo-apply-v2-sandbox
+    .bmo-apply-v3-sandbox
 
   Somente filesystem/frontend são escritos.
   As fases seguintes continuam PLAN_ONLY.
@@ -195,6 +196,40 @@ apply_copy() {
 }
 
 
+apply_copy_owned() {
+
+    SOURCE="$1"
+    DESTINATION="$2"
+    MODE_BITS="$3"
+    OWNER_UID="$4"
+    OWNER_GID="$5"
+
+    require_file "$REPO_ROOT/$SOURCE"
+
+    TARGET="$(
+        target_path "$DESTINATION"
+    )"
+
+    echo "APPLY  $SOURCE -> $TARGET [$MODE_BITS $OWNER_UID:$OWNER_GID]"
+
+    install \
+        -D \
+        -o "$OWNER_UID" \
+        -g "$OWNER_GID" \
+        -m "$MODE_BITS" \
+        "$REPO_ROOT/$SOURCE" \
+        "$TARGET"
+
+    cmp -s \
+        "$REPO_ROOT/$SOURCE" \
+        "$TARGET" || {
+            die "copia instalada divergiu: $DESTINATION"
+        }
+
+    echo "COPY_VERIFY_OK $DESTINATION"
+}
+
+
 while [ "$#" -gt 0 ]; do
 
     case "$1" in
@@ -275,11 +310,11 @@ case "$MODE" in
         }
 
         [ "$TARGET_ROOT" != "/" ] || {
-            die "APPLY v2 recusa TARGET_ROOT=/"
+            die "APPLY v3 recusa TARGET_ROOT=/"
         }
 
-        [ -f "$TARGET_ROOT/.bmo-apply-v2-sandbox" ] || {
-            die "marcador .bmo-apply-v2-sandbox ausente em $TARGET_ROOT"
+        [ -f "$TARGET_ROOT/.bmo-apply-v3-sandbox" ] || {
+            die "marcador .bmo-apply-v3-sandbox ausente em $TARGET_ROOT"
         }
 
         ;;
@@ -301,7 +336,7 @@ if [ "$MODE" = "dry-run" ]; then
 
 else
 
-    echo " MODE=APPLY-v2-SANDBOX"
+    echo " MODE=APPLY-v3-SANDBOX"
 
 fi
 
@@ -318,7 +353,7 @@ else
 
     echo "TARGET_ROOT=$TARGET_ROOT"
     echo "REAL_ROOT_WRITE=BLOCKED"
-    echo "APPLY_SCOPE=filesystem+frontend+runtime"
+    echo "APPLY_SCOPE=filesystem+frontend+runtime+emulators+rom-layout"
 
 fi
 
@@ -367,7 +402,39 @@ echo
 echo "NOTA:"
 echo "O dry-run valida a receita."
 echo "A validação rígida da BMO Linux Pure será adicionada"
-echo "antes de habilitarmos --apply."
+echo "antes de habilitarmos APPLY no sistema real."
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v3 preflight PPSSPP..."
+
+    [ -n "$PPSSPP_RUNTIME" ] || {
+        die "--ppsspp-runtime e obrigatorio no APPLY v3"
+    }
+
+    require_file "$PPSSPP_RUNTIME"
+
+    PREFLIGHT_PPSSPP_SHA="$(
+        sha256sum "$PPSSPP_RUNTIME" |
+        awk '{print $1}'
+    )"
+
+    echo "PREFLIGHT_PPSSPP_SHA=$PREFLIGHT_PPSSPP_SHA"
+
+    [ "$PREFLIGHT_PPSSPP_SHA" = "$BMO_PPSSPP_RUNTIME_SHA256" ] || {
+        die "PPSSPP runtime SHA divergente no preflight"
+    }
+
+    if tar -tzf "$PPSSPP_RUNTIME" |
+        grep -Eq '(^/|(^|/)\.\.(/|$))'
+    then
+        die "PPSSPP archive contem caminho inseguro"
+    fi
+
+    echo "PPSSPP_PREFLIGHT_OK"
+
+fi
 
 
 # ============================================================
@@ -446,7 +513,7 @@ if [ "$MODE" = "apply" ]; then
     )"
 
     echo
-    echo "APPLY v2 filesystem:"
+    echo "APPLY v3 filesystem:"
     echo "CREATE $UI_DIR"
 
     install \
@@ -469,7 +536,7 @@ if [ "$MODE" = "apply" ]; then
         -m 0755 \
         "$BIN_DIR"
 
-    echo "FILESYSTEM_APPLY_V2_OK"
+    echo "FILESYSTEM_APPLY_V3_OK"
 
 else
 
@@ -516,7 +583,7 @@ plan_copy \
 if [ "$MODE" = "apply" ]; then
 
     echo
-    echo "APPLY v2 frontend:"
+    echo "APPLY v3 frontend:"
 
     apply_copy \
         "frontend/index.html" \
@@ -581,7 +648,7 @@ plan_copy \
 if [ "$MODE" = "apply" ]; then
 
     echo
-    echo "APPLY v2 backend:"
+    echo "APPLY v3 backend:"
 
     apply_copy \
         "backend/bmo-control-api.py" \
@@ -662,7 +729,7 @@ plan_copy \
 if [ "$MODE" = "apply" ]; then
 
     echo
-    echo "APPLY v2 launchers/runtime:"
+    echo "APPLY v3 launchers/runtime:"
 
     RUNTIME_COPIES=(
         "launchers/bmo-game-launcher.py|/usr/local/bin/bmo-game-launcher.py"
@@ -717,9 +784,72 @@ cat <<'EOF'
 Expected cores:
   /usr/lib/aarch64-linux-gnu/libretro/mgba_libretro.so
   /usr/lib/aarch64-linux-gnu/libretro/snes9x_libretro.so
-
-STATUS=PLAN_ONLY
 EOF
+
+require_file "$EMULATOR_CONFIG_MANIFEST"
+
+echo
+echo "Validando configs versionadas..."
+
+(
+    cd "$REPO_ROOT"
+    sha256sum -c "$EMULATOR_CONFIG_MANIFEST"
+)
+
+echo "EMULATOR_CONFIG_SOURCE_SHA_OK"
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v3 RetroArch:"
+
+    R36S_HOME="$(
+        target_path /home/r36s
+    )"
+
+    CONFIG_ROOT="$(
+        target_path /home/r36s/.config
+    )"
+
+    RETRO_DIR="$(
+        target_path /home/r36s/.config/retroarch
+    )"
+
+    RETRO_CONFIG_DIR="$(
+        target_path /home/r36s/.config/retroarch/config
+    )"
+
+    MGBA_DIR="$(
+        target_path /home/r36s/.config/retroarch/config/mGBA
+    )"
+
+    for DIR in         "$R36S_HOME"         "$CONFIG_ROOT"         "$RETRO_DIR"         "$RETRO_CONFIG_DIR"         "$MGBA_DIR"
+    do
+        install             -d             -o 1000             -g 1000             -m 0755             "$DIR"
+    done
+
+    apply_copy_owned \
+        "configs/retroarch/retroarch.cfg" \
+        "/home/r36s/.config/retroarch/retroarch.cfg" \
+        "0644" \
+        "1000" \
+        "1000"
+
+    apply_copy_owned \
+        "configs/retroarch/config/mGBA/mGBA.opt" \
+        "/home/r36s/.config/retroarch/config/mGBA/mGBA.opt" \
+        "0644" \
+        "1000" \
+        "1000"
+
+    echo "RETROARCH_APPLY_V3_OK"
+
+else
+
+    echo
+    echo "STATUS=PLAN_ONLY"
+
+fi
 
 
 # ============================================================
@@ -787,7 +917,172 @@ fi
 
 echo
 echo "TARGET=/opt/src/ppsspp/build-bmo"
-echo "STATUS=PLAN_ONLY"
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v3 PPSSPP:"
+
+    PPSSPP_CONFIG_ROOT="$(
+        target_path /home/r36s/.config/ppsspp
+    )"
+
+    PPSSPP_PSP_DIR="$(
+        target_path /home/r36s/.config/ppsspp/PSP
+    )"
+
+    PPSSPP_SYSTEM_DIR="$(
+        target_path /home/r36s/.config/ppsspp/PSP/SYSTEM
+    )"
+
+    for DIR in         "$PPSSPP_CONFIG_ROOT"         "$PPSSPP_PSP_DIR"         "$PPSSPP_SYSTEM_DIR"
+    do
+        install             -d             -o 1000             -g 1000             -m 0755             "$DIR"
+    done
+
+    apply_copy_owned \
+        "configs/ppsspp/PSP/SYSTEM/controls.ini" \
+        "/home/r36s/.config/ppsspp/PSP/SYSTEM/controls.ini" \
+        "0644" \
+        "1000" \
+        "1000"
+
+    apply_copy_owned \
+        "configs/ppsspp/PSP/SYSTEM/ppsspp.ini" \
+        "/home/r36s/.config/ppsspp/PSP/SYSTEM/ppsspp.ini" \
+        "0644" \
+        "1000" \
+        "1000"
+
+    TMP_PPSSPP="$(
+        mktemp -d
+    )"
+
+    tar \
+        --no-same-owner \
+        -xzf "$PPSSPP_RUNTIME" \
+        -C "$TMP_PPSSPP"
+
+    SOURCE_BIN="$(
+        find "$TMP_PPSSPP" \
+            -type f \
+            -path '*/runtime/PPSSPPSDL' \
+            -print \
+            -quit
+    )"
+
+    [ -n "$SOURCE_BIN" ] || {
+        rm -rf "$TMP_PPSSPP"
+        die "PPSSPPSDL nao encontrado apos extracao"
+    }
+
+    SOURCE_RUNTIME="$(
+        dirname "$SOURCE_BIN"
+    )"
+
+    [ -d "$SOURCE_RUNTIME/assets" ] || {
+        rm -rf "$TMP_PPSSPP"
+        die "assets PPSSPP ausentes apos extracao"
+    }
+
+    SOURCE_BIN_SHA="$(
+        sha256sum "$SOURCE_BIN" |
+        awk '{print $1}'
+    )"
+
+    echo "EXTRACTED_PPSSPP_BINARY_SHA=$SOURCE_BIN_SHA"
+
+    [ "$SOURCE_BIN_SHA" = "$BMO_PPSSPP_BINARY_SHA256" ] || {
+        rm -rf "$TMP_PPSSPP"
+        die "PPSSPP binary extraido divergiu"
+    }
+
+    TARGET_PPSSPP="$(
+        target_path /opt/src/ppsspp/build-bmo
+    )"
+
+    rm -rf -- "$TARGET_PPSSPP"
+
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0755 \
+        "$TARGET_PPSSPP"
+
+    cp -a \
+        "$SOURCE_RUNTIME/." \
+        "$TARGET_PPSSPP/"
+
+    chown -R root:root "$TARGET_PPSSPP"
+
+    TARGET_BIN="$TARGET_PPSSPP/PPSSPPSDL"
+
+    [ -f "$TARGET_BIN" ] || {
+        rm -rf "$TMP_PPSSPP"
+        die "PPSSPPSDL nao instalado"
+    }
+
+    TARGET_BIN_SHA="$(
+        sha256sum "$TARGET_BIN" |
+        awk '{print $1}'
+    )"
+
+    echo "INSTALLED_PPSSPP_BINARY_SHA=$TARGET_BIN_SHA"
+
+    [ "$TARGET_BIN_SHA" = "$BMO_PPSSPP_BINARY_SHA256" ] || {
+        rm -rf "$TMP_PPSSPP"
+        die "PPSSPP instalado divergiu"
+    }
+
+    SOURCE_FILES="$(
+        find "$SOURCE_RUNTIME" -type f |
+        wc -l
+    )"
+
+    TARGET_FILES="$(
+        find "$TARGET_PPSSPP" -type f |
+        wc -l
+    )"
+
+    echo "PPSSPP_SOURCE_FILES=$SOURCE_FILES"
+    echo "PPSSPP_TARGET_FILES=$TARGET_FILES"
+
+    [ "$SOURCE_FILES" -eq "$TARGET_FILES" ] || {
+        rm -rf "$TMP_PPSSPP"
+        die "quantidade de arquivos PPSSPP divergiu"
+    }
+
+    while IFS= read -r -d '' SOURCE_FILE; do
+
+        RELATIVE="${SOURCE_FILE#$SOURCE_RUNTIME/}"
+        TARGET_FILE="$TARGET_PPSSPP/$RELATIVE"
+
+        [ -f "$TARGET_FILE" ] || {
+            rm -rf "$TMP_PPSSPP"
+            die "PPSSPP target ausente: $RELATIVE"
+        }
+
+        cmp -s "$SOURCE_FILE" "$TARGET_FILE" || {
+            rm -rf "$TMP_PPSSPP"
+            die "PPSSPP arquivo divergente: $RELATIVE"
+        }
+
+    done < <(
+        find "$SOURCE_RUNTIME" \
+            -type f \
+            -print0
+    )
+
+    rm -rf "$TMP_PPSSPP"
+
+    echo "PPSSPP_RUNTIME_APPLY_V3_OK"
+
+else
+
+    echo "STATUS=PLAN_ONLY"
+
+fi
 
 
 # ============================================================
@@ -954,9 +1249,48 @@ DO NOT COPY:
   save states
   favorites
   game covers
-
-STATUS=PLAN_ONLY
 EOF
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v3 empty ROM layout:"
+
+    ROM_ROOT="$(
+        target_path /home/r36s/ROMs
+    )"
+
+    install         -d         -o 1000         -g 1000         -m 0755         "$ROM_ROOT"
+
+    for ROM_DIR in \
+        /home/r36s/ROMs/gba \
+        /home/r36s/ROMs/sfc \
+        /home/r36s/ROMs/psp
+    do
+
+        TARGET_ROM_DIR="$(
+            target_path "$ROM_DIR"
+        )"
+
+        install \
+            -d \
+            -o 1000 \
+            -g 1000 \
+            -m 0755 \
+            "$TARGET_ROM_DIR"
+
+        echo "CREATE $TARGET_ROM_DIR"
+
+    done
+
+    echo "ROM_LAYOUT_APPLY_V3_OK"
+
+else
+
+    echo
+    echo "STATUS=PLAN_ONLY"
+
+fi
 
 
 # ============================================================
@@ -1017,7 +1351,7 @@ if [ "$MODE" = "dry-run" ]; then
 
 else
 
-    echo " BMO_READY_INSTALL_APPLY_V2_OK"
+    echo " BMO_READY_INSTALL_APPLY_V3_OK"
     echo "============================================================"
     echo
     echo "Only the sandbox target root was modified:"
