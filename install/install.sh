@@ -19,9 +19,6 @@ PP_ARCHIVE="$RUNTIME_DIR/BMO-PPSSPP-R36S-v1.20.4-runtime.tar.gz"
 ML_DEB="$RUNTIME_DIR/moonlight-qt_6.2.0-1_arm64.deb"
 SUMS="$RUNTIME_DIR/SHA256SUMS"
 
-BASE_INSTALLER="$INSTALL_DIR/bmo-install.sh"
-PHASE40="$INSTALL_DIR/phases/40-system-config.sh"
-PHASE50="$INSTALL_DIR/phases/50-services.sh"
 
 PP_BIN="/opt/src/ppsspp/build-bmo/PPSSPPSDL"
 
@@ -391,58 +388,234 @@ apply_bmo() {
 
     banner "BMO INSTALL - CORE"
 
-    [ -f "$BASE_INSTALLER" ] ||
-        die "bmo-install.sh ausente"
+    #
+    # O instalador principal e o unico caminho autorizado para
+    # instalacao real. As antigas phases Ready continuam sendo
+    # ferramentas de build/sandbox e nao sao chamadas aqui.
+    #
 
-    [ -f "$PHASE40" ] ||
-        die "40-system-config.sh ausente"
-
-    [ -f "$PHASE50" ] ||
-        die "50-services.sh ausente"
-
-
-    bash "$BASE_INSTALLER"
-
-    echo "BASE_INSTALL_OK"
-
-
-    bash "$PHASE40"
-
-    echo "SYSTEM_CONFIG_OK"
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0755 \
+        /opt/bmo-ui \
+        /usr/local/bin \
+        /usr/local/sbin \
+        /etc/default \
+        /etc/udev/rules.d \
+        /etc/systemd/system
 
 
-    # Nunca carrega UUID pessoal/antigo de um segundo SD.
-    if [ -f /etc/fstab ]; then
+    # --------------------------------------------------------
+    # Frontend
+    # --------------------------------------------------------
 
-        cp -a \
-            /etc/fstab \
-            /etc/fstab.bmo-preinstall
+    install \
+        -o root \
+        -g root \
+        -m 0644 \
+        "$ROOT/frontend/index.html" \
+        /opt/bmo-ui/index.html
 
-        awk '
-            $2 != "/mnt/bmo-sd2" {
-                print
-            }
-        ' \
-            /etc/fstab \
-            > /etc/fstab.bmo-new
+    install \
+        -o root \
+        -g root \
+        -m 0644 \
+        "$ROOT/frontend/index.bmo-next.html" \
+        /opt/bmo-ui/index.bmo-next.html
+
+
+    cmp -s \
+        /opt/bmo-ui/index.html \
+        /opt/bmo-ui/index.bmo-next.html \
+        || die "production e candidate divergiram"
+
+
+    # --------------------------------------------------------
+    # Runtime executavel
+    # --------------------------------------------------------
+
+    local root_files=(
+        "backend/bmo-control-api.py|/usr/local/bin/bmo-control-api.py|0755"
+
+        "launchers/bmo-game-launcher.py|/usr/local/bin/bmo-game-launcher.py|0755"
+        "launchers/bmo-kiosk.sh|/usr/local/bin/bmo-kiosk.sh|0755"
+        "launchers/bmo-moonlight-hotkeys.py|/usr/local/bin/bmo-moonlight-hotkeys.py|0755"
+        "launchers/bmo-moonlight-launch.sh|/usr/local/bin/bmo-moonlight-launch.sh|0755"
+
+        "scripts/runtime/bmo-game-hwkeys.py|/usr/local/bin/bmo-game-hwkeys.py|0755"
+        "scripts/runtime/bmo-x-init.sh|/usr/local/bin/bmo-x-init.sh|0755"
+        "scripts/runtime/bmo-usb-ip-watch.sh|/usr/local/bin/bmo-usb-ip-watch.sh|0755"
+        "scripts/runtime/bmo-usb-swap-screen.sh|/usr/local/bin/bmo-usb-swap-screen.sh|0755"
+        "scripts/runtime/bmo-usb-tether-auto.sh|/usr/local/bin/bmo-usb-tether-auto.sh|0755"
+
+        "scripts/runtime/r36s-battery-api.py|/usr/local/bin/r36s-battery-api.py|0755"
+        "scripts/runtime/r36s-sound-api.py|/usr/local/bin/r36s-sound-api.py|0755"
+        "scripts/runtime/r36s-status-api.py|/usr/local/bin/r36s-status-api.py|0755"
+
+        "deploy/r36s/bmo-deploy-helper|/usr/local/sbin/bmo-deploy-helper|0755"
+        "deploy/r36s/bmo-kiosk.default|/etc/default/bmo-kiosk|0644"
+
+        "install/system/udev/99-bmo-usb-power.rules|/etc/udev/rules.d/99-bmo-usb-power.rules|0644"
+    )
+
+
+    local item
+    local src
+    local dst
+    local mode
+
+    for item in "${root_files[@]}"; do
+
+        IFS='|' read -r src dst mode <<< "$item"
+
+        [ -f "$ROOT/$src" ] ||
+            die "fonte ausente: $src"
+
+        install \
+            -D \
+            -o root \
+            -g root \
+            -m "$mode" \
+            "$ROOT/$src" \
+            "$dst"
+
+        cmp -s \
+            "$ROOT/$src" \
+            "$dst" \
+            || die "copia divergente: $dst"
+
+        echo "INSTALLED=$dst"
+
+    done
+
+
+    # --------------------------------------------------------
+    # Sudo deploy helper
+    # --------------------------------------------------------
+
+    visudo \
+        -cf \
+        "$ROOT/deploy/r36s/bmo-deploy.sudoers" \
+        >/dev/null
+
+    install \
+        -o root \
+        -g root \
+        -m 0440 \
+        "$ROOT/deploy/r36s/bmo-deploy.sudoers" \
+        /etc/sudoers.d/bmo-deploy
+
+    visudo \
+        -cf \
+        /etc/sudoers.d/bmo-deploy \
+        >/dev/null
+
+
+    # --------------------------------------------------------
+    # Config RetroArch / PPSSPP
+    # --------------------------------------------------------
+
+    install \
+        -d \
+        -o r36s \
+        -g r36s \
+        -m 0755 \
+        /home/r36s/.config/retroarch \
+        /home/r36s/.config/retroarch/config \
+        /home/r36s/.config/retroarch/config/mGBA \
+        /home/r36s/.config/ppsspp \
+        /home/r36s/.config/ppsspp/PSP \
+        /home/r36s/.config/ppsspp/PSP/SYSTEM
+
+
+    local user_files=(
+        "configs/retroarch/retroarch.cfg|/home/r36s/.config/retroarch/retroarch.cfg"
+        "configs/retroarch/config/mGBA/mGBA.opt|/home/r36s/.config/retroarch/config/mGBA/mGBA.opt"
+
+        "configs/ppsspp/PSP/SYSTEM/controls.ini|/home/r36s/.config/ppsspp/PSP/SYSTEM/controls.ini"
+        "configs/ppsspp/PSP/SYSTEM/ppsspp.ini|/home/r36s/.config/ppsspp/PSP/SYSTEM/ppsspp.ini"
+    )
+
+
+    for item in "${user_files[@]}"; do
+
+        IFS='|' read -r src dst <<< "$item"
+
+        [ -f "$ROOT/$src" ] ||
+            die "fonte ausente: $src"
+
+        install \
+            -D \
+            -o r36s \
+            -g r36s \
+            -m 0644 \
+            "$ROOT/$src" \
+            "$dst"
+
+        cmp -s \
+            "$ROOT/$src" \
+            "$dst" \
+            || die "config divergente: $dst"
+
+        echo "CONFIG_INSTALLED=$dst"
+
+    done
+
+
+    # --------------------------------------------------------
+    # Systemd
+    # --------------------------------------------------------
+
+    local units=(
+        bmo-control-api.service
+        bmo-kiosk.service
+        bmo-ui.service
+
+        bmo-usb-ip-watch.service
+        bmo-usb-swap-screen.service
+        bmo-usb-tether-auto.service
+
+        bmo-vt.service
+        bmo-x-init.service
+        bmo-xorg.service
+
+        r36s-battery-api.service
+        r36s-console.service
+        r36s-sound-api.service
+        r36s-status-api.service
+    )
+
+
+    local unit
+
+    for unit in "${units[@]}"; do
+
+        [ -f "$ROOT/systemd/$unit" ] ||
+            die "unit fonte ausente: $unit"
 
         install \
             -o root \
             -g root \
             -m 0644 \
-            /etc/fstab.bmo-new \
-            /etc/fstab
+            "$ROOT/systemd/$unit" \
+            "/etc/systemd/system/$unit"
 
-        rm -f \
-            /etc/fstab.bmo-new
-    fi
+        echo "UNIT_INSTALLED=$unit"
+
+    done
 
 
-    bash "$PHASE50"
+    #
+    # Nao alteramos /boot, kernel, DTB, bootloader,
+    # Xorg da Pure ou /etc/fstab.
+    #
 
-    echo "SERVICES_CONFIG_OK"
+    echo "PURE_BOOT_UNTOUCHED=YES"
+    echo "PURE_FSTAB_UNTOUCHED=YES"
+    echo "BMO_CORE_INSTALL_OK"
 }
-
 
 install_management() {
 
