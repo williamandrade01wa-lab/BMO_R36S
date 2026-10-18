@@ -1,254 +1,307 @@
 # BMO Bootstrap — do zero ao BMO
 
-Este diretório existe para que qualquer pessoa com:
+Este diretório documenta o caminho mais simples para sair da imagem original do R36S e chegar ao BMO.
 
-- um R36S compatível;
-- a imagem **BMO Linux Pure R36S**;
-- acesso a este repositório Git;
-- um microSD de teste;
-
-consiga sair de uma instalação limpa e chegar ao BMO sem depender do histórico de desenvolvimento do projeto.
-
-## Visão geral
+O fluxo principal usa os próprios recursos que já vêm na imagem:
 
 ```text
-BMO Linux Pure
-      ↓
-primeiro boot pré-configurado (opcional)
-      ↓
-Wi-Fi + usuário r36s + SSH
-      ↓
-git clone BMO_R36S
-      ↓
+Gravar imagem
+    ↓
+abrir partição BOOT no PC
+    ↓
+selecionar ScreenFiles corretas
+    ↓
+editar firstrun_overrides.txt
+    ↓
+primeiro boot do R36S
+    ↓
+Wi-Fi + usuário r36s
+    ↓
+Git clone
+    ↓
 sudo ./install/install.sh
-      ↓
+    ↓
 BMO completo
 ```
 
-O bootstrap cuida somente da conveniência do primeiro boot. O sistema BMO completo continua sendo instalado pelo `install/install.sh`.
+---
+
+## 1. Grave a imagem
+
+Use a imagem validada do projeto `ohjhas/armbian-r36s`:
+
+```text
+armbian-r36s-trixie-xfce.img.xz
+SHA256: 5f9f35375c88fd945e780577cd92d1a30a58675a7eb043fd4547bcc77895a2e6
+```
+
+Depois da gravação, remova e reconecte o cartão se necessário.
+
+No Windows deverá aparecer uma partição chamada aproximadamente:
+
+```text
+boot
+```
+
+Essa é a partição que usamos antes do primeiro boot.
 
 ---
 
-## 1. Segurança primeiro
+## 2. IMPORTANTE — configure a tela correta
 
-Nunca coloque senhas reais, chaves SSH, tokens ou credenciais no Git.
+Na partição `boot` existe uma pasta `ScreenFiles` com variações de painel.
 
-O arquivo versionado é apenas:
+O projeto-base possui variantes como:
 
 ```text
-bootstrap/firstboot.conf.example
+ScreenFiles/
+├── Panel 0/
+├── Panel 1/
+├── Panel 2/
+├── Panel 3/
+└── Panel 4/
 ```
 
-Crie sua cópia local:
+Você precisa usar a variante correta para o painel do seu R36S.
 
-```bash
-cp bootstrap/firstboot.conf.example bootstrap/firstboot.local.conf
-chmod 600 bootstrap/firstboot.local.conf
+### O que copiar
+
+Entre na pasta correspondente ao painel correto e copie **os arquivos que estão dentro dela** para a raiz da partição `boot`.
+
+Exemplo conceitual:
+
+```text
+ANTES
+
+boot/
+├── ScreenFiles/
+│   ├── Panel 0/
+│   ├── Panel 1/
+│   ├── Panel 2/
+│   ├── Panel 3/
+│   └── Panel 4/
+├── firstrun_overrides.txt
+└── ...
+
+
+ESCOLHEU O PAINEL CORRETO
+
+ScreenFiles/Panel X/
+└── arquivos do painel
+
+              ↓ copiar o CONTEÚDO
+
+boot/
+├── arquivos do painel  ← aqui
+├── ScreenFiles/
+├── firstrun_overrides.txt
+└── ...
 ```
 
-Depois edite `bootstrap/firstboot.local.conf`.
+**Não copie apenas a pasta `Panel X` para a raiz.** Copie os arquivos que estão dentro dela.
 
-O arquivo `firstboot.local.conf` é local e deve permanecer fora do Git.
+Se o Windows perguntar se deseja substituir arquivos existentes, isso pode fazer parte da seleção do painel.
+
+> Usar arquivos de painel incorretos pode resultar em tela apagada, imagem incorreta ou boot sem vídeo. Não escolha um painel aleatoriamente se você já sabe qual variante funciona no seu aparelho.
 
 ---
 
-## 2. Configurar Wi-Fi, usuário e IP
+## 3. Configure o primeiro boot pelo arquivo que já vem na imagem
 
-No arquivo local, os campos mínimos para um primeiro boot totalmente automático são:
-
-```text
-PRESET_NET_WIFI_SSID
-PRESET_NET_WIFI_KEY
-PRESET_ROOT_PASSWORD
-PRESET_USER_PASSWORD
-```
-
-A base já usa:
+Na raiz da partição `boot` existe:
 
 ```text
-PRESET_USER_NAME="r36s"
-PRESET_NET_WIFI_COUNTRYCODE="BR"
-PRESET_LOCALE="pt_BR.UTF-8"
-PRESET_TIMEZONE="America/Sao_Paulo"
+firstrun_overrides.txt
 ```
 
-### DHCP
+Esse é o arquivo que recomendamos editar.
 
-Por padrão:
+A imagem original usa esse arquivo no primeiro login. Dentro do Linux ele aparece em:
 
 ```text
-PRESET_NET_USE_STATIC="0"
+/boot/u-boot/firstrun_overrides.txt
 ```
 
-O roteador escolherá o IP.
+O script original lê esse arquivo e usa as variáveis para criar o usuário e configurar o Wi-Fi.
 
-### IP fixo
+### Exemplo que vem na imagem
 
-Para usar IP fixo, altere:
+A imagem pode vir com valores semelhantes a:
 
 ```text
-PRESET_NET_USE_STATIC="1"
+rootpass=r36s
+FancyUserName=R36S
+username=r36s
+userpass=r36s
+ssid=WiFi
+wifipass=asuhdude
 ```
 
-E preencha todos os campos estáticos no arquivo.
+Esses são valores padrão, não dados pessoais do BMO.
 
-Não use um IP sem saber se ele está livre na sua rede.
+### O que recomendamos editar antes de ligar
+
+Exemplo:
+
+```text
+rootpass=SUA_SENHA_ROOT
+FancyUserName=R36S
+username=r36s
+userpass=SUA_SENHA_R36S
+ssid=SEU_WIFI
+wifipass=SUA_SENHA_WIFI
+timezone=America/Sao_Paulo
+locale=pt_BR.UTF-8
+```
+
+Também existe um modelo sem credenciais reais neste repositório:
+
+[`firstrun_overrides.example.txt`](firstrun_overrides.example.txt)
+
+### O que cada campo significa
+
+| Campo | Função |
+|---|---|
+| `rootpass` | senha administrativa do Linux |
+| `FancyUserName` | nome descritivo do usuário |
+| `username` | nome da conta Linux; para o BMO usamos `r36s` |
+| `userpass` | senha da conta `r36s` |
+| `ssid` | nome da rede Wi-Fi |
+| `wifipass` | senha da rede Wi-Fi |
+| `timezone` | fuso horário; recomendamos `America/Sao_Paulo` |
+| `locale` | idioma/localização; recomendamos `pt_BR.UTF-8` |
+
+O script original usa DHCP para o Wi-Fi, portanto normalmente o roteador atribui o IP automaticamente.
 
 ---
 
-## 3. Onde o Armbian lê a configuração
+## 4. Segurança
 
-A autoconfiguração oficial do Armbian usa:
+O `firstrun_overrides.txt` contém senhas em texto simples.
 
-```text
-/root/.not_logged_in_yet
-```
+Por isso:
 
-E executa uma vez, após o primeiro login bem-sucedido:
+- edite apenas a cópia que está no seu cartão;
+- nunca envie o arquivo preenchido para o Git;
+- nunca publique prints que mostrem as senhas;
+- para uso permanente, prefira SSH por chave depois que o aparelho estiver configurado.
 
-```text
-/root/provisioning.sh
-```
-
-Documentação oficial:
-
-- https://docs.armbian.com/user-guide/autoconfig/
-
-Importante: esses arquivos ficam na **rootfs Linux**, não na partição FAT/BOOT visível normalmente no Windows.
-
-O script `apply-to-rootfs.sh` existe para fazer essa cópia com validações.
-
----
-
-## 4. Injetar o preset na Pure
-
-Em uma máquina Linux, monte a partição root da Pure. Exemplo conceitual:
-
-```bash
-sudo mkdir -p /mnt/bmo-rootfs
-sudo mount /dev/SEU_DISPOSITIVO_ROOT /mnt/bmo-rootfs
-```
-
-Confirme com cuidado qual é a partição correta. Nunca copie exemplos de `/dev/...` sem verificar o seu dispositivo.
-
-Depois, dentro do repositório:
-
-```bash
-sudo bash ./bootstrap/apply-to-rootfs.sh /mnt/bmo-rootfs
-```
-
-O resultado esperado é:
-
-```text
-BMO FIRSTBOOT PRESET APPLIED
-```
-
-Desmonte corretamente:
-
-```bash
-sync
-sudo umount /mnt/bmo-rootfs
-```
-
-Agora o cartão pode ser colocado no R36S.
+O arquivo de exemplo do Git contém apenas `CHANGE_ME`.
 
 ---
 
 ## 5. Primeiro boot
 
-Ao iniciar a Pure com o preset aplicado, o Armbian deverá tentar automaticamente:
+Depois de configurar:
 
-1. configurar a rede;
-2. conectar no Wi-Fi informado;
-3. criar o usuário `r36s`;
-4. aplicar locale/timezone;
-5. executar `provisioning.sh`;
-6. definir o hostname como `bmo-r36s`;
-7. habilitar/iniciar SSH caso o serviço já exista na Pure.
+1. ejete o cartão corretamente do PC;
+2. coloque-o no TF1 do R36S;
+3. ligue o aparelho;
+4. aguarde o primeiro boot terminar.
 
-O `provisioning.sh` propositalmente não instala pacotes, não clona o Git e não contém credenciais.
+O script original deverá:
 
-Se o preset de rede estiver incorreto, o aparelho pode ficar sem rede. Nesse caso, corrija a configuração ou faça o primeiro login localmente.
+1. definir a senha de `root`;
+2. criar o usuário informado em `username`;
+3. definir a senha desse usuário;
+4. adicionar o usuário aos grupos necessários do aparelho;
+5. configurar o Wi-Fi informado;
+6. usar DHCP para obter um IP;
+7. aplicar `timezone` e `locale` quando informados;
+8. iniciar o ambiente gráfico.
+
+O usuário padrão recomendado pelo BMO é:
+
+```text
+r36s
+```
 
 ---
 
-## 6. Encontrar e acessar o R36S
+## 6. Descobrir o IP e acessar por SSH
 
-Se sua rede resolver hostnames locais, tente:
+Depois que o Wi-Fi estiver conectado, descubra o IP do R36S no roteador ou pela sua rede local.
 
-```bash
-ssh r36s@bmo-r36s
-```
-
-Caso contrário, consulte o IP entregue pelo roteador e use:
+Exemplo:
 
 ```bash
 ssh r36s@IP_DO_R36S
 ```
 
-Use a senha definida em `PRESET_USER_PASSWORD`.
+Use a senha colocada em:
 
-Depois que o ambiente estiver estabelecido, acesso por chave SSH é preferível a senha.
+```text
+userpass=
+```
+
+Neste ponto já conseguimos continuar a instalação remotamente.
 
 ---
 
 ## 7. Clonar o Git privado
 
-Este repositório é privado. Portanto, o dispositivo precisa de uma credencial Git autorizada para fazer o primeiro clone.
+Enquanto o projeto BMO estiver privado, o GitHub exige autenticação para fazer o clone.
 
-A estratégia oficial do BMO é uma **GitHub Deploy Key somente leitura**, exclusiva do dispositivo.
+Durante o desenvolvimento usamos uma **Deploy Key somente leitura**, exclusiva do aparelho.
 
-A chave privada nunca deve entrar no Git.
+A chave privada nunca deve ser adicionada ao Git.
 
-Durante a fase de desenvolvimento, use a branch indicada pelo projeto. Para a instalação estável, a intenção é usar `main`.
-
-Fluxo esperado depois que a chave estiver autorizada:
+Depois que a chave estiver autorizada:
 
 ```bash
 git clone git@github.com:williamandrade01wa-lab/BMO_R36S.git
 cd BMO_R36S
 ```
 
-Em teste de uma branch antes da promoção:
+Para testar a versão em desenvolvimento atual:
 
 ```bash
 git switch feat/installer-updater-v1
+```
+
+### Quando o BMO for público
+
+Essa etapa ficará mais simples e não exigirá Deploy Key:
+
+```bash
+git clone https://github.com/USUARIO/BMO_R36S.git
+cd BMO_R36S
 ```
 
 ---
 
 ## 8. Instalar o BMO
 
-A instalação real possui um único ponto de entrada:
+Existe um único ponto de entrada para a instalação real:
 
 ```bash
 sudo ./install/install.sh
 ```
 
-Não execute manualmente as antigas fases de build/sandbox em `install/phases/`.
+Não execute manualmente os scripts antigos de build/sandbox em `install/phases/`.
 
-O instalador deve terminar com:
+O resultado esperado ao final é:
 
 ```text
 BMO_INSTALL_COMPLETE_OK
 ```
 
-Quando solicitado pelo instalador, reinicie o aparelho.
+Depois reinicie quando o instalador solicitar.
 
 ---
 
 ## 9. Validar depois do reboot
 
-O mínimo esperado é:
+Comece por:
 
 ```bash
 bmo status
 bmo verify
 ```
 
-E fisicamente no R36S validar:
+Depois valide fisicamente:
 
-- tela/kiosk do BMO;
+- interface/kiosk do BMO;
 - D-pad e botões;
 - volume e brilho;
 - SYSTEM / CONTROL;
@@ -257,34 +310,41 @@ E fisicamente no R36S validar:
 - PSP;
 - PC STREAM / Moonlight;
 - Wi-Fi;
-- retorno ao BMO após sair de jogo/stream.
+- retorno ao BMO depois de jogos e streaming.
 
 A instalação limpa não inclui ROMs, saves, favoritos pessoais ou pareamento Moonlight.
 
 ---
 
-## 10. Arquivos deste diretório
+## 10. Por que usamos `firstrun_overrides.txt`?
+
+Porque essa imagem do R36S já foi construída para isso.
+
+O script `armbian-firstlogin` do projeto-base procura:
 
 ```text
-bootstrap/
-├── README.md                  # este manual
-├── firstboot.conf.example     # template sem segredos
-├── provisioning.sh            # ações genéricas do primeiro boot
-└── apply-to-rootfs.sh         # injeta os dois arquivos na Pure montada
+/boot/u-boot/firstrun_overrides.txt
 ```
 
-Arquivo local esperado, mas nunca versionado:
+Depois carrega as variáveis desse arquivo e configura usuário, senha, Wi-Fi, timezone e locale.
 
-```text
-bootstrap/firstboot.local.conf
-```
+Portanto, para a experiência normal de instalação, **não precisamos montar a partição Linux rootfs apenas para configurar o primeiro boot**.
+
+Os arquivos antigos `firstboot.conf.example`, `apply-to-rootfs.sh` e `provisioning.sh` permanecem temporariamente no branch enquanto consolidamos o fluxo, mas não são mais o caminho recomendado para esta imagem.
 
 ---
 
-## Caminho sem preconfiguração
+## Resumo rápido
 
-O bootstrap é opcional.
-
-Se você preferir, pode iniciar a BMO Linux Pure sem preset, concluir manualmente o primeiro login do Armbian, configurar Wi-Fi e então seguir diretamente para a etapa do Git.
-
-O objetivo do bootstrap é apenas tornar instalações repetidas e testes de cartões novos mais rápidos e previsíveis.
+```text
+1. Grave a imagem
+2. Abra a partição BOOT
+3. Copie o conteúdo da ScreenFiles correta para a raiz do BOOT
+4. Edite firstrun_overrides.txt
+5. Ejete o cartão
+6. Ligue o R36S
+7. Descubra o IP
+8. SSH
+9. Git clone
+10. sudo ./install/install.sh
+```
