@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -euo pipefail
+
+CONFIG="/etc/bmo/bmo.conf"
+OUTPUT="/opt/bmo-ui/bmo-runtime-config.js"
+
+die() {
+    echo "ERRO: $*" >&2
+    exit 1
+}
+
+[ "$EUID" -eq 0 ] || {
+    die "bmo-runtime-config requer root"
+}
+
+HUB_URL=""
+
+if [ -f "$CONFIG" ]; then
+
+    [ "$(stat -c '%u' "$CONFIG")" = "0" ] || {
+        die "$CONFIG precisa pertencer ao root"
+    }
+
+    if find "$CONFIG" \
+        -perm /022 \
+        -print \
+        -quit |
+        grep -q .
+    then
+        die "$CONFIG nao pode ser gravavel por grupo/outros"
+    fi
+
+    # shellcheck disable=SC1090
+    source "$CONFIG"
+
+    HUB_URL="${BMO_HUB_EVENTS_URL:-}"
+fi
+
+
+if [ -n "$HUB_URL" ]; then
+
+    case "$HUB_URL" in
+        http://*|https://*)
+            ;;
+        *)
+            die "BMO_HUB_EVENTS_URL precisa usar http ou https"
+            ;;
+    esac
+fi
+
+
+install \
+    -d \
+    -o root \
+    -g root \
+    -m 0755 \
+    /opt/bmo-ui
+
+
+python3 \
+    - "$HUB_URL" \
+    "$OUTPUT" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+url = sys.argv[1]
+out = Path(sys.argv[2])
+
+payload = (
+    "window.BMO_RUNTIME_CONFIG = "
+    "Object.freeze({\n"
+    f"    hubEventsUrl: {json.dumps(url)}\n"
+    "});\n"
+)
+
+out.write_text(
+    payload,
+    encoding="utf-8"
+)
+PY
+
+
+chown root:root "$OUTPUT"
+chmod 0644 "$OUTPUT"
+
+echo "BMO_RUNTIME_CONFIG_OK"
+echo "HUB_CONFIGURED=$([ -n "$HUB_URL" ] && echo YES || echo NO)"

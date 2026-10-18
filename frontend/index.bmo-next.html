@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BMO Display OS</title>
 
+  <script src="/bmo-runtime-config.js"></script>
+
   <style>
     /* ==========================================================================
        BMO DISPLAY OS - TELA CHEIA NATIVA
@@ -227,7 +229,7 @@
       opacity: 1;
       transform: translateY(0);
     }
-  
+
     /* ==========================================================================
        R36S SYSTEM PANEL
        ========================================================================== */
@@ -307,7 +309,7 @@
     .sys-ok { color: #9CFFB7; }
     .sys-bad { color: #FF8C8C; }
 
-  
+
     /* ==========================================================================
        BMO MAIN MENU
        ========================================================================== */
@@ -2788,7 +2790,7 @@
   <!-- ======================================================
        BMO CONTROL
        ====================================================== -->
-  
+
   <!-- ======================================================
        BMO_PC_STREAM_V1
        ====================================================== -->
@@ -3129,7 +3131,7 @@
         className: 'state-happy',
         render: (isTalking) => `
           <circle class="face-part blink-eye" cx="120" cy="130" r="19" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
             : `<path class="face-part" d="M 195 138 Q 220 166 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3154,7 +3156,7 @@
         className: 'state-shocked',
         render: (isTalking) => `
           <circle class="face-part" cx="115" cy="120" r="24" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="150" rx="24" ry="34" />`
             : `<ellipse class="face-part" cx="220" cy="150" rx="22" ry="34" />`
           }
@@ -3180,7 +3182,7 @@
         render: (isTalking) => `
           <line class="face-part" x1="95" y1="105" x2="145" y2="155" stroke-width="14" stroke-linecap="round" />
           <line class="face-part" x1="145" y1="105" x2="95" y2="155" stroke-width="14" stroke-linecap="round" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="22" ry="16" />`
             : `<line class="face-part" x1="185" y1="145" x2="255" y2="145" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3197,7 +3199,7 @@
           <!-- Coração Esquerdo -->
           <path class="face-part" d="M 120 138 A 12 12 0 0 0 102 120 A 12 12 0 0 0 120 144 A 12 12 0 0 0 138 120 A 12 12 0 0 0 120 138 Z" transform="rotate(45 120 130) scale(1.6) translate(-40, -40)" />
           <!-- Sorriso -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
             : `<path class="face-part" d="M 195 138 Q 220 168 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3215,7 +3217,7 @@
           <line class="face-part" x1="90" y1="105" x2="145" y2="128" stroke-width="12" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="120" cy="142" r="16" />
           <!-- Boca Reta / Irritada -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="22" ry="18" />`
             : `<line class="face-part" x1="190" y1="155" x2="250" y2="155" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3234,7 +3236,7 @@
           <line class="face-part" x1="95" y1="118" x2="145" y2="105" stroke-width="10" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="120" cy="135" r="18" />
           <!-- Boca para baixo -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="20" ry="16" />`
             : `<path class="face-part" d="M 195 158 Q 220 135 245 158" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3264,7 +3266,7 @@
           <!-- Olho Fechado piscando -->
           <line class="face-part" x1="95" y1="130" x2="145" y2="130" stroke-width="13" stroke-linecap="round" />
           <!-- Boca sorrindo de lado -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="225" cy="145" rx="20" ry="18" />`
             : `<path class="face-part" d="M 195 138 Q 225 170 248 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3279,7 +3281,7 @@
         className: 'state-thinking',
         render: (isTalking) => `
           <ellipse class="face-part blink-eye" cx="120" cy="130" rx="19" ry="14" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="148" rx="18" ry="16" />`
             : `<path class="face-part" d="M 195 150 Q 220 144 245 148" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -3302,10 +3304,10 @@
      */
     function renderFace() {
       const expr = BMO_EXPRESSIONS[currentExpression] || BMO_EXPRESSIONS.happy;
-      
+
       // Classes do body (para transição de animações)
       bodyEl.className = `${expr.className} ${isTalking ? 'is-talking' : ''}`;
-      
+
       // Renderização do SVG
       svgEl.innerHTML = expr.render(isTalking);
     }
@@ -3366,7 +3368,7 @@
       /**
        * MODO FALA COMPLETO:
        * Mostra a legenda, move a boca do BMO durante a duração e encerra ao final.
-       * 
+       *
        * @param {string} text - Mensagem a ser falada
        * @param {object} [options]
        * @param {number} [options.duration] - Duração em ms (se omitido, calcula automaticamente pelo tamanho do texto)
@@ -3514,7 +3516,7 @@
         BMO.clearSubtitle();
       }
     });
-  
+
 
     /* =========================================================================
        SYSTEM PANEL CONTROLLER
@@ -10685,7 +10687,10 @@ window.stopBmoSleepMode =
 (() => {
 
     const HUB_EVENTS =
-        "http://192.168.1.50:8084/api/events";
+        String(
+            window.BMO_RUNTIME_CONFIG?.hubEventsUrl
+            || ""
+        ).trim();
 
     let lastEventTimestamp = 0;
 
@@ -10814,7 +10819,19 @@ window.stopBmoSleepMode =
 
     function connect() {
 
-        console.log("[BMO SSE] conectando ao Hub...");
+        if (!HUB_EVENTS) {
+
+            console.info(
+                "[BMO SSE] Hub desabilitado; endpoint nao configurado"
+            );
+
+            return;
+        }
+
+        console.log(
+            "[BMO SSE] conectando ao Hub:",
+            HUB_EVENTS
+        );
 
         const source =
             new EventSource(HUB_EVENTS);

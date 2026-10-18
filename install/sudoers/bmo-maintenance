@@ -1,0 +1,2 @@
+# BMO maintenance - helper root com allowlist interna.
+r36s ALL=(root) NOPASSWD: /usr/local/sbin/bmo-maintenance *

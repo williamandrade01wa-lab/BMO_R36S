@@ -1,0 +1,19 @@
+# BMO device configuration
+#
+# Este arquivo e modelo.
+# O instalador cria /etc/bmo/bmo.conf.
+
+BMO_REPO_URL=
+BMO_BRANCH=main
+BMO_CHANNEL=stable
+
+BMO_REPO_DIR=/var/lib/bmo/repo
+BMO_GIT_KEY=/etc/bmo/github_deploy_key
+
+# Sunshine / Moonlight
+BMO_MOONLIGHT_HOST=
+
+# BMO Hub / SSE opcional.
+# Exemplo:
+# BMO_HUB_EVENTS_URL=http://host:8084/api/events
+BMO_HUB_EVENTS_URL=
