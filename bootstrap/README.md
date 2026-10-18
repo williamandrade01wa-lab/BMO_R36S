@@ -134,7 +134,7 @@ Confirme com cuidado qual é a partição correta. Nunca copie exemplos de `/dev
 Depois, dentro do repositório:
 
 ```bash
-sudo ./bootstrap/apply-to-rootfs.sh /mnt/bmo-rootfs
+sudo bash ./bootstrap/apply-to-rootfs.sh /mnt/bmo-rootfs
 ```
 
 O resultado esperado é:
