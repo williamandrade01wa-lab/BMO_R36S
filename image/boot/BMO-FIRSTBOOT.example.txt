@@ -1,0 +1,41 @@
+# ============================================================
+# BMO Linux Base - First Boot
+# ============================================================
+#
+# Copie este arquivo para a particao BOOT com o nome:
+#   BMO-FIRSTBOOT.txt
+#
+# Edite somente os valores necessarios.
+# O bootstrap BMO deve tratar os valores literalmente e nunca
+# executar este arquivo como script Shell.
+#
+# NUNCA publique uma copia preenchida com senhas reais.
+
+# ------------------------------------------------------------
+# Wi-Fi
+# ------------------------------------------------------------
+WIFI_SSID=CHANGE_ME_WIFI_SSID
+WIFI_PASSWORD=CHANGE_ME_WIFI_PASSWORD
+
+# ------------------------------------------------------------
+# Usuario local
+# ------------------------------------------------------------
+USER_NAME=r36s
+USER_PASSWORD=CHANGE_ME_R36S_PASSWORD
+ROOT_PASSWORD=CHANGE_ME_ROOT_PASSWORD
+
+# ------------------------------------------------------------
+# Sistema
+# ------------------------------------------------------------
+HOSTNAME=bmo-r36s
+TIMEZONE=America/Sao_Paulo
+LOCALE=pt_BR.UTF-8
+
+# ------------------------------------------------------------
+# BMO
+# ------------------------------------------------------------
+# Na BMO Linux Base o padrao e nao instalar automaticamente.
+# Depois do primeiro boot execute:
+#   bmo install
+BMO_AUTO_INSTALL=no
+BMO_CHANNEL=stable
