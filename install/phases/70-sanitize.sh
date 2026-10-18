@@ -103,6 +103,47 @@ echo "GENERIC_IDENTITY_CLEAN_OK"
 
 
 echo
+echo "[1c/5] Removendo SSH host keys clonadas..."
+
+SSHD_KEYGEN_SERVICE="$TARGET_ROOT/usr/lib/systemd/system/sshd-keygen.service"
+
+[ -f "$SSHD_KEYGEN_SERVICE" ] || {
+    die "sshd-keygen.service ausente"
+}
+
+grep -Fq \
+    'ConditionFirstBoot=yes' \
+    "$SSHD_KEYGEN_SERVICE" || {
+        die "sshd-keygen.service sem ConditionFirstBoot"
+    }
+
+grep -Fq \
+    'ExecStart=ssh-keygen -A' \
+    "$SSHD_KEYGEN_SERVICE" || {
+        die "sshd-keygen.service sem ssh-keygen -A"
+    }
+
+rm -f \
+    "$TARGET_ROOT"/etc/ssh/ssh_host_* \
+    2>/dev/null || true
+
+SSH_HOST_KEYS="$(
+    find "$TARGET_ROOT/etc/ssh" \
+        -maxdepth 1 \
+        -type f \
+        -name 'ssh_host_*' \
+        2>/dev/null |
+    wc -l
+)"
+
+echo "SSH_HOST_KEYS=$SSH_HOST_KEYS"
+
+[ "$SSH_HOST_KEYS" -eq 0 ]
+
+echo "SSH_HOST_KEYS_CLEAN_OK"
+
+
+echo
 echo "[2/5] Removendo Wi-Fi salvo..."
 
 NM="$TARGET_ROOT/etc/NetworkManager/system-connections"
