@@ -17,7 +17,7 @@ echo "============================================================"
 echo
 echo "[1/5] Arquivos proibidos..."
 
-FORBIDDEN_FILE_REGEX='(^|/)(Moonlight\.conf|id_rsa|id_ed25519|github_deploy_key|bmo-runtime-config\.js|system-connections/)|\.(gba|gb|gbc|sfc|smc|nes|iso|cso|pbp|p12|pfx|key|pem|token|secret|credentials|img|raw|deb)$'
+FORBIDDEN_FILE_REGEX='(^|/)(Moonlight\.conf|id_rsa|id_ed25519|github_deploy_key|bmo-runtime-config\.js|system-connections/|bootstrap/[^/]*\.local\.conf$)|\.(gba|gb|gbc|sfc|smc|nes|iso|cso|pbp|p12|pfx|key|pem|token|secret|credentials|img|raw|deb)$'
 
 if git ls-files |
     grep -Ev '^install/runtime/(BMO-PPSSPP-R36S-v1.20.4-runtime.tar.gz|moonlight-qt_6.2.0-1_arm64.deb|SHA256SUMS)$' |
