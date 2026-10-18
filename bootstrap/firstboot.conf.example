@@ -1,0 +1,57 @@
+# BMO / Armbian first-boot preset
+#
+# Copie este arquivo para:
+#   bootstrap/firstboot.local.conf
+#
+# Edite os valores CHANGE_ME localmente.
+# NUNCA versione o arquivo local com senhas reais.
+#
+# O bootstrap copia o resultado para:
+#   /root/.not_logged_in_yet
+#
+# Referencia Armbian:
+# https://docs.armbian.com/user-guide/autoconfig/
+
+# ------------------------------------------------------------
+# Network
+# ------------------------------------------------------------
+PRESET_NET_CHANGE_DEFAULTS="1"
+
+# Wi-Fi tem prioridade sobre Ethernet quando habilitado.
+PRESET_NET_ETHERNET_ENABLED="0"
+PRESET_NET_WIFI_ENABLED="1"
+PRESET_NET_WIFI_SSID="CHANGE_ME_WIFI_SSID"
+PRESET_NET_WIFI_KEY="CHANGE_ME_WIFI_PASSWORD"
+PRESET_NET_WIFI_COUNTRYCODE="BR"
+PRESET_CONNECT_WIRELESS="n"
+
+# DHCP e o padrao recomendado.
+PRESET_NET_USE_STATIC="0"
+
+# Para IP fixo, altere PRESET_NET_USE_STATIC para "1" e
+# descomente/preencha TODOS os campos abaixo.
+# PRESET_NET_STATIC_IP="CHANGE_ME_STATIC_IP"
+# PRESET_NET_STATIC_MASK="255.255.255.0"
+# PRESET_NET_STATIC_GATEWAY="CHANGE_ME_GATEWAY"
+# PRESET_NET_STATIC_DNS="1.1.1.1 8.8.8.8"
+
+# ------------------------------------------------------------
+# Locale / timezone
+# ------------------------------------------------------------
+SET_LANG_BASED_ON_LOCATION="n"
+PRESET_LOCALE="pt_BR.UTF-8"
+PRESET_TIMEZONE="America/Sao_Paulo"
+
+# ------------------------------------------------------------
+# Initial accounts
+# ------------------------------------------------------------
+# Estas senhas existem somente para o primeiro boot.
+# Prefira depois acesso SSH por chave.
+PRESET_ROOT_PASSWORD="CHANGE_ME_ROOT_PASSWORD"
+PRESET_ROOT_KEY=""
+
+PRESET_USER_NAME="r36s"
+PRESET_USER_PASSWORD="CHANGE_ME_R36S_PASSWORD"
+PRESET_USER_KEY=""
+PRESET_DEFAULT_REALNAME="BMO R36S"
+PRESET_USER_SHELL="bash"
