@@ -1,0 +1,64 @@
+name: Build BMO Linux Base
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: R36S Trixie minimal
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout BMO
+        uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/.ghcup || true
+          docker system prune -af || true
+          df -h
+
+      - name: Install host prerequisites
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            qemu-user-static \
+            binfmt-support \
+            xz-utils \
+            ca-certificates
+          sudo update-binfmts --enable || true
+
+      - name: Build minimal image
+        shell: bash
+        run: |
+          bash image/armbian/build-bmo-linux-base.sh
+
+      - name: Compress image and checksum
+        shell: bash
+        run: |
+          cd image/armbian/output
+          xz -T0 -6 --extreme bmo-linux-base-r36s-trixie-v0.1.img
+          sha256sum bmo-linux-base-r36s-trixie-v0.1.img.xz \
+            > bmo-linux-base-r36s-trixie-v0.1.img.xz.sha256
+          ls -lh
+          cat bmo-linux-base-r36s-trixie-v0.1.img.xz.sha256
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmo-linux-base-r36s-trixie-v0.1
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.1.img.xz
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.1.img.xz.sha256
