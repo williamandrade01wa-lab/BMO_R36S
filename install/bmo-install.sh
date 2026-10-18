@@ -8,11 +8,11 @@ set -euo pipefail
 #
 # Estado atual:
 #   DRY-RUN completo
-#   APPLY v1 somente em raiz SANDBOX
+#   APPLY v2 somente em raiz SANDBOX
 #
-# APPLY v1:
+# APPLY v2:
 #   - nunca permite TARGET_ROOT=/
-#   - exige marcador .bmo-apply-v1-sandbox
+#   - exige marcador .bmo-apply-v2-sandbox
 #   - escreve somente filesystem/frontend
 #   - demais fases permanecem PLAN_ONLY
 # ============================================================
@@ -31,6 +31,7 @@ MANIFEST="$SCRIPT_DIR/manifests/ready-v1.0.0.env"
 PACKAGES="$SCRIPT_DIR/packages/audited-runtime.txt"
 ENABLED_SERVICES="$SCRIPT_DIR/manifests/enabled-services.txt"
 OPTIONAL_SERVICES="$SCRIPT_DIR/manifests/optional-services.txt"
+RUNTIME_BIN_MANIFEST="$SCRIPT_DIR/manifests/runtime-bin.sha256"
 
 MODE=""
 PPSSPP_RUNTIME=""
@@ -47,7 +48,7 @@ Dry-run:
 
   ./install/bmo-install.sh --dry-run
 
-Sandbox APPLY v1:
+Sandbox APPLY v2:
 
   sudo ./install/bmo-install.sh \
       --apply \
@@ -56,10 +57,10 @@ Sandbox APPLY v1:
 
 IMPORTANTE:
 
-  APPLY v1 NÃO pode usar / como destino.
+  APPLY v2 NÃO pode usar / como destino.
   O destino precisa conter:
 
-    .bmo-apply-v1-sandbox
+    .bmo-apply-v2-sandbox
 
   Somente filesystem/frontend são escritos.
   As fases seguintes continuam PLAN_ONLY.
@@ -183,6 +184,14 @@ apply_copy() {
         -m "$MODE_BITS" \
         "$REPO_ROOT/$SOURCE" \
         "$TARGET"
+
+    cmp -s \
+        "$REPO_ROOT/$SOURCE" \
+        "$TARGET" || {
+            die "copia instalada divergiu: $DESTINATION"
+        }
+
+    echo "COPY_VERIFY_OK $DESTINATION"
 }
 
 
@@ -266,11 +275,11 @@ case "$MODE" in
         }
 
         [ "$TARGET_ROOT" != "/" ] || {
-            die "APPLY v1 recusa TARGET_ROOT=/"
+            die "APPLY v2 recusa TARGET_ROOT=/"
         }
 
-        [ -f "$TARGET_ROOT/.bmo-apply-v1-sandbox" ] || {
-            die "marcador .bmo-apply-v1-sandbox ausente em $TARGET_ROOT"
+        [ -f "$TARGET_ROOT/.bmo-apply-v2-sandbox" ] || {
+            die "marcador .bmo-apply-v2-sandbox ausente em $TARGET_ROOT"
         }
 
         ;;
@@ -292,7 +301,7 @@ if [ "$MODE" = "dry-run" ]; then
 
 else
 
-    echo " MODE=APPLY-v1-SANDBOX"
+    echo " MODE=APPLY-v2-SANDBOX"
 
 fi
 
@@ -309,7 +318,7 @@ else
 
     echo "TARGET_ROOT=$TARGET_ROOT"
     echo "REAL_ROOT_WRITE=BLOCKED"
-    echo "APPLY_SCOPE=filesystem+frontend"
+    echo "APPLY_SCOPE=filesystem+frontend+runtime"
 
 fi
 
@@ -437,7 +446,7 @@ if [ "$MODE" = "apply" ]; then
     )"
 
     echo
-    echo "APPLY v1 filesystem:"
+    echo "APPLY v2 filesystem:"
     echo "CREATE $UI_DIR"
 
     install \
@@ -447,7 +456,20 @@ if [ "$MODE" = "apply" ]; then
         -m 0755 \
         "$UI_DIR"
 
-    echo "FILESYSTEM_APPLY_V1_OK"
+    BIN_DIR="$(
+        target_path /usr/local/bin
+    )"
+
+    echo "CREATE $BIN_DIR"
+
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0755 \
+        "$BIN_DIR"
+
+    echo "FILESYSTEM_APPLY_V2_OK"
 
 else
 
@@ -494,7 +516,7 @@ plan_copy \
 if [ "$MODE" = "apply" ]; then
 
     echo
-    echo "APPLY v1 frontend:"
+    echo "APPLY v2 frontend:"
 
     apply_copy \
         "frontend/index.html" \
@@ -529,7 +551,7 @@ if [ "$MODE" = "apply" ]; then
         "$TARGET_CAND" ||
         die "frontend instalado divergiu"
 
-    echo "FRONTEND_APPLY_V1_OK"
+    echo "FRONTEND_APPLY_V2_OK"
 
 fi
 
@@ -540,10 +562,35 @@ fi
 
 phase 6 "backend"
 
+require_file "$RUNTIME_BIN_MANIFEST"
+
+echo "Validando SHAs do runtime ativo..."
+
+(
+    cd "$REPO_ROOT"
+    sha256sum -c "$RUNTIME_BIN_MANIFEST"
+)
+
+echo "RUNTIME_SOURCE_SHA_OK"
+
 plan_copy \
     "backend/bmo-control-api.py" \
     "/usr/local/bin/bmo-control-api.py" \
     "0755"
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v2 backend:"
+
+    apply_copy \
+        "backend/bmo-control-api.py" \
+        "/usr/local/bin/bmo-control-api.py" \
+        "0755"
+
+    echo "BACKEND_APPLY_V2_OK"
+
+fi
 
 
 # ============================================================
@@ -611,6 +658,42 @@ plan_copy \
     "scripts/runtime/r36s-status-api.py" \
     "/usr/local/bin/r36s-status-api.py" \
     "0755"
+
+if [ "$MODE" = "apply" ]; then
+
+    echo
+    echo "APPLY v2 launchers/runtime:"
+
+    RUNTIME_COPIES=(
+        "launchers/bmo-game-launcher.py|/usr/local/bin/bmo-game-launcher.py"
+        "launchers/bmo-kiosk.sh|/usr/local/bin/bmo-kiosk.sh"
+        "launchers/bmo-moonlight-hotkeys.py|/usr/local/bin/bmo-moonlight-hotkeys.py"
+        "launchers/bmo-moonlight-launch.sh|/usr/local/bin/bmo-moonlight-launch.sh"
+        "scripts/runtime/bmo-game-hwkeys.py|/usr/local/bin/bmo-game-hwkeys.py"
+        "scripts/runtime/bmo-x-init.sh|/usr/local/bin/bmo-x-init.sh"
+        "scripts/runtime/bmo-usb-ip-watch.sh|/usr/local/bin/bmo-usb-ip-watch.sh"
+        "scripts/runtime/bmo-usb-swap-screen.sh|/usr/local/bin/bmo-usb-swap-screen.sh"
+        "scripts/runtime/bmo-usb-tether-auto.sh|/usr/local/bin/bmo-usb-tether-auto.sh"
+        "scripts/runtime/r36s-battery-api.py|/usr/local/bin/r36s-battery-api.py"
+        "scripts/runtime/r36s-sound-api.py|/usr/local/bin/r36s-sound-api.py"
+        "scripts/runtime/r36s-status-api.py|/usr/local/bin/r36s-status-api.py"
+    )
+
+    for ITEM in "${RUNTIME_COPIES[@]}"; do
+
+        SOURCE="${ITEM%%|*}"
+        DESTINATION="${ITEM#*|}"
+
+        apply_copy \
+            "$SOURCE" \
+            "$DESTINATION" \
+            "0755"
+
+    done
+
+    echo "RUNTIME_APPLY_V2_OK"
+
+fi
 
 
 # ============================================================
@@ -934,7 +1017,7 @@ if [ "$MODE" = "dry-run" ]; then
 
 else
 
-    echo " BMO_READY_INSTALL_APPLY_V1_OK"
+    echo " BMO_READY_INSTALL_APPLY_V2_OK"
     echo "============================================================"
     echo
     echo "Only the sandbox target root was modified:"
