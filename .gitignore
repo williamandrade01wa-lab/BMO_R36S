@@ -71,6 +71,9 @@ configs/retroarch/playlists/logs/
 **/NetworkManager/system-connections/
 github_deploy_key
 github_deploy_key.*
+# First-boot secrets / local presets
+bootstrap/firstboot.local.conf
+bootstrap/*.local.conf
 # Disk / runtime artifacts
 *.img
 *.img.xz
