@@ -76,7 +76,7 @@ run lsmod
 section "DEVICE TREE RUNTIME"
 shell 'if [ -r /proc/device-tree/model ]; then tr -d "\0" < /proc/device-tree/model; echo; fi'
 shell 'if [ -r /proc/device-tree/compatible ]; then tr "\0" "\n" < /proc/device-tree/compatible; fi'
-shell 'find /proc/device-tree -maxdepth 3 -type f -name status -o -name compatible 2>/dev/null | head -n 300'
+shell 'find /proc/device-tree -maxdepth 3 -type f \( -name status -o -name compatible \) 2>/dev/null | head -n 300'
 
 section "DRM / DISPLAY"
 shell 'for c in /sys/class/drm/card*-*/status; do [ -r "$c" ] && echo "$c: $(cat "$c")"; done'
@@ -125,10 +125,10 @@ run systemctl list-dependencies --plain graphical.target
 
 section "DISPLAY MANAGER / DESKTOP"
 shell 'systemctl status display-manager --no-pager 2>&1 || true'
-shell 'dpkg-query -W -f="${binary:Package}\t${Version}\n" 2>/dev/null | grep -Ei "xfce|lightdm|xorg|chromium|wayland|weston|mesa|panfrost|mali" || true'
+shell 'dpkg-query -W 2>/dev/null | grep -Ei "xfce|lightdm|xorg|chromium|wayland|weston|mesa|panfrost|mali" || true'
 
 section "IMPORTANT PACKAGES"
-shell 'dpkg-query -W -f="${binary:Package}\t${Version}\n" 2>/dev/null | grep -Ei "^(linux-|armbian|u-boot|firmware|network-manager|netplan|openssh|git|sudo|python3|alsa|bluez|evtest|joystick|libinput|xserver|xorg|mesa|chromium|retroarch|ppsspp|moonlight)" || true'
+shell 'dpkg-query -W 2>/dev/null | grep -Ei "^(linux-|armbian|u-boot|firmware|network-manager|netplan|openssh|git|sudo|python3|alsa|bluez|evtest|joystick|libinput|xserver|xorg|mesa|chromium|retroarch|ppsspp|moonlight)" || true'
 
 section "UDEV RULES RELATED TO INPUT / USB / POWER"
 shell 'grep -RniE "usb|input|gamepad|joystick|backlight|brightness|power/control|0a05|7211|0bda|0179" /etc/udev/rules.d /usr/lib/udev/rules.d 2>/dev/null | head -n 500 || true'
