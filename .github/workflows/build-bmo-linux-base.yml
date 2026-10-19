@@ -1,147 +1,87 @@
 name: Build BMO Linux Base
+
 on:
   workflow_dispatch:
   push:
     branches: [feat/bmo-linux-base-v1]
-    paths: ['image/armbian/**', '.github/workflows/build-bmo-linux-base.yml']
+    paths:
+      - 'image/armbian/**'
+      - '.github/workflows/build-bmo-linux-base.yml'
+
 permissions:
   contents: read
+
+concurrency:
+  group: bmo-linux-base-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  preflight:
+    name: Preflight BMO Linux Base
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout BMO
+        uses: actions/checkout@v4
+
+      - name: Validate source contract and safety
+        shell: bash
+        run: bash image/armbian/ci/preflight.sh
+
   build:
     name: R36S Trixie minimal v0.2
+    needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
       - name: Checkout BMO
         uses: actions/checkout@v4
+
       - name: Free runner disk space
         shell: bash
         run: |
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup || true
           docker system prune -af || true
           df -h
+
       - name: Install host prerequisites
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y git qemu-user-static binfmt-support xz-utils ca-certificates
           sudo update-binfmts --enable || true
+
       - name: Build minimal image
         shell: bash
         run: bash image/armbian/build-bmo-linux-base.sh
-      - name: Validate image contents
+
+      - name: Validate image contract
         shell: bash
         run: |
-          set -euo pipefail
+          mkdir -p image/armbian/output
+          set -o pipefail
+          bash image/armbian/ci/validate-image.sh \
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img \
+            2>&1 | tee image/armbian/output/validation-report.txt
 
-          IMG="image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img"
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmo-linux-base-validation-${{ github.run_id }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: image/armbian/output/validation-report.txt
 
-          echo "============================================================"
-          echo " BMO IMAGE CONTENT VALIDATION"
-          echo "============================================================"
-          echo "IMG=$IMG"
-
-          test -f "$IMG" || {
-            echo "FAIL: image not found: $IMG"
-            exit 1
-          }
-
-          LOOP="$(sudo losetup --find --show --partscan "$IMG")"
-          BOOT_MNT="$(mktemp -d)"
-          ROOT_MNT="$(mktemp -d)"
-
-          cleanup() {
-            sudo umount "$BOOT_MNT" 2>/dev/null || true
-            sudo umount "$ROOT_MNT" 2>/dev/null || true
-            sudo losetup -d "$LOOP" 2>/dev/null || true
-            rmdir "$BOOT_MNT" "$ROOT_MNT" 2>/dev/null || true
-          }
-
-          trap cleanup EXIT
-          sleep 2
-
-          echo
-          echo "=== LOOP DEVICE ==="
-          echo "LOOP=$LOOP"
-          lsblk -f "$LOOP"
-
-          BOOT_PART="$(lsblk -lnpo NAME,FSTYPE "$LOOP" | awk '$2 ~ /vfat|fat/ {print $1; exit}')"
-          ROOT_PART="$(lsblk -lnpo NAME,FSTYPE "$LOOP" | awk '$2 == "ext4" {print $1; exit}')"
-
-          echo
-          echo "BOOT_PART=${BOOT_PART:-<not found>}"
-          echo "ROOT_PART=${ROOT_PART:-<not found>}"
-
-          if [ -z "$BOOT_PART" ]; then
-            echo "FAIL: FAT boot partition not found"
-            exit 1
-          fi
-
-          if [ -z "$ROOT_PART" ]; then
-            echo "FAIL: ext4 root partition not found"
-            exit 1
-          fi
-
-          sudo mount -o ro "$BOOT_PART" "$BOOT_MNT"
-          sudo mount -o ro "$ROOT_PART" "$ROOT_MNT"
-
-          echo
-          echo "=== BOOT CONTENTS ==="
-          find "$BOOT_MNT" -maxdepth 2 -type f -printf '%P\n' | sort || true
-
-          echo
-          echo "=== VALIDATING REQUIRED FILES ==="
-
-          check_file() {
-            local file="$1"
-
-            if [ -f "$file" ]; then
-              echo "OK_FILE: $file"
-            else
-              echo "FAIL_MISSING_FILE: $file"
-              exit 1
-            fi
-          }
-
-          check_exec() {
-            local file="$1"
-
-            if [ -x "$file" ]; then
-              echo "OK_EXEC: $file"
-            else
-              if [ -e "$file" ]; then
-                echo "FAIL_NOT_EXECUTABLE: $file"
-                ls -l "$file" || true
-              else
-                echo "FAIL_MISSING_EXECUTABLE: $file"
-              fi
-
-              exit 1
-            fi
-          }
-
-          check_file "$BOOT_MNT/BMO-FIRSTBOOT.txt"
-          check_file "$BOOT_MNT/README-FIRST-BOOT.txt"
-
-          check_exec "$ROOT_MNT/usr/local/bin/bmo"
-          check_exec "$ROOT_MNT/usr/local/sbin/bmo-firstboot"
-
-          check_file "$ROOT_MNT/etc/bmo/source.conf"
-          check_file "$ROOT_MNT/etc/NetworkManager/conf.d/20-bmo.conf"
-          check_file "$ROOT_MNT/etc/netplan/90-bmo-networkmanager.yaml"
-          check_file "$ROOT_MNT/etc/udev/rules.d/99-bmo-usb-power.rules"
-
-          echo
-          echo "============================================================"
-          echo " BMO_IMAGE_CONTENTS_OK"
-          echo "============================================================"
       - name: Compress image and checksum
         shell: bash
         run: |
           cd image/armbian/output
           xz -T0 -6 --extreme bmo-linux-base-r36s-trixie-v0.2.img
           sha256sum bmo-linux-base-r36s-trixie-v0.2.img.xz > bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
-          ls -lh; cat bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
+          ls -lh
+          cat bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
+
       - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
