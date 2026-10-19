@@ -34,11 +34,18 @@ Os critérios detalhados e os commits seguros de retorno ficam em [`CHECKPOINTS.
 
 Objetivo: garantir que qualquer novo chat/agente/dev consiga entender e continuar o projeto pelo Git.
 
-- [ ] estrutura de responsabilidades versionada;
-- [ ] checkpoints versionados;
-- [ ] README alinhado com a experiência pública desejada;
-- [ ] continuidade aponta exatamente o próximo passo;
-- [ ] Worklog registra decisões significativas.
+- [x] estrutura de responsabilidades versionada;
+- [x] checkpoints versionados;
+- [x] README alinhado com a experiência pública desejada;
+- [x] continuidade aponta exatamente o próximo passo;
+- [x] Worklog registra decisões significativas.
+
+Evidência:
+
+```text
+CP-STRUCTURE-001
+commit base: ed658f30c1a3a599b37557188cd8856b5ef54b2b
+```
 
 ### Gate 1 — imagem base reproduzível
 
