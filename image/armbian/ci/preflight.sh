@@ -38,6 +38,7 @@ echo "CONTRACT=${CONTRACT#$REPO_ROOT/}"
 REQUIRED_FILES=(
   "image/armbian/UPSTREAM.env"
   "image/armbian/build-bmo-linux-base.sh"
+  "image/armbian/userpatches/config-r36s-trixie-minimal.conf"
   "image/armbian/userpatches/customize-image.sh"
   "image/armbian/ci/preflight.sh"
   "image/armbian/ci/validate-image.sh"
@@ -90,6 +91,7 @@ echo
 echo "=== SHELL SYNTAX ==="
 SHELL_FILES=(
   "image/armbian/build-bmo-linux-base.sh"
+  "image/armbian/userpatches/config-r36s-trixie-minimal.conf"
   "image/armbian/userpatches/customize-image.sh"
   "image/armbian/ci/preflight.sh"
   "image/armbian/ci/validate-image.sh"
@@ -97,6 +99,18 @@ SHELL_FILES=(
 for path in "${SHELL_FILES[@]}"; do
   if [[ -f "$path" ]] && bash -n "$path"; then good "bash -n: $path"; else fail "bash syntax: $path"; fi
 done
+
+echo
+echo "=== BUILD PROFILE ==="
+PROFILE="image/armbian/userpatches/config-r36s-trixie-minimal.conf"
+if [[ -f "$PROFILE" ]] && bash -n "$PROFILE"; then
+  unset KERNEL_BTF
+  # shellcheck disable=SC1090
+  source "$PROFILE"
+  [[ "${KERNEL_BTF:-}" == "no" ]] && good "deterministic memory profile: KERNEL_BTF=no" || fail "minimal build profile must pin KERNEL_BTF=no"
+else
+  fail "build profile unavailable or invalid: $PROFILE"
+fi
 
 echo
 echo "=== PYTHON SYNTAX ==="
