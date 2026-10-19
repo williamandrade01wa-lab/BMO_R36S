@@ -467,3 +467,66 @@ A falha não é do contrato de conteúdo da imagem; é uma dependência implíci
 ```text
 R36S_REQUIRED=NO
 ```
+
+---
+
+## 2026-10-18 — Correção determinística do build BTF
+
+- Fase: BMO Linux Base v0.2 — correção de build/CI
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `6dfd0981a7c2905caf8565df20fe41f0ff955e5b`
+- Objetivo: eliminar a dependência implícita da RAM do runner que abortou a Run #5 e impedir regressão futura da configuração.
+- `R36S_REQUIRED=NO`
+
+### Ações realizadas
+
+- preparado commit funcional `7e1342e0b89e88a8c117a877062aed6dad45f6a6`;
+- adicionado `KERNEL_BTF=no` ao perfil mínimo R36S/Trixie;
+- incluído o perfil mínimo na lista de arquivos obrigatórios do preflight;
+- incluído `bash -n` do perfil no preflight;
+- adicionada assertion explícita `KERNEL_BTF=no` antes do build pesado;
+- preservadas todas as demais opções de kernel/build já existentes;
+- preservados kernel source, DTB, overlay, firstboot, rede e contrato de conteúdo da imagem.
+
+### Arquivos alterados
+
+- `image/armbian/userpatches/config-r36s-trixie-minimal.conf`;
+- `image/armbian/ci/preflight.sh`;
+- `docs/WORKLOG.md` — registro desta correção.
+
+### Resultado esperado
+
+- o Armbian não deve mais habilitar BTF automaticamente com base na RAM disponível do runner;
+- o preflight deve falhar imediatamente caso `KERNEL_BTF=no` seja removido no futuro;
+- o build deve avançar além de `kernel_config_initialize` e, se concluir, alcançar a validação agregada da imagem.
+
+### Resultado obtido
+
+Correção preparada de forma mínima e isolada. Nenhuma funcionalidade da imagem foi deliberadamente alterada além da geração de metadata BTF do kernel, que não é requisito funcional declarado do BMO/R36S.
+
+### Validação
+
+- diff funcional limitado ao perfil e ao preflight;
+- modo executável de `preflight.sh` preservado (`100755`);
+- `config-r36s-trixie-minimal.conf` preservado como `100644`;
+- `KERNEL_BTF=no` é exatamente a mitigação recomendada pelo erro do Armbian na Run #5;
+- nenhuma alteração em `main`;
+- próxima CI ainda precisa confirmar a correção em ambiente real do GitHub Actions.
+
+### Pendências / riscos
+
+- a correção remove BTF do kernel; caso no futuro exista requisito explícito de tooling eBPF/BTF/CO-RE, essa decisão deve ser revisitada com runner adequado, não removida silenciosamente;
+- ainda não há validação pós-build da imagem desta correção;
+- `docs/ROADMAP.md` permanece inalterado.
+
+### Próximo passo exato
+
+1. publicar o commit funcional `7e1342e0b89e88a8c117a877062aed6dad45f6a6` na branch `feat/bmo-linux-base-v1`;
+2. confirmar que o novo preflight passa incluindo `KERNEL_BTF=no`;
+3. confirmar que o build não repete exit 43 por memória/BTF;
+4. se o build concluir, capturar o relatório agregado de `Validate image contract`;
+5. registrar Run ID, Job IDs e resultado antes da próxima correção funcional.
+
+```text
+R36S_REQUIRED=NO
+```
