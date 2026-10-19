@@ -480,7 +480,7 @@ R36S_REQUIRED=NO
 
 ### Ações realizadas
 
-- preparada correção funcional para publicação após este registro documental;
+- preparada e publicada a correção funcional após os registros documentais obrigatórios;
 - adicionado `KERNEL_BTF=no` ao perfil mínimo R36S/Trixie;
 - incluído o perfil mínimo na lista de arquivos obrigatórios do preflight;
 - incluído `bash -n` do perfil no preflight;
@@ -502,7 +502,7 @@ R36S_REQUIRED=NO
 
 ### Resultado obtido
 
-Correção mínima preparada. O commit funcional publicado na sequência deste registro é `8c9a80ea6289a01515e7f46c5a2c311ffce29c35`.
+Correção funcional final publicada como commit `ab1955358d9e99bcbd62699357772bf52e486646`.
 
 ### Validação
 
@@ -521,7 +521,7 @@ Correção mínima preparada. O commit funcional publicado na sequência deste r
 
 ### Próximo passo exato
 
-1. confirmar que o commit funcional `8c9a80ea6289a01515e7f46c5a2c311ffce29c35` está no HEAD da branch `feat/bmo-linux-base-v1` após este registro;
+1. confirmar que a próxima Run está associada ao commit `ab1955358d9e99bcbd62699357772bf52e486646`;
 2. confirmar que o novo preflight passa incluindo `KERNEL_BTF=no`;
 3. confirmar que o build não repete exit 43 por memória/BTF;
 4. se o build concluir, capturar o relatório agregado de `Validate image contract`;
