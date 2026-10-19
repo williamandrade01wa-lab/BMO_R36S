@@ -388,3 +388,82 @@ Após a publicação, a próxima validação obrigatória é o job `Preflight BM
 ```text
 R36S_REQUIRED=NO
 ```
+
+---
+
+## 2026-10-18 — Run #5: build abortado por memória insuficiente para BTF
+
+- Fase: BMO Linux Base v0.2 — diagnóstico de build
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `f7e1b9d66ed876616ceccd57e822fe3772320651`
+- Objetivo: identificar a causa exata da falha da primeira execução da CI em camadas antes de qualquer correção.
+- `R36S_REQUIRED=NO`
+
+### Ações realizadas
+
+- analisada a Run #5, Run ID `39182819565`;
+- confirmado `Preflight BMO Linux Base = SUCCESS`, Job ID `117839018196`;
+- analisado o Job ID `117839042350` do build pesado;
+- confirmado que `Build minimal image = FAILURE` e `Validate image contract = SKIPPED`;
+- confirmado que nenhum `validation-report.txt` foi gerado porque a imagem não chegou a ser criada;
+- localizada a falha exata dentro de `kernel_config_initialize` do Armbian;
+- confirmado que o runner possuía `6426 MiB` disponíveis no momento da checagem;
+- confirmado que o Armbian encerrou com `exit code 43` antes da compilação do kernel por tentativa de habilitar BTF/eBPF;
+- revisado `image/armbian/userpatches/config-r36s-trixie-minimal.conf` e confirmado que `KERNEL_BTF` ainda não está explicitamente fixado.
+
+### Arquivos alterados
+
+- `docs/WORKLOG.md` — somente registro do diagnóstico desta etapa.
+
+### Resultado esperado
+
+Identificar uma causa reproduzível e comprovada que possa ser corrigida sem alterar hardware, DTB, conteúdo do rootfs ou requisitos funcionais da imagem.
+
+### Resultado obtido
+
+Causa comprovada pelo log:
+
+```text
+Not enough RAM available (6426Mib) for BTF build.
+Please set 'KERNEL_BTF=no' to avoid running out of memory during the kernel LD/BTF build step
+```
+
+Estado da Run #5:
+
+```text
+Preflight BMO Linux Base      SUCCESS
+Build minimal image           FAILURE — exit 43
+Validate image contract       SKIPPED
+Upload validation diagnostics SUCCESS, sem arquivo para enviar
+Compress image and checksum   SKIPPED
+Upload image artifact         SKIPPED
+```
+
+A falha não é do contrato de conteúdo da imagem; é uma dependência implícita da quantidade de RAM disponível no runner durante a configuração do kernel.
+
+### Validação
+
+- erro explícito emitido pelo próprio Armbian;
+- `6426 MiB` registrados no log imediatamente antes do abort;
+- recomendação explícita do upstream no próprio erro: `KERNEL_BTF=no`;
+- o perfil atual é uma imagem mínima para R36S e não possui requisito do projeto que dependa de BTF;
+- nenhuma correção funcional foi aplicada antes deste registro.
+
+### Pendências / riscos
+
+- sem fixação explícita, o resultado do build pode variar conforme memória disponível no runner;
+- forçar `KERNEL_BTF=yes` aumentaria consumo de memória/swap e é contrário ao objetivo de previsibilidade da CI;
+- a validação pós-build ainda precisa ser executada depois que o build voltar a concluir;
+- `docs/ROADMAP.md` permanece inalterado.
+
+### Próximo passo exato
+
+1. fixar `KERNEL_BTF=no` no perfil `config-r36s-trixie-minimal.conf`;
+2. adicionar ao preflight uma assertion de que o perfil mínimo mantém `KERNEL_BTF=no`;
+3. revisar o diff e garantir que nenhuma outra opção do kernel foi alterada;
+4. registrar a correção no Worklog;
+5. executar a próxima CI e confirmar se o build chega ao validator agregado.
+
+```text
+R36S_REQUIRED=NO
+```
