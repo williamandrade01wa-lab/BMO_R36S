@@ -1,123 +1,148 @@
 # BMO Roadmap
 
-## Prioridade atual — BMO Linux Base pública por arquitetura
+## North Star
 
-A direção do projeto mudou: em vez de manter o desktop XFCE como base definitiva, vamos estruturar uma imagem própria/minimalista para o R36S e desenhá-la desde o início para futura distribuição pública.
-
-Arquitetura detalhada:
-
-- [`BMO-LINUX-BASE-DESIGN.md`](BMO-LINUX-BASE-DESIGN.md)
-
-Meta:
+O projeto existe para entregar uma experiência simples e didática:
 
 ```text
-boot / U-Boot / DTB
-        ↓
-Linux mínimo
-        ↓
-console + rede + SSH + hardware
-        ↓
-comando bmo
-        ↓
-bmo install
-        ↓
-BMO completo
+baixar → gravar → configurar BOOT → ligar → bmo install → usar
 ```
 
-## Princípios
+A engenharia pode ser complexa internamente; a instalação pública não deve ser.
 
-- sem XFCE e sem aplicativos de desktop desnecessários;
-- partição BOOT legível pelo Windows;
+## Princípios permanentes
+
+- imagem própria/minimalista para R36S;
+- sem XFCE como dependência da solução final;
+- BOOT legível pelo Windows;
 - ScreenFiles preservadas;
 - configuração por `BMO-FIRSTBOOT.txt`;
 - DHCP como padrão;
-- IP/status/logs úteis gravados na BOOT sem segredos;
-- `bmo` já presente na imagem base;
-- imagem sem chave SSH, token ou credencial GitHub;
-- Git público via HTTPS como arquitetura padrão;
-- acesso ao Git privado configurado manualmente apenas durante desenvolvimento;
-- dependências de terceiros obtidas de upstream oficial quando possível;
-- versão da imagem base separada da versão do aplicativo BMO.
+- status/logs úteis na BOOT sem segredos;
+- comando `bmo` presente na imagem base;
+- Git público via HTTPS na distribuição final;
+- nenhum token/chave/credencial embutido;
+- dependências externas pinadas e verificadas;
+- versão da imagem separada da versão do BMO App;
+- cada avanço importante protegido por checkpoint versionado.
 
-## Hardware a preservar e validar
+## Gates do produto
 
-Antes de aposentar a imagem de referência, capturar e validar:
+Os critérios detalhados e os commits seguros de retorno ficam em [`CHECKPOINTS.md`](CHECKPOINTS.md).
 
-- boot/U-Boot;
-- ScreenFiles / suporte aos painéis;
-- kernel e DTB do R36S;
-- mapeamento completo dos controles físicos;
-- hotkeys;
-- áudio;
-- volume;
-- brilho;
-- USB OTG;
-- HUB USB;
-- Wi-Fi USB;
-- SSH;
-- TF1/TF2;
-- DRM/KMS/X mínimo necessário ao kiosk;
-- Moonlight;
-- RetroArch;
-- PPSSPP.
+### Gate 0 — estrutura e continuidade
 
-## Fases
+Objetivo: garantir que qualquer novo chat/agente/dev consiga entender e continuar o projeto pelo Git.
 
-### Fase 1 — captura da referência
+- [ ] estrutura de responsabilidades versionada;
+- [ ] checkpoints versionados;
+- [ ] README alinhado com a experiência pública desejada;
+- [ ] continuidade aponta exatamente o próximo passo;
+- [ ] Worklog registra decisões significativas.
 
-- [ ] capturar mapeamento dos botões da imagem funcional;
-- [ ] capturar módulos/drivers importantes;
-- [ ] validar OTG/HUB/Wi-Fi;
-- [ ] registrar pacotes essenciais;
-- [ ] registrar boot/DTB/ScreenFiles usados.
+### Gate 1 — imagem base reproduzível
 
-### Fase 2 — build mínimo
+Objetivo: gerar uma imagem mínima válida sem depender do R36S físico.
 
-- [ ] criar `image/armbian/userpatches/`;
-- [ ] configurar Debian Trixie minimal;
+- [ ] upstreams e pins fixados;
+- [ ] Debian Trixie minimal;
 - [ ] `BUILD_MINIMAL=yes`;
 - [ ] `BUILD_DESKTOP=no`;
-- [ ] preservar suporte específico do R36S;
-- [ ] incluir NetworkManager CLI e SSH;
-- [ ] incluir `bmo` base.
+- [ ] preflight passa;
+- [ ] build conclui;
+- [ ] contrato da imagem passa;
+- [ ] imagem comprimida;
+- [ ] SHA256 gerado;
+- [ ] artifact final publicado pelo CI.
 
-### Fase 3 — primeiro boot BMO
+### Gate 2 — boot e firstboot
 
-- [ ] implementar parser seguro de `BMO-FIRSTBOOT.txt`;
-- [ ] configurar usuário/senhas;
-- [ ] configurar Wi-Fi com autoconnect;
-- [ ] aplicar timezone/locale/hostname;
-- [ ] gravar `BMO-IP.txt`;
-- [ ] gravar `BMO-STATUS.txt`;
-- [ ] gravar logs sanitizados na BOOT;
-- [ ] garantir comportamento idempotente.
+Objetivo: cartão novo iniciar e configurar a base sem intervenção técnica avançada.
 
-### Fase 4 — Git e instalação
+- [ ] boot/U-Boot funcional;
+- [ ] ScreenFiles documentadas e funcionais;
+- [ ] parser seguro de `BMO-FIRSTBOOT.txt`;
+- [ ] usuário/senhas configurados;
+- [ ] timezone/locale/hostname aplicados;
+- [ ] `BMO-IP.txt` criado;
+- [ ] `BMO-STATUS.txt` criado;
+- [ ] logs sanitizados;
+- [ ] firstboot idempotente.
+
+### Gate 3 — rede e hardware base
+
+Objetivo: a base reconhecer os recursos essenciais do R36S.
+
+- [ ] NetworkManager/DHCP;
+- [ ] Wi-Fi USB;
+- [ ] autoconnect após reboot;
+- [ ] SSH;
+- [ ] gamepad;
+- [ ] áudio;
+- [ ] volume;
+- [ ] brilho;
+- [ ] USB OTG;
+- [ ] HUB USB;
+- [ ] Wi-Fi pelo HUB;
+- [ ] TF2;
+- [ ] DRM/KMS necessário ao BMO.
+
+### Gate 4 — bootstrap público do BMO
+
+Objetivo: instalar o BMO completo sem exigir conhecimento de Git.
 
 - [ ] `bmo source`;
 - [ ] `bmo install`;
-- [ ] fonte pública HTTPS por padrão;
-- [ ] override SSH manual para desenvolvimento privado;
-- [ ] nenhum segredo embutido na imagem;
-- [ ] integrar instalador atual.
+- [ ] HTTPS público por padrão;
+- [ ] SSH somente como override de desenvolvimento;
+- [ ] validação de origem/protocolo;
+- [ ] download de dependências externas com pin + SHA256;
+- [ ] instalação idempotente/reexecutável;
+- [ ] nenhum segredo embutido.
 
-### Fase 5 — BMO completo
+### Gate 5 — BMO completo
 
-- [ ] kiosk mínimo;
-- [ ] gamepad;
-- [ ] volume/brilho;
+Objetivo: experiência funcional de uso diário.
+
+- [ ] kiosk/frontend;
+- [ ] backend/control API;
+- [ ] navegação por gamepad;
 - [ ] SYSTEM / CONTROL;
-- [ ] GBA/SNES/PSP;
+- [ ] Favorites X/Y;
+- [ ] Fast Nav / Virtual Window / Lazy Load;
+- [ ] GBA/SNES;
+- [ ] PSP;
 - [ ] PC STREAM / Moonlight;
-- [ ] updater;
-- [ ] rollback.
+- [ ] FN+SELECT sai do streaming;
+- [ ] retorno ao BMO após jogos/streaming.
 
-### Fase 6 — publicação
+### Gate 6 — manutenção segura
 
-- [ ] build reproduzível;
-- [ ] créditos/licenças;
-- [ ] SHA256 da imagem;
-- [ ] auditoria pública;
-- [ ] teste em cartão limpo;
-- [ ] teste de `bmo install` por HTTPS sem chave;
-- [ ] documentação final de Windows → BOOT → R36S → BMO.
+Objetivo: atualizar sem obrigar o usuário a regravar cartão em toda mudança do BMO App.
+
+- [ ] `bmo verify`;
+- [ ] `bmo check-update`;
+- [ ] `bmo update`;
+- [ ] rollback;
+- [ ] recuperação após falha de rede/update;
+- [ ] separação clara entre versão da imagem e versão do App.
+
+### Gate 7 — publicação pública
+
+Objetivo: oferecer uma release que um usuário novo consiga seguir sem apoio do desenvolvedor.
+
+- [ ] build reproduzível final;
+- [ ] cartão limpo validado do zero;
+- [ ] SHA256 publicado;
+- [ ] auditoria de segredos;
+- [ ] auditoria de licença/proveniência;
+- [ ] créditos e terceiros revisados;
+- [ ] export público sem histórico/blobs privados desnecessários;
+- [ ] instalação pública por HTTPS validada;
+- [ ] manual final testado por uma pessoa seguindo somente a documentação.
+
+## Regra de conclusão
+
+Uma caixa só deve ser marcada quando houver evidência correspondente em `docs/WORKLOG.md`.
+
+Build verde, teste em desenvolvimento ou existência do código não substituem validação do gate correspondente.
