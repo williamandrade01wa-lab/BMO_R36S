@@ -302,3 +302,89 @@ CANDIDATE_STATIC_VALIDATION_OK
 ```text
 R36S_REQUIRED=NO
 ```
+
+---
+
+## 2026-10-18 — Arquitetura de CI em camadas aplicada
+
+- Fase: implementação do hardening de CI da BMO Linux Base v0.2
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `8e168bbfae881bb207587c50f8600bd2823acc1f`
+- Objetivo: publicar a arquitetura de validação em camadas definida na etapa anterior, sem modificar o comportamento funcional da imagem.
+- `R36S_REQUIRED=NO`
+
+### Ações realizadas
+
+- criado contrato versionado de conteúdo crítico da imagem;
+- criado preflight barato e agregado para estrutura, fontes, executáveis, sintaxe, pins e assinaturas óbvias de segredo;
+- extraída a validação pós-build do YAML para script dedicado;
+- alterada a validação pós-build para acumular todas as falhas contratuais encontradas na mesma imagem;
+- adicionado relatório persistente `validation-report.txt` e upload diagnóstico com `if: always()`;
+- adicionada dependência explícita `build -> needs: preflight`;
+- adicionada concorrência por branch com `cancel-in-progress: true`;
+- mantido o builder existente e mantidos inalterados kernel, DTB, overlay, firstboot, rede e conteúdo funcional da imagem;
+- documentada a arquitetura em `docs/BMO-CI-ARCHITECTURE.md`.
+
+### Arquivos alterados
+
+- `.github/workflows/build-bmo-linux-base.yml`;
+- `image/armbian/ci/image-contract.tsv`;
+- `image/armbian/ci/preflight.sh`;
+- `image/armbian/ci/validate-image.sh`;
+- `docs/BMO-CI-ARCHITECTURE.md`.
+
+### Resultado esperado
+
+Fluxo de CI:
+
+```text
+preflight barato
+      ↓
+build pesado somente se preflight OK
+      ↓
+validação agregada da imagem
+      ↓
+artifact diagnóstico sempre
+      ↓
+compressão + SHA256 + artifact final somente se validação OK
+```
+
+### Resultado obtido
+
+- commit de arquitetura criado: `f7e1b9d66ed876616ceccd57e822fe3772320651`;
+- branch atualizada por fast-forward a partir de `8e168bbfae881bb207587c50f8600bd2823acc1f`;
+- nenhum arquivo funcional da imagem foi modificado nesta implementação.
+
+### Validação
+
+Antes da publicação:
+
+```text
+bash -n preflight.sh             OK
+bash -n validate-image.sh        OK
+image-contract.tsv              OK — 8 entradas / destinos únicos
+workflow YAML                   OK
+assinaturas de segredo          OK
+CANDIDATE_STATIC_VALIDATION_OK
+```
+
+Após a publicação, a próxima validação obrigatória é o job `Preflight BMO Linux Base` da run disparada pelo commit `f7e1b9d66ed876616ceccd57e822fe3772320651`.
+
+### Pendências / riscos
+
+- o contrato é a fonte única dos requisitos de validação, mas a lógica de geração da imagem continua independente; portanto mudanças futuras de destino devem atualizar o contrato junto com o gerador na mesma revisão;
+- o novo CI reduz builds desperdiçados, mas não substitui validação física do R36S;
+- a causa funcional da falha da Run #4 continua sem correção hipotética: deve ser comprovada pelo relatório agregado da nova arquitetura;
+- `docs/ROADMAP.md` permanece inalterado.
+
+### Próximo passo exato
+
+1. atualizar `docs/PROJECT-CONTINUITY.md` com a nova arquitetura e novo ponto de retomada;
+2. identificar Run ID e Job IDs disparados pelo commit `f7e1b9d66ed876616ceccd57e822fe3772320651`;
+3. validar o resultado do preflight;
+4. se o build chegar à validação pós-build, ler o relatório agregado completo;
+5. registrar o resultado antes de qualquer correção funcional da imagem.
+
+```text
+R36S_REQUIRED=NO
+```
