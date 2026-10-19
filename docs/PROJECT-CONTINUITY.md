@@ -906,3 +906,85 @@ Atualizar `docs/PROJECT-CONTINUITY.md` quando ocorrer qualquer um destes eventos
 - promoção para `main`.
 
 A meta é que um chat completamente novo consiga continuar o projeto apenas lendo o Git.
+
+## 26. ESTADO ATUAL — CI em camadas (supersede o ponto operacional das seções 18–19)
+
+As seções 18 e 19 permanecem como histórico do bloqueio anterior. Para retomada operacional, esta seção é a fonte mais recente.
+
+### Mudança arquitetural aplicada
+
+Commit funcional da arquitetura de CI:
+
+```text
+f7e1b9d66ed876616ceccd57e822fe3772320651
+ci: add layered validation for BMO Linux Base
+```
+
+A pipeline da BMO Linux Base passa a seguir:
+
+```text
+preflight barato
+      ↓
+build pesado somente se preflight OK
+      ↓
+validação agregada da imagem
+      ↓
+artifact de diagnóstico sempre
+      ↓
+compressão + SHA256 + artifact final somente se validação OK
+```
+
+Arquivos centrais:
+
+```text
+image/armbian/ci/image-contract.tsv
+image/armbian/ci/preflight.sh
+image/armbian/ci/validate-image.sh
+docs/BMO-CI-ARCHITECTURE.md
+.github/workflows/build-bmo-linux-base.yml
+```
+
+### Regras novas de CI
+
+1. falhas baratas de estrutura/sintaxe/pins/segurança devem ocorrer antes do build pesado;
+2. `build` depende explicitamente de `preflight`;
+3. requisitos críticos da imagem ficam centralizados em `image-contract.tsv`;
+4. a validação pós-build acumula todas as falhas contratuais possíveis em uma única execução;
+5. `validation-report.txt` é publicado como artifact diagnóstico mesmo quando a validação falha;
+6. compressão, SHA256 e artifact final só acontecem após validação bem-sucedida;
+7. runs da mesma branch usam `cancel-in-progress: true` para não compilar estado obsoleto;
+8. não voltar a embutir listas paralelas de arquivos obrigatórios no YAML;
+9. mudanças futuras de destino precisam atualizar gerador e contrato na mesma revisão;
+10. esta CI não substitui validação física do R36S.
+
+### Escopo preservado
+
+O hardening de CI não alterou nesta etapa:
+
+- builder funcional;
+- kernel;
+- DTB;
+- ScreenFiles;
+- overlay da imagem;
+- firstboot;
+- rede;
+- Wi-Fi;
+- conteúdo funcional da imagem.
+
+A causa funcional da falha da Run #4 não deve ser corrigida por hipótese. O objetivo da nova arquitetura é produzir evidência suficiente para corrigir todas as falhas comprovadas de uma vez.
+
+### PRÓXIMO PASSO EXATO
+
+1. identificar a GitHub Actions disparada pelo commit `f7e1b9d66ed876616ceccd57e822fe3772320651`;
+2. registrar Run ID e Job IDs;
+3. confirmar primeiro o resultado do job `Preflight BMO Linux Base`;
+4. se o preflight falhar, corrigir somente a falha barata comprovada e não iniciar análise de imagem;
+5. se o preflight passar, observar o build pesado;
+6. se a validação pós-build falhar, ler `validation-report.txt` completo e reunir todas as falhas contratuais da mesma imagem;
+7. registrar o diagnóstico no `docs/WORKLOG.md` antes de alterar conteúdo funcional da imagem;
+8. aplicar uma correção funcional agrupada apenas para defeitos comprovados;
+9. `docs/ROADMAP.md` continua sem alteração até validator, compressão, SHA256 e artifact final passarem.
+
+```text
+R36S_REQUIRED=NO
+```
