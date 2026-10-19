@@ -217,3 +217,88 @@ sem mudar os critérios funcionais já exigidos pela validação.
 ```text
 R36S_REQUIRED=NO
 ```
+
+---
+
+## 2026-10-18 — Hardening da CI em camadas após Run #4
+
+- Fase: CI hardening / validação em camadas da BMO Linux Base v0.2
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `65ac1816c7910805129c4866459185026287d411`
+- Objetivo: reduzir ciclos caros de build, impedir drift entre expectativa e imagem e obter diagnóstico completo em uma única execução.
+- `R36S_REQUIRED=NO`
+
+### Ações realizadas
+
+- confirmada nova falha da Run #4, Run ID `39176142980`, Job ID `117819101367`;
+- revisados workflow, builder, customizer, overlay e pins de upstream;
+- identificado risco estrutural: critérios de imagem estavam embutidos no YAML e separados dos arquivos-fonte que originam a imagem;
+- identificado risco operacional: uma validação pós-build que encerra no primeiro defeito força nova compilação para descobrir defeitos seguintes;
+- definido contrato único de requisitos críticos da imagem;
+- definida camada de preflight barata e agregada antes do build;
+- definida validação pós-build agregada, sem `set -e`, para reportar todos os defeitos contratuais encontrados na mesma imagem;
+- definido artifact de diagnóstico independente do artifact final da imagem;
+- definido cancelamento de runs obsoletas da mesma branch;
+- mantida a imagem funcionalmente inalterada até existir prova da causa funcional da Run #4.
+
+### Arquivos alterados
+
+- `docs/WORKLOG.md` — registro desta etapa de diagnóstico e desenho;
+- alterações de CI preparadas e validadas estaticamente, mas ainda não promovidas no início deste registro.
+
+### Resultado esperado
+
+- falhas de estrutura, sintaxe, pins ou segurança devem impedir o build pesado;
+- uma imagem construída deve revelar todos os problemas contratuais críticos em uma única validação;
+- critérios de conteúdo devem existir em um contrato único, evitando listas divergentes no workflow;
+- runs antigas da mesma branch devem ser canceladas quando substituídas por commit novo.
+
+### Resultado obtido
+
+Arquitetura candidata preparada com quatro barreiras:
+
+```text
+contrato/estrutura
+        ↓
+sintaxe + pins + segurança
+        ↓
+build pesado
+        ↓
+validação agregada + artifact de diagnóstico
+```
+
+A causa funcional específica de conteúdo da Run #4 não é considerada provada apenas pela estrutura atual dos logs e, portanto, nenhum conteúdo da imagem foi alterado nesta etapa.
+
+### Validação
+
+Validação estática local dos candidatos:
+
+```text
+bash -n preflight.sh             OK
+bash -n validate-image.sh        OK
+image-contract.tsv              OK — 8 entradas / destinos únicos
+workflow YAML                   OK
+assinaturas de segredo          OK
+CANDIDATE_STATIC_VALIDATION_OK
+```
+
+### Pendências / riscos
+
+- a arquitetura melhora observabilidade e custo, mas não substitui boot/hardware físico no R36S;
+- não alterar conteúdo da imagem com base em hipótese;
+- a primeira run da arquitetura nova deve ser usada para obter um relatório agregado e corrigir de uma vez somente os defeitos comprovados;
+- `docs/ROADMAP.md` permanece inalterado até validação real da etapa.
+
+### Próximo passo exato
+
+1. aplicar a arquitetura de CI em camadas sem alterar conteúdo funcional da imagem;
+2. revisar o diff e confirmar que a mudança ficou restrita à engenharia de CI/documentação;
+3. commitar na `feat/bmo-linux-base-v1`;
+4. confirmar o job de preflight;
+5. somente se o preflight passar, executar o build pesado;
+6. usar o relatório agregado pós-build para identificar todas as falhas comprovadas;
+7. registrar Run ID, Job IDs e resultados no Worklog antes da correção funcional.
+
+```text
+R36S_REQUIRED=NO
+```
