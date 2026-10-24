@@ -23,7 +23,8 @@ O usuário comum não deverá precisar clonar repositório, configurar chave SSH
    - copiar ScreenFiles corretas
    - editar BMO-FIRSTBOOT.txt
         ↓
-4. Ligar o R36S
+4. Primeiro boot somente com o cartao do sistema em TF1
+   - retirar o TF2 de jogos antes de ligar
    - rede, usuário e SSH configurados
    - BMO-IP.txt / BMO-STATUS.txt disponíveis
         ↓
@@ -47,6 +48,14 @@ A imagem base deve ser pequena e previsível. Ela contém somente o necessário 
 - instalar o restante do BMO pela internet.
 
 Ela **não deve depender de XFCE** nem de um desktop tradicional.
+
+## Primeiro boot: retirar o TF2 de jogos
+
+**Mantenha o cartão TF2 de jogos fora do R36S durante todo o primeiro boot.** Inicie somente com o cartão do sistema na entrada TF1 e aguarde a configuração inicial terminar.
+
+Depois, desligue completamente o aparelho, insira o TF2 de jogos e ligue novamente. Não formate nem altere o TF2 para realizar esse procedimento.
+
+Esta orientação foi registrada após o primeiro teste físico da Base v0.2 da Run #8. O motivo técnico ainda precisa de diagnóstico; não presumir que os jogos ou o cartão estão com defeito.
 
 ## Regra da ScreenFile
 

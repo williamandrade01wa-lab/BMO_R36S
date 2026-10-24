@@ -271,16 +271,20 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-1. Recuperar o artifact #12547459290 e conferir SHA256 do .img.xz; preservar uma cópia local/remota antes da expiração.
-2. Auditar/fixar dependências externas com evidência, sem recompilar apenas por hipótese.
-3. Validar boot/firstboot/painel/rede da Base no microSD extra confirmado pelo usuário, preservando o cartão atual (`R36S_REQUIRED=YES`).
-4. Adaptar receita Ready a uma imagem Linux populada: preservar fstab, validar apenas links/artefatos BMO e reservar espaço antes de apt.
-5. Habilitar firstboot e kiosk sem exigir login manual, gerar candidato Ready e validar boot direto no BMO no cartão extra.
+Atualização física em 2026-10-24: usuário gravou a Base da Run #8 e relatou que iniciou e parece funcionar perfeitamente. Boot físico inicial confirmado por relato; firstboot detalhado e hardware ainda sem relatório. SSH permanece desligado.
 
-R36S atual tem kernel 6.12.74; a Base gerada usa 6.12.32. Não assumir equivalência de hardware sem teste.
-A API 8086 do aparelho de referência escuta somente em loopback.
+**Regra operacional: manter TF2 de jogos fora do R36S durante todo o primeiro boot.** Usar somente TF1; após a configuração inicial, desligar completamente, inserir TF2 e ligar novamente. Não formatar/alterar TF2. Causa técnica não diagnosticada.
 
-`R36S_REQUIRED=NO` para análise/CI; `R36S_REQUIRED=YES` para boot/hardware/Ready.
+1. No terminal local, coletar `bmo status`, `bmo firstboot status`, `bmo doctor` e `systemctl --failed --no-pager`; não compartilhar BMO-FIRSTBOOT.txt com senhas.
+2. Validar armazenamento/montagens, rede, gamepad, áudio e brilho conforme `docs/BASE-FIRSTBOOT-TESTS.md`.
+3. Validar desligamento/reboot e autoconnect sem reaplicar senhas/configuração inicial.
+4. Testar TF2 somente após desligamento completo; listar/montar apenas em leitura quando necessário e nunca formatar.
+5. Com evidências suficientes, fechar CP-BOOT-001; não considerar o relato geral como aprovação de todos os gates.
+6. Adaptar receita Ready e testar boot automático no BMO no cartão extra, preservando o cartão original.
+
+Pendências anteriores preservadas: backup/verificação do artifact, pins externos de ScreenFiles/U-Boot e diferenças de kernel (Base 6.12.32; aparelho anterior 6.12.74).
+
+`R36S_REQUIRED=YES` para a validação física atual.
 
 ## 13. ScreenFiles
 

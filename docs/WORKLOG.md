@@ -329,3 +329,49 @@ Artifact expira: 2026-10-31T04:21:41Z
 2. Fechar auditoria/pins de dependências externas; Gate 1 ainda tem esse item aberto.
 3. Boot/firstboot/painel/rede em cartão extra: `R36S_REQUIRED=YES`.
 4. Adaptar receita Ready, dimensionar espaço e validar boot automático no BMO; CI verde não equivale a teste físico.
+
+## 2026-10-24 — Primeiro boot físico relatado e orientação TF2
+
+- Fase: Gate 2 / CP-BOOT-001 VALIDATING
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial documental: `0a0b12de0e3432d076036dce34d47fda605322a4`
+- Imagem: Run #8, `701ed1d7a2946a143cbbd90527f141e0b05c3867`
+- Objetivo: registrar primeiro relato físico e instrução do usuário, preparando validação detalhada.
+- `R36S_REQUIRED=YES`
+
+### Ações realizadas
+
+- Usuário informou: instalado, aparentemente funcionou perfeitamente.
+- Usuário solicitou registrar que TF2 de Games precisa ficar fora durante o primeiro boot.
+- Usuário confirmou SSH ainda desligado; nenhum diagnóstico remoto da nova instalação foi alegado.
+- Adicionada orientação no README principal e template README-FIRST-BOOT.txt da BOOT.
+- Criado roteiro de testes locais de status/firstboot, armazenamento, rede, hardware, reboot e TF2.
+- Marcado somente boot inicial no roadmap; demais testes continuam pendentes.
+- CP-BOOT-001 permanece VALIDATING, sem declarar funcionamento completo.
+- Commit documental usa [skip ci] para não disparar rebuild pesado por mudança de texto.
+
+### Arquivos alterados
+
+- `README.md`
+- `image/armbian/userpatches/overlay/usr/share/bmo/README-FIRST-BOOT.txt`
+- `docs/BASE-FIRSTBOOT-TESTS.md`
+- `docs/PROJECT-CONTINUITY.md`
+- `docs/CHECKPOINTS.md`
+- `docs/ROADMAP.md`
+- `docs/WORKLOG.md`
+
+### Resultado esperado / obtido / validação
+
+- Orientação de usar somente TF1 no primeiro boot documentada; desligar completamente antes de reinserir TF2.
+- Não formatar nem alterar TF2. Causa técnica da necessidade ainda não diagnosticada.
+- Fonte da evidência física: relato do usuário; saídas de doctor/status ainda não recebidas.
+- Revisão documental: copiar ScreenFiles preservado, sem credenciais e sem instruções de escrita no TF2.
+- Alteração no template aparecerá em builds futuros; artifact da Run #8 e cartão já gravado não são modificados por este commit.
+- Nenhum serviço/rede/boot do aparelho foi alterado.
+
+### Pendências / próximo passo
+
+1. Receber `bmo status`, `bmo firstboot status`, `bmo doctor`, serviços falhando do terminal local.
+2. Validar root/BOOT, rede, gamepad, áudio, brilho e reboot conforme roteiro.
+3. Validar TF2 após desligamento; registrar diferenças antes de diagnóstico causal.
+4. Só fechar checkpoint com evidências; depois preparar integração Ready.

@@ -148,9 +148,20 @@ Retorno seguro: usar o commit compilado e os hashes acima; não promover para ma
 
 ## Checkpoints planejados
 
-### CP-BOOT-001
+### CP-BOOT-001 — Em validação física
 
-Criar quando cartão limpo comprovar:
+```text
+STATUS=VALIDATING
+IMAGE_RUN=40057180564
+IMAGE_COMMIT=701ed1d7a2946a143cbbd90527f141e0b05c3867
+R36S_REQUIRED=YES
+```
+
+Em 2026-10-24, usuário confirmou que gravou a imagem e o R36S iniciou, aparentemente funcionando perfeitamente. Evidência: relato do usuário; ainda não foram coletados status/doctor/logs. SSH desligado.
+
+Regra observada a documentar: TF2 de jogos deve ficar fora durante todo o primeiro boot. Após configurar, desligar completamente antes de reinserir TF2. Causa técnica ainda não diagnosticada.
+
+Fechar este checkpoint somente quando cartão limpo comprovar:
 
 - boot;
 - ScreenFiles;

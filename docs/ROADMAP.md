@@ -68,7 +68,7 @@ Evidência de CI/contrato: `CP-IMAGE-002`, Run #8 `40057180564`, commit `701ed1d
 
 Objetivo: cartão novo iniciar e configurar a base sem intervenção técnica avançada.
 
-- [ ] boot/U-Boot funcional;
+- [x] boot inicial observado no aparelho (relato do usuário, Run #8, 2026-10-24);
 - [ ] ScreenFiles documentadas e funcionais;
 - [ ] parser seguro de `BMO-FIRSTBOOT.txt`;
 - [ ] usuário/senhas configurados;
@@ -77,6 +77,8 @@ Objetivo: cartão novo iniciar e configurar a base sem intervenção técnica av
 - [ ] `BMO-STATUS.txt` criado;
 - [ ] logs sanitizados;
 - [ ] firstboot idempotente.
+
+Evidência parcial do Gate 2: CP-BOOT-001 em VALIDATING; TF2 deve ficar fora durante o primeiro boot. Status detalhado, firstboot e reboot idempotente ainda pendentes.
 
 ### Gate 3 — rede e hardware base
 
