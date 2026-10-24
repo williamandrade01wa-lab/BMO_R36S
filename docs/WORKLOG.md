@@ -460,3 +460,57 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Usuário testar atualização offline para ver o IP/SSH sem regravar o cartão.
 - Consultar resultado final da Run #9; não declarar nova imagem pronta enquanto build/contrato/artifact pendentes.
 - Depois validar tela/reboot e continuar Ready.
+
+## 2026-10-24 — Modo preguiça: assistente de preparação do cartão no Windows
+
+- Fase: UX da preparação / Gate 2
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `c04ef2e25e4d3f3b32ba99d5f9062b3c0ee6e61f`
+- Objetivo: preparar cartão com perguntas/opções sem editar TXT nem copiar ScreenFiles manualmente.
+- `R36S_REQUIRED=NO` para testes locais; `R36S_REQUIRED=YES` para boot final.
+
+### Ações realizadas
+
+- Criado assistente offline Windows Forms com conversa, opções e botão Voltar.
+- Seleção de BOOT validada por ScreenFiles/boot.ini; listagem real dos painéis do cartão.
+- Perguntas condicionais de rede: Wi-Fi com senha/aberto, cabo automático ou sem rede.
+- Senha do aparelho com confirmação e SSH opcional; senhas mascaradas e ausentes do histórico/resumo.
+- Geração de chaves legadas compatíveis com parsers antigo e novo; sem aspas; valores literais e UTF-8 sem BOM/LF no TXT.
+- Recusados quebras de linha, sentinelas de senha e espaços nas extremidades que o parser antigo removeria.
+- Cópia de ScreenFiles preserva fonte, verifica SHA256, cria backup e restaura arquivos em falha; paths/reparse points/destinos fora da BOOT recusados.
+- Nada gravado antes do resumo final; sem formatação, sem alterações no TF2.
+- Aviso de usar antes do primeiro boot e de que editar TXT não reaplica um cartão já configurado.
+- Launcher .cmd para dois cliques e ZIP com três arquivos.
+- Criada CI leve Windows restrita a scripts/windows; não dispara/reinicia o build pesado da imagem.
+
+### Arquivos alterados
+
+- `scripts/windows/BMO-Preparar-Cartao.ps1`
+- `scripts/windows/ABRIR-BMO.cmd`
+- `scripts/windows/LEIA-ME.txt`
+- `.github/workflows/test-windows-card-wizard.yml`
+- `README.md`, `docs/PROJECT-CONTINUITY.md`, `docs/WORKLOG.md`.
+
+### Resultado esperado / obtido
+
+- Interface funcional de preparação com painel escolhido pelo usuário, revisão e gravação com backup.
+- Pacote BMO-Modo-Preguica.zip gerado e conferido (launcher, PS1, instruções).
+- Testes somente em diretórios temporários; nenhum cartão real ou sistema Linux modificado.
+- Assistente não detecta qual painel físico o aparelho usa; não marca boot/hardware como validados.
+- Artefatos das imagens #8/#9 não são alterados por esta ferramenta.
+
+### Validação
+
+- 23 verificações locais passaram: descoberta, caracteres literais/Unicode, LF/UTF-8, cópia, preservação de fonte, backup, rollback, modos de rede e recusas de entradas inválidas.
+- Fluxo gráfico completo exercitado em fixture: senha mascarada, nenhuma senha no transcript, nenhuma gravação antes da confirmação e TXT criado após confirmar.
+- Janela renderizada/inspecionada visualmente; campos, instruções e botões visíveis.
+- Compatibilidade: quatro modos de rede lidos corretamente por dois parsers reais do Git (Run #8 e UX nova), oito combinações aprovadas.
+- ZIP: CRC e exatamente três arquivos conferidos.
+- Corrigido durante teste uso de Move-Item em destino com colchetes; escrita final usa File.Copy com backup/rollback.
+
+### Pendências / próximo passo exato
+
+1. Registrar resultado da CI Windows.
+2. Usuário testar em BOOT real do cartão extra, selecionar ScreenFiles conhecidas e revisar configurações.
+3. Testar boot sem TF2 e mensagem com IP/SSH.
+4. Manter validação física/Ready pendentes até evidência.

@@ -1,0 +1,21 @@
+name: Test Windows Card Wizard
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/bmo-linux-base-v1]
+    paths:
+      - 'scripts/windows/**'
+      - '.github/workflows/test-windows-card-wizard.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test card preparation and rollback in temporary folders
+        shell: powershell
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/BMO-Preparar-Cartao.ps1 -SelfTest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

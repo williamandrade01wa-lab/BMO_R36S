@@ -271,28 +271,30 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-Prioridade solicitada em 2026-10-24: primeiro boot simples para leigos, sem copiar saídas de vários comandos.
+Pedido atual: "modo preguiça", com perguntas/opções, seleção de ScreenFiles e preenchimento automático do TXT.
 
-Implementado e testado isoladamente:
-- quatro campos em português no BMO-FIRSTBOOT.txt: REDE_WIFI, SENHA_WIFI, SENHA_USUARIO, ACESSO_REMOTO;
-- legado/avançado compatível, sim/nao e UTF-8 BOM/CRLF;
-- mensagem no console com rede local, IP e SSH; BMO-RESUMO.txt na BOOT;
-- --summary somente leitura, reapresentado no login após reboot;
-- atualizador offline em scripts/offline/bmo-update-firstboot-ux.sh que preserva configuração/senhas e não reaplica rede/firstboot;
-- 19 testes e 89 verificações do preflight passaram. Nova UX física ainda não validada.
+Implementado assistente Windows em `scripts/windows/BMO-Preparar-Cartao.ps1`, aberto por `ABRIR-BMO.cmd`:
+- conversa guiada: escolher BOOT, painel, rede, nome/senha, senha R36S/confirmar e SSH;
+- resumo sem senhas; grava somente ao clicar Preparar cartão;
+- cópia preserva ScreenFiles originais, cria backup e restaura arquivos em falha simulada;
+- TXT usa nomes compatíveis com as imagens #8 e nova UX;
+- sem Python/administrador/rede; não formata cartão;
+- painel é escolhido pelo usuário, sem inventar autodetecção;
+- avisa se BOOT já registra FIRSTBOOT=OK: salvar TXT não reaplica automaticamente.
 
-Usuário relatou que comandos BMO funcionaram na imagem #8, mas não enviou saídas; SSH continua desligado. Boot inicial foi confirmado por relato; checkpoint físico continua VALIDATING.
+Validação local no Windows:
+- 23 verificações de arquivos/configuração/backup/rollback e caminhos;
+- fluxo completo da janela exercitado em cartão simulado, sem gravação antes da confirmação e sem senhas no histórico;
+- 8 combinações de parsing: quatro modos de rede x parsers antigo/novo;
+- ZIP conferido; nenhuma BOOT real do usuário foi modificada nos testes.
 
-1. Consultar resultado da Run #9 `40118103143`, commit `946353e66bfb48ef4d739aea532d87ebf43460e4`. Preflight `120943560799` passou; build `120943591400` em andamento.
-2. Usuário testar atualização offline no cartão atual, sem regravar: copiar BMO-ATUALIZAR-PRIMEIRO-BOOT.sh para BOOT e executar sudo bash /boot/u-boot/BMO-ATUALIZAR-PRIMEIRO-BOOT.sh. Visualizar IP/SSH no resumo.
-3. Validar visualmente a mensagem e depois rede, reboot e hardware conforme docs/BASE-FIRSTBOOT-TESTS.md.
-4. Validar nova imagem quando CI concluir; não confundir imagem #8 com a versão nova.
-5. Continuar Ready com kiosk automático, preservando o cartão original.
+1. Confirmar CI leve Windows e registrar resultado.
+2. Usuário testar o assistente com a BOOT do cartão extra antes de seu primeiro boot; escolher o painel conhecido correto.
+3. Conferir o status da Run #9 da imagem e testar a mensagem de rede/IP/SSH no R36S. O assistente Windows não modifica os artifacts já publicados.
+4. Seguir testes físicos e integração Ready. CP-BOOT-001 continua VALIDATING.
 
-**TF2 de jogos fora durante todo o primeiro boot.** Desligar completamente antes de reinserir; não formatar. Causa técnica ainda não diagnosticada.
-
-Pendências preservadas: backup do artifact, pins externos e diferença de kernel entre Base e aparelho antigo.
-`R36S_REQUIRED=YES` para validação física; testes isolados `R36S_REQUIRED=NO`.
+**TF2 de jogos fora durante todo o primeiro boot.** Desligar completamente antes de reinserir; não formatar.
+`R36S_REQUIRED=NO` para assistente/testes Windows; `R36S_REQUIRED=YES` para validar boot final.
 
 ## 13. ScreenFiles
 

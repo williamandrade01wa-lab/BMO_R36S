@@ -49,6 +49,30 @@ A imagem base deve ser pequena e previsível. Ela contém somente o necessário 
 
 Ela **não deve depender de XFCE** nem de um desktop tradicional.
 
+## Modo preguiça: assistente no Windows
+
+Extraia o pacote do assistente e abra **ABRIR-BMO.cmd** com dois cliques. O código fica em [scripts/windows](scripts/windows).
+
+Ele pergunta em formato de conversa:
+1. onde está a BOOT do cartão;
+2. qual pasta ScreenFiles usar;
+3. Wi-Fi com senha, Wi-Fi aberto, cabo/Ethernet ou sem rede;
+4. nome/senha do Wi-Fi quando necessário;
+5. senha do R36S e confirmação;
+6. se deseja acesso remoto por SSH.
+
+Depois mostra um resumo sem senhas. Ao clicar em **Preparar cartão**, copia as ScreenFiles do painel para a raiz da BOOT e escreve o TXT. Preserva os originais, faz backup dos destinos e tenta restaurá-los se uma gravação falhar.
+
+O assistente é offline, usa PowerShell/Windows Forms do Windows e não exige Python ou administrador. A escolha do painel é do usuário; não existe detecção automática da tela. Use antes do primeiro boot: no cartão já configurado, salvar o TXT não reaplica as opções automaticamente.
+
+O TXT gerado usa as chaves antigas compatíveis com a imagem #8 e com a nova UX. Nome/senha com espaços internos e caracteres especiais são escritos literalmente, sem aspas. DHCP é o padrão. O TF2 deve ficar fora durante todo o primeiro boot.
+
+Teste automatizado sem cartão real:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/BMO-Preparar-Cartao.ps1 -SelfTest
+```
+
 ## Configuração simples do primeiro boot
 
 Abra `BMO-FIRSTBOOT.txt` na BOOT e preencha somente:

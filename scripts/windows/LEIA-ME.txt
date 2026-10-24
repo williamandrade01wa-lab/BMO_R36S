@@ -1,0 +1,36 @@
+BMO - MODO PREGUICA
+==================
+1. Extraia TODOS os arquivos deste ZIP para uma pasta no Windows.
+2. Coloque o cartao do sistema no computador.
+3. Dê dois cliques em ABRIR-BMO.cmd.
+4. Escolha a BOOT do cartao, que contem ScreenFiles e boot.ini.
+5. Responda as perguntas e confira o resumo.
+6. Clique em Preparar cartao.
+7. Remova o cartao com seguranca. Primeiro boot somente com TF1;
+   mantenha o TF2 de jogos FORA durante a configuracao inicial.
+
+O assistente copia as ScreenFiles do painel escolhido, preserva
+os originais e cria BMO-FIRSTBOOT.txt. Voce nao precisa editar
+o arquivo, colocar aspas ou saber o que e DHCP.
+
+Rede: Wi-Fi com senha, Wi-Fi aberto, cabo/Ethernet ou sem rede.
+Acesso remoto: opcional, por SSH com o usuario r36s.
+Senhas ficam escondidas e nao aparecem no resumo.
+O painel precisa ser escolhido por voce: nao existe deteccao
+automatica do modelo da tela pelo computador.
+
+Funciona com a Base da Run #8 e com o formato novo de firstboot.
+O TXT usa internamente nomes compativeis com as duas versoes.
+Use em cartao recem-gravado, ANTES do primeiro boot.
+No cartao que ja concluiu o firstboot, salvar o TXT nao reaplica
+a configuracao automaticamente.
+
+Nenhum cartao e formatado. Os destinos anteriores sao copiados
+para .BMO-backup-DATA-ID na BOOT antes de gravar.
+Em caso de falha de copia, o assistente tenta restaurar os
+arquivos anteriores. Confira qualquer erro antes de ligar.
+
+Feche o assistente antes de remover o cartao.
+Nao compartilhe o TXT preenchido nem os backups com senhas.
+
+Versao inicial: 2026-10-24.
