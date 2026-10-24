@@ -242,33 +242,19 @@ docs/BMO-CI-ARCHITECTURE.md
 
 ## 10. Estado do bloqueio atual
 
-Falha anterior comprovada da Run #5:
+Atualizado em 2026-10-24. HEAD inicial confirmado: `6b65731f24497d901bf5e125edbe575f9f212ae4`.
 
-```text
-Not enough RAM available (6426Mib) for BTF build.
-```
+Run #7 (`39184063121`), job `117842763898`, finalizou:
+- preflight: success;
+- build: success;
+- validator: failure, exatamente dois arquivos ausentes na FAT:
+  `/BMO-FIRSTBOOT.txt` e `/README-FIRST-BOOT.txt`;
+- seis entradas do contrato root passaram;
+- compressão/artifact da imagem: skipped.
 
-Correção aplicada:
+Correção preparada e testada: finalizar explicitamente a FAT no arquivo .img após os hooks upstream e antes de SHA256/validator. Fixture real passou, inclusive idempotência e preservação do rootfs. Nova CI integral pendente. BTF permanece resolvido com `KERNEL_BTF=no`.
 
-```text
-KERNEL_BTF=no
-```
-
-O preflight passou a exigir explicitamente essa configuração.
-
-Run válida seguinte:
-
-```text
-Run #7
-Run ID: 39184063121
-HEAD: 8d967e34f07e013752e45b2478250b1e9b71e933
-```
-
-Na última consulta via API durante a sessão, o endpoint ainda reportava a run como `in_progress`, enquanto a interface observada pelo usuário já indicava falha no validator. Portanto:
-
-- BTF não deve ser reaberto sem nova evidência;
-- a próxima causa funcional deve vir do `validation-report.txt`/log da Run #7;
-- não corrigir conteúdo da imagem por hipótese.
+Meta solicitada nesta retomada: imagem Ready que inicia diretamente no BMO. A Base mínima é pré-requisito, não a entrega Ready. A receita antiga `install/build-ready-image.sh` existe, mas o build local anterior parou por falta de espaço; não considerá-lo validado.
 
 ## 11. Checkpoint atual
 
@@ -295,31 +281,14 @@ Critérios completos: `docs/CHECKPOINTS.md`.
 
 ## 12. PRÓXIMO PASSO EXATO
 
-Após registrar esta reestruturação e o checkpoint no Git:
+1. Validar preflight/diff e commitar a correção de finalização da FAT com Worklog.
+2. Acompanhar a nova CI e registrar Run ID/Job ID/resultado.
+3. Concluir Gate 1 somente com validator, compressão, SHA256 e artifact final.
+4. Preparar Ready sobre a Base validada com espaço suficiente e BMO/kiosk habilitados, sem credenciais/ROMs.
+5. Validar boot físico diretamente no BMO em cartão separado, preservando o cartão atual.
 
-1. recuperar o resultado final da Run #7;
-2. obter o `validation-report.txt` completo ou log equivalente;
-3. listar todas as falhas contratuais da mesma imagem;
-4. registrar o diagnóstico em `docs/WORKLOG.md`;
-5. corrigir somente falhas comprovadas;
-6. revisar diff;
-7. executar nova CI;
-8. somente declarar Gate 1 concluído quando validator, compressão, SHA256 e artifact final passarem.
-
-```text
-R36S_REQUIRED=NO
-```
-
-Depois do Gate 1:
-
-```text
-Gate 2 — boot/firstboot     R36S_REQUIRED=YES
-Gate 3 — rede/hardware      R36S_REQUIRED=YES
-Gate 4 — bmo install        R36S_REQUIRED=YES
-Gate 5 — BMO completo       R36S_REQUIRED=YES
-Gate 6 — update/rollback    R36S_REQUIRED=YES
-Gate 7 — publicação         R36S_REQUIRED=YES + auditoria
-```
+Build/contrato: `R36S_REQUIRED=NO`.
+Boot/Ready/hardware: `R36S_REQUIRED=YES`.
 
 ## 13. ScreenFiles
 

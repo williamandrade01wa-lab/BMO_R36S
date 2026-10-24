@@ -174,3 +174,58 @@ ed658f30c1a3a599b37557188cd8856b5ef54b2b
 ```text
 R36S_REQUIRED=NO
 ```
+
+## 2026-10-24 — Diagnóstico Run #7 e finalização da BOOT
+
+- Fase: Gate 1 / correção comprovada pós-build
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `6b65731f24497d901bf5e125edbe575f9f212ae4`
+- Objetivo: destravar a imagem base e continuar rumo à imagem Ready que inicia diretamente no BMO, solicitada pelo usuário.
+- `R36S_REQUIRED=NO`
+
+### Ações realizadas
+
+- Confirmado o HEAD pelo Git remoto e que a Run #7 é a última execução.
+- Recuperados jobs e log completo do job `117842763898`, Run `39184063121`.
+- Build e preflight passaram. Validator falhou exatamente em dois arquivos ausentes na FAT: `/BMO-FIRSTBOOT.txt` e `/README-FIRST-BOOT.txt`. As seis entradas root passaram.
+- Confirmado no upstream Armbian pinado que hooks de bootloader/imagem executam depois da customização do rootfs; a verificação condicional de `/boot/u-boot` no chroot não garante o conteúdo final da FAT.
+- Adicionado finalizador explícito da imagem final: exige arquivo regular não vazio, uma única partição FAT, copia os dois templates versionados, compara conteúdo e libera mount/loop.
+- Builder chama o finalizador antes do SHA256; validator integral permanece sem relaxamento.
+- Receita Ready antiga e fontes locais localizadas na Potato. Build antigo de 18/10 parou em pacotes por falta de espaço; não tratar esse arquivo como Ready validada.
+
+### Arquivos alterados
+
+- `image/armbian/ci/finalize-boot.sh`
+- `image/armbian/build-bmo-linux-base.sh`
+- `image/armbian/ci/preflight.sh`
+- `docs/PROJECT-CONTINUITY.md`
+- `docs/WORKLOG.md`
+
+### Resultado esperado / obtido
+
+- Esperado: os dois templates estarão na FAT final, preservando rootfs e demais arquivos de boot.
+- Obtido em fixture real FAT32/ext4 de 96 MiB: duas execuções idempotentes, conteúdo correto, `boot.ini` preservado, hash da partição root inalterado.
+- Imagem inválida sem FAT foi recusada e o loop foi liberado.
+- Evidência local na Potato: `/home/hipo/bmo/boot-fixture.xFE58y`.
+- Build completo da correção ainda pendente; Gate 1 permanece aberto.
+
+### Validação
+
+- Fixture com partições reais passou; sintaxe e preflight devem passar antes do push.
+- Não alterados kernel, DTB, gamepad, frontend nem sistema em produção do R36S.
+- `main` preservada.
+
+### Pendências / riscos
+
+- Imagem mínima não equivale a Ready; integração e boot físico do BMO continuam pendentes.
+- Log upstream contém `sd_fusing.sh: sudo: not found`; auditar antes de declarar bootloader/boot físico validado.
+- Receita Ready antiga contém premissas de Pure e contagens rígidas; não reutilizar sobre a nova Base sem adaptação validada.
+- Não reutilizar imagem Ready antiga parcialmente modificada/falta de espaço.
+
+### Próximo passo exato
+
+1. Validar preflight e diff; commitar correção e este registro na branch de imagem.
+2. Acompanhar a nova CI; registrar Run ID/Job ID/resultados.
+3. Somente concluir Gate 1 após validator, compressão, SHA256 e artifact final.
+4. Integrar receita Ready sobre uma cópia com espaço suficiente, sem segredos nem ROMs.
+5. Validar em cartão separado o primeiro boot diretamente no BMO (`R36S_REQUIRED=YES`).

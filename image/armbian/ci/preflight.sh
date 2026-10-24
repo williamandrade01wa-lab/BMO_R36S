@@ -42,6 +42,7 @@ REQUIRED_FILES=(
   "image/armbian/userpatches/customize-image.sh"
   "image/armbian/ci/preflight.sh"
   "image/armbian/ci/validate-image.sh"
+  "image/armbian/ci/finalize-boot.sh"
   "image/armbian/ci/image-contract.tsv"
 )
 for path in "${REQUIRED_FILES[@]}"; do require_file "$REPO_ROOT/$path"; done
@@ -95,6 +96,7 @@ SHELL_FILES=(
   "image/armbian/userpatches/customize-image.sh"
   "image/armbian/ci/preflight.sh"
   "image/armbian/ci/validate-image.sh"
+  "image/armbian/ci/finalize-boot.sh"
 )
 for path in "${SHELL_FILES[@]}"; do
   if [[ -f "$path" ]] && bash -n "$path"; then good "bash -n: $path"; else fail "bash syntax: $path"; fi

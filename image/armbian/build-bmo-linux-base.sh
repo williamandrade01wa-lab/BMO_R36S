@@ -21,5 +21,8 @@ grep -F "KERNELSOURCE='${BMO_KERNEL_REPO}'" "$RK3326_FAMILY" >/dev/null || die "
 log "aplicando customizacoes BMO Linux Base v${BMO_BASE_VERSION}"; cp -a "$SCRIPT_DIR/userpatches/." "$ARMBIAN_SRC/userpatches/"
 (cd "$ARMBIAN_SRC" && ./compile.sh "$BMO_IMAGE_PROFILE")
 IMAGE="$(find "$ARMBIAN_SRC/output" -type f -name '*.img' -print -quit 2>/dev/null || true)"; [ -n "$IMAGE" ] || die "imagem .img nao encontrada"
-OUT_IMAGE="${OUT_DIR}/bmo-linux-base-r36s-trixie-v${BMO_BASE_VERSION}.img"; cp -f "$IMAGE" "$OUT_IMAGE"; sha256sum "$OUT_IMAGE" > "${OUT_IMAGE}.sha256"
+OUT_IMAGE="${OUT_DIR}/bmo-linux-base-r36s-trixie-v${BMO_BASE_VERSION}.img"; cp -f "$IMAGE" "$OUT_IMAGE"
+# Board hooks run after customize-image.sh; populate the final BOOT partition.
+sudo bash "$SCRIPT_DIR/ci/finalize-boot.sh" "$OUT_IMAGE"
+sha256sum "$OUT_IMAGE" > "${OUT_IMAGE}.sha256"
 log "imagem: $OUT_IMAGE"; log "sha256: $(cut -d' ' -f1 "${OUT_IMAGE}.sha256")"; log "BMO_LINUX_BASE_BUILD_OK"
