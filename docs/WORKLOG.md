@@ -514,3 +514,29 @@ Artifact expira: 2026-10-31T04:21:41Z
 2. Usuário testar em BOOT real do cartão extra, selecionar ScreenFiles conhecidas e revisar configurações.
 3. Testar boot sem TF2 e mensagem com IP/SSH.
 4. Manter validação física/Ready pendentes até evidência.
+
+## 2026-10-24 — CI Windows do assistente aprovada
+
+- Fase: validação Windows / preparação do cartão
+- Branch: `feat/bmo-linux-base-v1`
+- Commit testado: `f4469114b6a0d74c50d2fbfb007bddf20dac301d`
+- Objetivo: conferir testes de cópia/configuração/rollback no runner Windows.
+- `R36S_REQUIRED=NO`
+
+### Ações / resultado / validação
+
+- Run `40141713783`, workflow Test Windows Card Wizard.
+- Job `121014650099`: success; todos os passos concluídos.
+- Testes de preparação e recuperação executados em diretórios temporários, sem cartão real.
+- Pacote final local BMO-Modo-Preguica.zip conferido com CRC e arquivos esperados.
+- Na consulta de runs, a imagem #9 `40118103143` também consta success; avaliação detalhada de logs/artifacts da #9 ainda não realizada nesta etapa.
+
+### Arquivos alterados
+
+- Continuidade e Worklog, somente registro documental.
+
+### Pendências / próximo passo
+
+- Teste do assistente em BOOT real do microSD extra e validação de boot com TF2 fora.
+- Conferir nova mensagem/IP/SSH da imagem #9 ou atualização offline.
+- Nenhum gate físico foi concluído automaticamente pela CI Windows.

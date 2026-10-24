@@ -288,9 +288,9 @@ Validação local no Windows:
 - 8 combinações de parsing: quatro modos de rede x parsers antigo/novo;
 - ZIP conferido; nenhuma BOOT real do usuário foi modificada nos testes.
 
-1. Confirmar CI leve Windows e registrar resultado.
+1. CI leve Windows aprovada: Run `40141713783`, job `121014650099`, commit `f4469114b6a0d74c50d2fbfb007bddf20dac301d`. Prosseguir com teste no cartão real.
 2. Usuário testar o assistente com a BOOT do cartão extra antes de seu primeiro boot; escolher o painel conhecido correto.
-3. Conferir o status da Run #9 da imagem e testar a mensagem de rede/IP/SSH no R36S. O assistente Windows não modifica os artifacts já publicados.
+3. Run #9 `40118103143` consta success na API; avaliar logs/artifacts e testar a mensagem de rede/IP/SSH no R36S. O assistente Windows não modifica os artifacts já publicados.
 4. Seguir testes físicos e integração Ready. CP-BOOT-001 continua VALIDATING.
 
 **TF2 de jogos fora durante todo o primeiro boot.** Desligar completamente antes de reinserir; não formatar.
