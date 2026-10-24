@@ -252,7 +252,7 @@ Run #7 (`39184063121`), job `117842763898`, finalizou:
 - seis entradas do contrato root passaram;
 - compressão/artifact da imagem: skipped.
 
-Correção preparada e testada: finalizar explicitamente a FAT no arquivo .img após os hooks upstream e antes de SHA256/validator. Fixture real passou, inclusive idempotência e preservação do rootfs. Nova CI integral pendente. BTF permanece resolvido com `KERNEL_BTF=no`.
+Correção preparada e testada: finalizar explicitamente a FAT no arquivo .img após os hooks upstream e antes de SHA256/validator. Fixture real passou, inclusive idempotência e preservação do rootfs. Nova CI integral: Run #8 `40057180564`, commit `701ed1d7a2946a143cbbd90527f141e0b05c3867`; preflight `120762624034` passou e build `120762650098` está em andamento. Resultado final pendente. BTF permanece resolvido com `KERNEL_BTF=no`.
 
 Meta solicitada nesta retomada: imagem Ready que inicia diretamente no BMO. A Base mínima é pré-requisito, não a entrega Ready. A receita antiga `install/build-ready-image.sh` existe, mas o build local anterior parou por falta de espaço; não considerá-lo validado.
 
@@ -281,11 +281,13 @@ Critérios completos: `docs/CHECKPOINTS.md`.
 
 ## 12. PRÓXIMO PASSO EXATO
 
-1. Validar preflight/diff e commitar a correção de finalização da FAT com Worklog.
-2. Acompanhar a nova CI e registrar Run ID/Job ID/resultado.
+1. Consultar jobs e resultado final da Run #8 `40057180564` (build job `120762650098`), correção já publicada em `701ed1d7a2946a143cbbd90527f141e0b05c3867`.
+2. Registrar validator, SHA256 e artifacts antes de avançar.
 3. Concluir Gate 1 somente com validator, compressão, SHA256 e artifact final.
 4. Preparar Ready sobre a Base validada com espaço suficiente e BMO/kiosk habilitados, sem credenciais/ROMs.
-5. Validar boot físico diretamente no BMO em cartão separado, preservando o cartão atual.
+5. Validar boot físico diretamente no BMO no microSD extra confirmado pelo usuário, preservando o cartão atual.
+
+Ready antiga precisa substituir checks globais de sandbox (zero symlinks/ausência de fstab/contagem total de binários) por validações específicas dos artefatos BMO. Aparelho de referência tem kernel 6.12.74 e serviços BMO ativos; API 8086 é apenas loopback.
 
 Build/contrato: `R36S_REQUIRED=NO`.
 Boot/Ready/hardware: `R36S_REQUIRED=YES`.

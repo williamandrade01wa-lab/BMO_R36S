@@ -229,3 +229,46 @@ R36S_REQUIRED=NO
 3. Somente concluir Gate 1 após validator, compressão, SHA256 e artifact final.
 4. Integrar receita Ready sobre uma cópia com espaço suficiente, sem segredos nem ROMs.
 5. Validar em cartão separado o primeiro boot diretamente no BMO (`R36S_REQUIRED=YES`).
+## 2026-10-24 — Correção publicada e Run #8 iniciada
+
+- Fase: Gate 1 / compilação integral e preparação de Ready
+- Branch: `feat/bmo-linux-base-v1`
+- Commit da correção: `701ed1d7a2946a143cbbd90527f141e0b05c3867`
+- Objetivo: validar a FAT final corrigida antes de integrar BMO Ready.
+- `R36S_REQUIRED=NO` para CI; `R36S_REQUIRED=YES` para boot.
+
+### Ações realizadas / validação
+
+- Preflight local: 82 verificações, zero falhas; diff revisado.
+- Commit publicado por atualização fast-forward com HEAD esperado.
+- Run #8: `40057180564`.
+- Preflight job `120762624034`: success.
+- Build job `120762650098`: in_progress na última consulta (instalando pré-requisitos).
+- Usuário confirmou outro microSD disponível para teste físico separado.
+- R36S inspecionado somente em leitura por SSH via Potato: kernel `6.12.74-lts-rk3326`, BOOT FAT em `/boot/u-boot`, root ext4, BMO kiosk/UI/control/Xorg e APIs ativos.
+- A API 8086 escuta somente em `127.0.0.1`; falha ao acessá-la pela Potato não comprova serviço parado.
+- Receita Ready antiga auditada: fase 40 presume zero symlinks em /etc/systemd/system e ausência de /etc/fstab. Esses checks de sandbox não servem para uma imagem Linux populada. Builder também conta todos os links/binários em vez de validar apenas os artefatos BMO. Adaptar preservando fstab/boot e validando somente os arquivos da receita.
+- Build antigo local interrompido em apt/dpkg por falta de espaço; não foi retomado nem promovido.
+
+### Arquivos alterados
+
+- `docs/WORKLOG.md`, `docs/PROJECT-CONTINUITY.md` (registro da execução e retomada).
+
+### Resultado esperado / obtido
+
+- Esperado: CI integral válida e depois Ready com boot físico direto no BMO.
+- Obtido: correção testada/publicada, preflight remoto aprovado; build integral ainda em andamento.
+- Não há nova imagem Ready validada ou artifact final confirmado nesta consulta.
+
+### Pendências / riscos
+
+- Gate 1 continua aberto até o resultado integral.
+- Boot da base usa kernel pinado 6.12.32, enquanto o aparelho de referência está em 6.12.74; exigir teste de painel/DTB/gamepad/rede.
+- Preservar cartão atual; gravar candidato somente no cartão extra após conferir artifact/SHA256.
+
+### Próximo passo exato
+
+1. Consultar jobs da Run #8 `40057180564` e obter validator/artifact.
+2. Registrar resultado antes de avançar.
+3. Se Gate 1 passar, adaptar receita Ready às imagens populadas, dimensionar espaço e habilitar firstboot/kiosk sem depender de login manual.
+4. Validar offline, gerar candidato e testar no microSD extra.
