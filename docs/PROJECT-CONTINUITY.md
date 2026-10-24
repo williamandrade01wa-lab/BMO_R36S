@@ -283,7 +283,7 @@ Implementado e testado isoladamente:
 
 Usuário relatou que comandos BMO funcionaram na imagem #8, mas não enviou saídas; SSH continua desligado. Boot inicial foi confirmado por relato; checkpoint físico continua VALIDATING.
 
-1. Confirmar CI da nova alteração e registrar Run ID/Job ID.
+1. Consultar resultado da Run #9 `40118103143`, commit `946353e66bfb48ef4d739aea532d87ebf43460e4`. Preflight `120943560799` passou; build `120943591400` em andamento.
 2. Usuário testar atualização offline no cartão atual, sem regravar: copiar BMO-ATUALIZAR-PRIMEIRO-BOOT.sh para BOOT e executar sudo bash /boot/u-boot/BMO-ATUALIZAR-PRIMEIRO-BOOT.sh. Visualizar IP/SSH no resumo.
 3. Validar visualmente a mensagem e depois rede, reboot e hardware conforme docs/BASE-FIRSTBOOT-TESTS.md.
 4. Validar nova imagem quando CI concluir; não confundir imagem #8 com a versão nova.

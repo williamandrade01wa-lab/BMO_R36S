@@ -434,3 +434,29 @@ Artifact expira: 2026-10-31T04:21:41Z
 2. Usuário copiar atualizador para BOOT e executar uma única vez; conferir visualmente o resumo e IP.
 3. Validar imagem nova quando CI concluir; manter CP-BOOT-001 em VALIDATING até evidências de reboot/rede/hardware.
 4. Continuar integração Ready após este primeiro boot mais simples, preservando regra TF2 fora e cartão original.
+
+## 2026-10-24 — CI da nova UX iniciada
+
+- Fase: validação integral da imagem com primeiro boot simples
+- Branch: `feat/bmo-linux-base-v1`
+- Commit compilado: `946353e66bfb48ef4d739aea532d87ebf43460e4`
+- Objetivo: validar empacotamento do novo resumo/perfil na imagem.
+- `R36S_REQUIRED=NO` para CI; `R36S_REQUIRED=YES` para tela real.
+
+### Ações / resultado / validação
+
+- Publicados código, 19 testes, documentação e atualizador offline.
+- Run #9: `40118103143`.
+- Preflight job `120943560799`: success.
+- Build job `120943591400`: in_progress na consulta.
+- Atualizador offline validado em raiz isolada, não aplicado remotamente ao R36S do usuário.
+
+### Arquivos alterados
+
+- Continuidade e este registro; nenhum código funcional adicional nesta anotação.
+
+### Pendências / próximo passo
+
+- Usuário testar atualização offline para ver o IP/SSH sem regravar o cartão.
+- Consultar resultado final da Run #9; não declarar nova imagem pronta enquanto build/contrato/artifact pendentes.
+- Depois validar tela/reboot e continuar Ready.
