@@ -1,17 +1,41 @@
-BMO LINUX BASE v0.2 - PRIMEIRO BOOT
-===================================
-1. Grave a imagem no microSD.
-2. Abra a particao BOOT no Windows.
-3. COPIE os arquivos de ScreenFiles/Panel X para a raiz da BOOT. NAO mova.
-4. Edite BMO-FIRSTBOOT.txt.
-5. Com o R36S desligado, retire o cartao TF2 de jogos.
-6. Coloque somente o cartao do sistema na entrada TF1 e ligue.
-7. Mantenha o TF2 FORA durante todo o primeiro boot/configuracao inicial.
-8. Quando a configuracao terminar, desligue completamente, insira o TF2 e ligue novamente.
-Nao formate nem altere o TF2 para realizar esse procedimento.
+BMO - PRIMEIRO BOOT
+==================
+1. Grave a imagem no cartao do sistema (TF1).
+2. Abra a BOOT no Windows.
+3. COPIE os arquivos do seu ScreenFiles/Panel X para a raiz da BOOT.
+   Nao mova os originais.
+4. Abra BMO-FIRSTBOOT.txt no Bloco de Notas:
+   REDE_WIFI = nome do seu Wi-Fi (deixe vazio se usar cabo)
+   SENHA_WIFI = senha do Wi-Fi
+   SENHA_USUARIO = senha que voce escolhe para o R36S
+   ACESSO_REMOTO = sim para SSH, ou nao para manter desligado
+   Edite depois do sinal =, sem aspas.
+   Para ligar o SSH, escolha uma senha diferente de r36s.
+5. Salve e remova o cartao com seguranca.
+6. Com o R36S desligado, retire o TF2 de jogos.
+7. Ligue somente com TF1 e aguarde a configuracao.
+   A tela mostrara se conectou, o IP e se o SSH esta ligado.
+   Pode ocorrer uma reinicializacao para preparar o cartao.
+   O resumo reaparece ao entrar no terminal.
+8. Depois de concluir, desligue completamente antes de inserir TF2.
+   Nao formate nem altere o cartao de jogos.
 
-REDE: Wi-Fi e Ethernet/USB aceitam DHCP ou IPv4 estatico. Wi-Fi suporta WPA-PSK, rede aberta, SSID oculto e autoconnect. SSH vem desligado.
-SEGURANCA: BMO-FIRSTBOOT.txt nao e Shell. Depois de aplicado, senhas viram __APPLIED__.
-STATUS: BMO-IP.txt, BMO-STATUS.txt e logs/firstboot.log sao gravados na BOOT.
+SE NAO CONECTAR
+Confira o nome/senha do Wi-Fi e o cabo/adaptador.
+O sistema informa SEM CONEXAO / SEM IP; isso nao impede uso local.
+No computador, consulte BMO-RESUMO.txt na BOOT apos desligar o R36S.
 
-Comandos: bmo status | bmo ip | bmo network status | bmo network scan | bmo network config | sudo bmo network apply | bmo doctor | bmo source show | sudo bmo install
+SENHAS
+Este arquivo de configuracao nao executa comandos.
+Apos aplicar, senhas sao substituidas por __APPLIED__.
+Nao envie suas senhas a ninguem.
+
+STATUS
+BMO-RESUMO.txt = resumo simples, com IP e SSH
+BMO-IP.txt / BMO-STATUS.txt / logs/firstboot.log = diagnostico
+Rede conectada com IP nao significa que a internet foi testada.
+
+OPCOES AVANCADAS
+Os nomes antigos (WIFI_SSID, USER_PASSWORD, SSH_ENABLED etc.)
+continuam aceitos; nao repita a mesma opcao com dois nomes.
+IP automatico (DHCP) e o padrao.

@@ -1,41 +1,29 @@
-# BMO Linux Base v0.2 - configuracao inicial
-# Edite na particao BOOT antes de ligar o R36S.
-# Este arquivo NAO e executado como Shell. Valores sao literais.
-# Depois de aplicado, senhas sao substituidas por __APPLIED__.
+# BMO - COMECE AQUI
+# Abra no Bloco de Notas. Edite somente depois do sinal =.
+# Nao coloque aspas. Mantenha cada resposta em uma unica linha.
+# Retire o cartao TF2 de jogos durante todo o primeiro boot!
 
-USER_NAME=r36s
-USER_PASSWORD=r36s
-ROOT_PASSWORD=LOCKED
-HOSTNAME=bmo-r36s
-TIMEZONE=America/Sao_Paulo
-LOCALE=pt_BR.UTF-8
+# 1. WI-FI
+# Digite o nome e a senha exatamente como no seu roteador.
+# Para usar cabo/adaptador Ethernet ou ficar sem rede, deixe vazio.
+REDE_WIFI=
+SENHA_WIFI=
 
-NETWORK_ENABLED=yes
+# 2. SENHA DO R36S
+# Escolha sua senha. Voce nao precisa enviar essa senha a ninguem.
+# Para acesso remoto, ela precisa ser diferente de r36s.
+SENHA_USUARIO=r36s
 
-# Wi-Fi USB: WIFI_SECURITY=wpa-psk|open / WIFI_IPV4_MODE=dhcp|static
-WIFI_ENABLED=no
-WIFI_SSID=
-WIFI_SECURITY=wpa-psk
-WIFI_PASSWORD=
-WIFI_HIDDEN=no
-WIFI_AUTOCONNECT=yes
-WIFI_IPV4_MODE=dhcp
-WIFI_STATIC_ADDRESS=
-WIFI_STATIC_GATEWAY=
-WIFI_STATIC_DNS=
+# 3. ACESSO PELO COMPUTADOR (SSH)
+# sim = permitir acesso remoto; nao = manter desligado.
+ACESSO_REMOTO=nao
 
-# Ethernet / adaptador USB: WIRED_IPV4_MODE=dhcp|static
-WIRED_ENABLED=yes
-WIRED_AUTOCONNECT=yes
-WIRED_IPV4_MODE=dhcp
-WIRED_STATIC_ADDRESS=
-WIRED_STATIC_GATEWAY=
-WIRED_STATIC_DNS=
-
-# SSH vem desligado. Para senha, use USER_PASSWORD diferente de r36s.
-SSH_ENABLED=no
-SSH_PASSWORD_AUTH=yes
-SSH_PORT=22
-MDNS_ENABLED=yes
-
-BMO_AUTO_INSTALL=no
+# PRONTO! Salve, remova o cartao com seguranca e ligue o R36S.
+# O IP e o resultado aparecerao na tela e em BMO-RESUMO.txt.
+# As senhas serao apagadas deste arquivo apos a configuracao.
+#
+# Nao precisa preencher nada abaixo para uma instalacao comum.
+# Opcoes avancadas continuam aceitas: WIFI_ENABLED, WIFI_HIDDEN,
+# WIFI_SECURITY, WIFI_IPV4_MODE, WIRED_IPV4_MODE, SSH_PORT,
+# USER_NAME, HOSTNAME, TIMEZONE e LOCALE.
+# Use os nomes antigos OU os nomes acima; nao repita a mesma opcao.

@@ -129,6 +129,13 @@ else
 fi
 
 echo
+echo "=== FIRSTBOOT UX REGRESSION TESTS ==="
+if python3 image/armbian/ci/tests/test_firstboot_ux.py; then
+  good "firstboot UX regression tests"
+else
+  fail "firstboot UX regression tests"
+fi
+
 echo "=== UPSTREAM PINS ==="
 UPSTREAM="image/armbian/UPSTREAM.env"
 if [[ -f "$UPSTREAM" ]]; then

@@ -11,6 +11,12 @@ Imagem em teste: Run #8, commit `701ed1d7a2946a143cbbd90527f141e0b05c3867`.
 - SSH vem desligado; os comandos abaixo podem ser executados no terminal local com teclado.
 - Não compartilhar senhas, chaves privadas ou o BMO-FIRSTBOOT.txt completo.
 
+## Resumo simples (nova UX)
+
+Ao terminar o primeiro boot, conferir a mensagem na tela: configuração concluída ou atenção; rede conectada e IP, ou sem IP; SSH ligado/desligado/falha. A mesma informação fica em `BMO-RESUMO.txt` na BOOT. O resumo reaparece ao entrar no terminal e não reaplica a configuração.
+
+No aparelho já gravado com a Run #8, copiar a atualização offline para BOOT e executar `sudo bash /boot/u-boot/BMO-ATUALIZAR-PRIMEIRO-BOOT.sh`. O instalador cria backup, preserva configuração/senhas/rede e mostra resumo sem refazer firstboot. Modelo simples separado é salvo como BMO-FIRSTBOOT-MODELO.txt; ele não substitui a configuração atual.
+
 ## 1. Estado básico — somente leitura
 
 ```bash

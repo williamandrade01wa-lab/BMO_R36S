@@ -15,6 +15,8 @@ install -m 0644 /tmp/overlay/etc/bmo/base-version.env /etc/bmo/base-version.env
 install -m 0644 /tmp/overlay/etc/NetworkManager/conf.d/20-bmo.conf /etc/NetworkManager/conf.d/20-bmo.conf
 install -m 0600 /tmp/overlay/etc/netplan/90-bmo-networkmanager.yaml /etc/netplan/90-bmo-networkmanager.yaml
 install -m 0644 /tmp/overlay/etc/udev/rules.d/99-bmo-usb-power.rules /etc/udev/rules.d/99-bmo-usb-power.rules
+install -d -m 0755 /etc/profile.d
+install -m 0644 /tmp/overlay/etc/profile.d/90-bmo-welcome.sh /etc/profile.d/90-bmo-welcome.sh
 systemctl disable systemd-networkd.service systemd-networkd-wait-online.service 2>/dev/null || true
 systemctl enable NetworkManager.service
 systemctl disable ssh.service 2>/dev/null || true

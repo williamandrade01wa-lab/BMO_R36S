@@ -375,3 +375,62 @@ Artifact expira: 2026-10-31T04:21:41Z
 2. Validar root/BOOT, rede, gamepad, áudio, brilho e reboot conforme roteiro.
 3. Validar TF2 após desligamento; registrar diferenças antes de diagnóstico causal.
 4. Só fechar checkpoint com evidências; depois preparar integração Ready.
+
+## 2026-10-24 — Primeiro boot simples, resumo de rede/IP/SSH e atualização offline
+
+- Fase: UX do firstboot / Gate 2
+- Branch: `feat/bmo-linux-base-v1`
+- Commit inicial: `f59368cb0512158aaba39c9ad55faa0db00f5740`
+- Objetivo: pessoa leiga configurar e ver conexão/IP sem enviar saídas de vários comandos.
+- `R36S_REQUIRED=NO` para testes isolados; `R36S_REQUIRED=YES` para validação visual final.
+
+### Ações realizadas
+
+- Template reduzido a quatro campos em português: REDE_WIFI, SENHA_WIFI, SENHA_USUARIO, ACESSO_REMOTO.
+- Nome de Wi-Fi preenchido ativa Wi-Fi automaticamente se WIFI_ENABLED não foi informado. Cabo continua DHCP por padrão; SSH permanece desligado por padrão.
+- Parser aceita aliases e sim/nao, preservando chaves avançadas antigas. Duplicidade alias/chave antiga é recusada.
+- Suporte a UTF-8 BOM e CRLF do Windows; valores permanecem literais, sem executar Shell.
+- Senhas dos dois formatos sanitizadas, inclusive BOM antes da primeira chave.
+- Console mostra conclusão/atenção, conexão local ou ausência de IP, IPs e SSH ligado/desligado/falha; não declara internet testada.
+- BOOT recebe BMO-RESUMO.txt e os arquivos técnicos existentes continuam.
+- Adicionado --summary somente leitura; perfil interativo reapresenta status com IP atual após login/reboot. Aviso antes do reboot de resize com pausa de oito segundos.
+- Ativação de conexão tem espera explícita de 20s; SSH só é exibido ligado se o serviço estiver ativo.
+- Evitado vazamento de senha em CalledProcessError do nmcli: mensagem pública não reproduz a linha de comando com PSK.
+- Instalador offline permite atualizar o cartão da Run #8 sem regravar: cria backup, preserva configuração atual e senhas, não aplica firstboot nem reinicia rede; modelo simples fica separado.
+- Nenhuma configuração da nova instalação do usuário foi alterada remotamente; SSH nela continua desligado.
+
+### Arquivos alterados
+
+- `image/armbian/userpatches/overlay/usr/local/sbin/bmo-firstboot`
+- `image/armbian/userpatches/overlay/usr/share/bmo/BMO-FIRSTBOOT.txt`
+- `image/armbian/userpatches/overlay/usr/share/bmo/README-FIRST-BOOT.txt`
+- `image/armbian/userpatches/overlay/etc/profile.d/90-bmo-welcome.sh`
+- `image/armbian/userpatches/customize-image.sh`
+- `image/armbian/userpatches/rk3326/R36S/armbian-firstlogin`
+- `image/armbian/ci/image-contract.tsv`
+- `image/armbian/ci/preflight.sh`
+- `image/armbian/ci/tests/test_firstboot_ux.py`
+- `scripts/offline/bmo-update-firstboot-ux.sh`
+- README, design da Base, roteiro de testes, continuidade e este Worklog.
+
+### Resultado esperado / obtido
+
+- Fonte preparada para imagem futura e atualização offline entregue para testar no cartão já instalado.
+- Sem prometer atualização automática da imagem da Run #8, sem afirmar validação física desta nova tela.
+- Sessão de login reapresenta status atual; BMO-RESUMO.txt é o resumo persistido no firstboot/atualização offline.
+
+### Validação
+
+- 19 testes isolados passaram: formato simples/legado, BOM/CRLF, literais, aliases duplicados, sanitização, sem IP, IP local, SSH falhando/desligado, segredos em erros e --summary sem mutação.
+- Preflight em checkout isolado na Potato: 89 verificações, zero falhas.
+- bash -n / sh -n e git diff --check aprovados.
+- Atualizador offline testado duas vezes em raiz temporária: backup preservado, hashes de configuração e shadow inalterados, alvo inválido recusado.
+- Testes não executaram configuração real de rede/usuários no host.
+- Evidência: `/home/hipo/bmo/firstboot-ux-preflight.log` e fixtures `/home/hipo/bmo/welcome-update-test.*`.
+
+### Pendências / próximo passo exato
+
+1. Publicar a alteração na branch e registrar a CI disparada.
+2. Usuário copiar atualizador para BOOT e executar uma única vez; conferir visualmente o resumo e IP.
+3. Validar imagem nova quando CI concluir; manter CP-BOOT-001 em VALIDATING até evidências de reboot/rede/hardware.
+4. Continuar integração Ready após este primeiro boot mais simples, preservando regra TF2 fora e cartão original.

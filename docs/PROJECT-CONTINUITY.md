@@ -271,20 +271,28 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-Atualização física em 2026-10-24: usuário gravou a Base da Run #8 e relatou que iniciou e parece funcionar perfeitamente. Boot físico inicial confirmado por relato; firstboot detalhado e hardware ainda sem relatório. SSH permanece desligado.
+Prioridade solicitada em 2026-10-24: primeiro boot simples para leigos, sem copiar saídas de vários comandos.
 
-**Regra operacional: manter TF2 de jogos fora do R36S durante todo o primeiro boot.** Usar somente TF1; após a configuração inicial, desligar completamente, inserir TF2 e ligar novamente. Não formatar/alterar TF2. Causa técnica não diagnosticada.
+Implementado e testado isoladamente:
+- quatro campos em português no BMO-FIRSTBOOT.txt: REDE_WIFI, SENHA_WIFI, SENHA_USUARIO, ACESSO_REMOTO;
+- legado/avançado compatível, sim/nao e UTF-8 BOM/CRLF;
+- mensagem no console com rede local, IP e SSH; BMO-RESUMO.txt na BOOT;
+- --summary somente leitura, reapresentado no login após reboot;
+- atualizador offline em scripts/offline/bmo-update-firstboot-ux.sh que preserva configuração/senhas e não reaplica rede/firstboot;
+- 19 testes e 89 verificações do preflight passaram. Nova UX física ainda não validada.
 
-1. No terminal local, coletar `bmo status`, `bmo firstboot status`, `bmo doctor` e `systemctl --failed --no-pager`; não compartilhar BMO-FIRSTBOOT.txt com senhas.
-2. Validar armazenamento/montagens, rede, gamepad, áudio e brilho conforme `docs/BASE-FIRSTBOOT-TESTS.md`.
-3. Validar desligamento/reboot e autoconnect sem reaplicar senhas/configuração inicial.
-4. Testar TF2 somente após desligamento completo; listar/montar apenas em leitura quando necessário e nunca formatar.
-5. Com evidências suficientes, fechar CP-BOOT-001; não considerar o relato geral como aprovação de todos os gates.
-6. Adaptar receita Ready e testar boot automático no BMO no cartão extra, preservando o cartão original.
+Usuário relatou que comandos BMO funcionaram na imagem #8, mas não enviou saídas; SSH continua desligado. Boot inicial foi confirmado por relato; checkpoint físico continua VALIDATING.
 
-Pendências anteriores preservadas: backup/verificação do artifact, pins externos de ScreenFiles/U-Boot e diferenças de kernel (Base 6.12.32; aparelho anterior 6.12.74).
+1. Confirmar CI da nova alteração e registrar Run ID/Job ID.
+2. Usuário testar atualização offline no cartão atual, sem regravar: copiar BMO-ATUALIZAR-PRIMEIRO-BOOT.sh para BOOT e executar sudo bash /boot/u-boot/BMO-ATUALIZAR-PRIMEIRO-BOOT.sh. Visualizar IP/SSH no resumo.
+3. Validar visualmente a mensagem e depois rede, reboot e hardware conforme docs/BASE-FIRSTBOOT-TESTS.md.
+4. Validar nova imagem quando CI concluir; não confundir imagem #8 com a versão nova.
+5. Continuar Ready com kiosk automático, preservando o cartão original.
 
-`R36S_REQUIRED=YES` para a validação física atual.
+**TF2 de jogos fora durante todo o primeiro boot.** Desligar completamente antes de reinserir; não formatar. Causa técnica ainda não diagnosticada.
+
+Pendências preservadas: backup do artifact, pins externos e diferença de kernel entre Base e aparelho antigo.
+`R36S_REQUIRED=YES` para validação física; testes isolados `R36S_REQUIRED=NO`.
 
 ## 13. ScreenFiles
 

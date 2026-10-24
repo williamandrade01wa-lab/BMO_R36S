@@ -4,14 +4,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 BASE_VERSION='0.2.0'; BOOT_CANDIDATES=[Path('/boot/u-boot'),Path('/boot')]; DEFAULT_CONFIG=Path('/usr/share/bmo/BMO-FIRSTBOOT.txt'); STATE_DIR=Path('/var/lib/bmo'); STATE_FILE=STATE_DIR/'firstboot-state.env'; MARKER=STATE_DIR/'firstboot.done'; LOG_FILE=Path('/var/log/bmo-firstboot.log'); SENTINELS={'','CHANGE_ME','__APPLIED__'}
 DEFAULTS={'USER_NAME':'r36s','USER_PASSWORD':'r36s','ROOT_PASSWORD':'LOCKED','HOSTNAME':'bmo-r36s','TIMEZONE':'America/Sao_Paulo','LOCALE':'pt_BR.UTF-8','NETWORK_ENABLED':'yes','WIFI_ENABLED':'no','WIFI_SSID':'','WIFI_SECURITY':'wpa-psk','WIFI_PASSWORD':'','WIFI_HIDDEN':'no','WIFI_AUTOCONNECT':'yes','WIFI_IPV4_MODE':'dhcp','WIFI_STATIC_ADDRESS':'','WIFI_STATIC_GATEWAY':'','WIFI_STATIC_DNS':'','WIRED_ENABLED':'yes','WIRED_AUTOCONNECT':'yes','WIRED_IPV4_MODE':'dhcp','WIRED_STATIC_ADDRESS':'','WIRED_STATIC_GATEWAY':'','WIRED_STATIC_DNS':'','SSH_ENABLED':'no','SSH_PASSWORD_AUTH':'yes','SSH_PORT':'22','MDNS_ENABLED':'yes','BMO_AUTO_INSTALL':'no'}
-ALLOWED_KEYS=set(DEFAULTS); SECRET_KEYS={'USER_PASSWORD','ROOT_PASSWORD','WIFI_PASSWORD'}
+ALIASES={'REDE_WIFI':'WIFI_SSID','SENHA_WIFI':'WIFI_PASSWORD','SENHA_USUARIO':'USER_PASSWORD','ACESSO_REMOTO':'SSH_ENABLED'}
+ALLOWED_KEYS=set(DEFAULTS)|set(ALIASES); SECRET_KEYS={'USER_PASSWORD','ROOT_PASSWORD','WIFI_PASSWORD','SENHA_WIFI','SENHA_USUARIO'}
 def log(m):
  l=f'{datetime.now(timezone.utc).isoformat()} {m}'; print(l)
  try:
   LOG_FILE.parent.mkdir(parents=True,exist_ok=True); open(LOG_FILE,'a',encoding='utf-8').write(l+'\n')
  except OSError: pass
 def run(a,check=True,input_text=None): return subprocess.run(a,check=check,text=True,input=input_text,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-def yes(v): return str(v).strip().lower() in {'1','yes','true','on'}
+def yes(v): return str(v).strip().lower() in {'1','yes','true','on','sim','s'}
 def boot_dir():
  for p in BOOT_CANDIDATES:
   if p.is_dir(): return p
@@ -22,15 +23,18 @@ def ensure_boot_config():
  if not p.exists() and DEFAULT_CONFIG.exists(): p.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(DEFAULT_CONFIG,p)
  return p
 def parse_config(p):
- c=dict(DEFAULTS)
+ c=dict(DEFAULTS); seen=set()
  if not p.exists(): return c
- for n,r in enumerate(p.read_text(encoding='utf-8',errors='replace').splitlines(),1):
+ for n,r in enumerate(p.read_text(encoding='utf-8-sig',errors='replace').splitlines(),1):
   line=r.rstrip('\r\n')
   if not line.strip() or line.lstrip().startswith('#'): continue
   if '=' not in line: raise ValueError(f'linha {n}: esperado CHAVE=VALOR')
   k,v=line.split('=',1); k=k.strip(); v=v.strip()
   if k not in ALLOWED_KEYS: raise ValueError(f'linha {n}: chave desconhecida: {k}')
-  c[k]=v
+  dest=ALIASES.get(k,k)
+  if dest in seen: raise ValueError(f'linha {n}: configuracao repetida: {dest}')
+  seen.add(dest); c[dest]=v
+ if c['WIFI_SSID'] and 'WIFI_ENABLED' not in seen: c['WIFI_ENABLED']='yes'
  return c
 def validate_ipv4(mode,address,gateway,label):
  if mode not in {'dhcp','static'}: raise ValueError(f'{label}_IPV4_MODE invalido')
@@ -112,7 +116,7 @@ def wifi(c):
   elif not nm_get(n,'802-11-wireless-security.key-mgmt'): raise RuntimeError('WIFI_PASSWORD ausente')
  ipv4(n,c['WIFI_IPV4_MODE'],c['WIFI_STATIC_ADDRESS'],c['WIFI_STATIC_GATEWAY'],c['WIFI_STATIC_DNS'])
  if yes(c['WIFI_AUTOCONNECT']):
-  r=run(['nmcli','connection','up',n],check=False); return 'connected' if r.returncode==0 else 'configured-waiting-device'
+  r=run(['nmcli','--wait','20','connection','up',n],check=False); return 'connected' if r.returncode==0 else 'configured-waiting-device'
  return 'configured'
 def wired(c):
  n='bmo-wired'
@@ -122,50 +126,106 @@ def wired(c):
  if not nm_exists(n): run(['nmcli','connection','add','type','ethernet','ifname','*','con-name',n])
  run(['nmcli','connection','modify',n,'connection.autoconnect','yes' if yes(c['WIRED_AUTOCONNECT']) else 'no']); ipv4(n,c['WIRED_IPV4_MODE'],c['WIRED_STATIC_ADDRESS'],c['WIRED_STATIC_GATEWAY'],c['WIRED_STATIC_DNS'])
  if yes(c['WIRED_AUTOCONNECT']):
-  r=run(['nmcli','connection','up',n],check=False); return 'connected' if r.returncode==0 else 'configured-waiting-device'
+  r=run(['nmcli','--wait','20','connection','up',n],check=False); return 'connected' if r.returncode==0 else 'configured-waiting-device'
  return 'configured'
 def network(c):
  run(['systemctl','enable','NetworkManager'],check=False); run(['systemctl','start','NetworkManager'],check=False)
  if not yes(c['NETWORK_ENABLED']): run(['nmcli','networking','off'],check=False); return {'network':'offline','wifi':'disabled','wired':'disabled'}
- run(['nmcli','networking','on'],check=False); return {'network':'online','wifi':wifi(c),'wired':wired(c)}
+ run(['nmcli','networking','on'],check=False); return {'network':'configured','wifi':wifi(c),'wired':wired(c)}
 def ssh(c,s):
  en=yes(c['SSH_ENABLED']); pa=yes(c['SSH_PASSWORD_AUTH'])
- if en and pa and s.get('USER_PASSWORD_DEFAULT','yes')=='yes': raise RuntimeError('SSH com senha exige USER_PASSWORD diferente de r36s')
+ if en and pa and s.get('USER_PASSWORD_DEFAULT','yes')=='yes': raise RuntimeError('Para ligar ACESSO_REMOTO, troque SENHA_USUARIO por uma senha diferente de r36s.')
  d=Path('/etc/ssh/sshd_config.d'); d.mkdir(parents=True,exist_ok=True); (d/'90-bmo.conf').write_text('PermitRootLogin no\n'+f"PasswordAuthentication {'yes' if pa else 'no'}\n"+'PubkeyAuthentication yes\n'+f"Port {int(c['SSH_PORT'])}\n")
- if en: run(['ssh-keygen','-A'],check=False); run(['systemctl','enable','ssh'],check=False); run(['systemctl','restart','ssh'],check=False); return 'enabled'
+ if en: run(['ssh-keygen','-A'],check=False); run(['systemctl','enable','ssh'],check=False); run(['systemctl','restart','ssh'],check=False); return 'enabled' if run(['systemctl','is-active','--quiet','ssh'],check=False).returncode==0 else 'error'
  run(['systemctl','disable','ssh'],check=False); run(['systemctl','stop','ssh'],check=False); return 'disabled'
 def mdns(c):
  if yes(c['MDNS_ENABLED']) and yes(c['NETWORK_ENABLED']): run(['systemctl','enable','avahi-daemon'],check=False); run(['systemctl','restart','avahi-daemon'],check=False); return 'enabled'
  run(['systemctl','disable','avahi-daemon'],check=False); run(['systemctl','stop','avahi-daemon'],check=False); return 'disabled'
 def ips():
- r=run(['ip','-4','-o','addr','show','scope','global'],check=False); return [x.split()[3].split('/')[0] for x in r.stdout.splitlines() if len(x.split())>=4]
+ r=run(['ip','-4','-o','addr','show','up','scope','global'],check=False); addresses=[]
+ for line in r.stdout.splitlines():
+  fields=line.split()
+  if len(fields)<4 or fields[1].split('@')[0].startswith(('lo','tailscale','tun','docker','veth','br-')): continue
+  try: address=ipaddress.ip_interface(fields[3]).ip
+  except ValueError: continue
+  if address.version==4 and not address.is_link_local and not address.is_loopback:
+   addresses.append(str(address))
+ return list(dict.fromkeys(addresses))
+
+def summary_lines(c,ns,ss,result,addresses):
+ lines=['','========================================','          BMO - PRIMEIRO BOOT','========================================']
+ lines.append('Configuracao: CONCLUIDA' if result=='OK' else 'Configuracao: PRECISA DE ATENCAO')
+ if not yes(c['NETWORK_ENABLED']): lines.append('Rede: DESLIGADA na configuracao')
+ elif addresses:
+  lines.append('Rede local: CONECTADA')
+  lines.extend(f'IP: {address}' for address in addresses)
+  lines.append('Internet: nao testada')
+ else:
+  lines.extend(['Rede: SEM CONEXAO / SEM IP','Confira o Wi-Fi ou o cabo/adaptador.','Ajuste BMO-FIRSTBOOT.txt se precisar.'])
+ if ss=='enabled':
+  lines.append('SSH: LIGADO (acesso remoto)')
+  if addresses:
+   lines.extend(['No computador, use:',f'ssh -p {c["SSH_PORT"]} {c["USER_NAME"]}@{addresses[0]}'])
+  else: lines.append('SSH precisa de uma rede com IP.')
+ elif ss=='error': lines.append('SSH: FALHOU ao iniciar')
+ else: lines.append('SSH: DESLIGADO')
+ if result!='OK': lines.append('Veja BMO-STATUS.txt na BOOT.')
+ lines.extend(['','Resumo salvo em BMO-RESUMO.txt na BOOT.','TF2: desligue antes de inserir o cartao.','========================================',''])
+ return lines
+
+def show_summary():
+ c=parse_config(config_path()); saved={}
+ p=boot_dir()/'BMO-STATUS.txt'
+ if p.exists():
+  for line in p.read_text(errors='replace').splitlines():
+   if '=' in line:
+    key,value=line.split('=',1); saved[key]=value
+ result=saved.get('FIRSTBOOT','PENDING')
+ ss='enabled' if run(['systemctl','is-active','--quiet','ssh'],check=False).returncode==0 else 'disabled'
+ print('\\n'.join(summary_lines(c,{},ss,result,ips())),flush=True)
+
 def status(c,ns,ss,ms,result='OK'):
- b=boot_dir()
+ b=boot_dir(); a=ips()
+ network_state='offline' if not yes(c['NETWORK_ENABLED']) else ('connected' if a else 'disconnected')
+ if result!='OK': network_state='error'
+ summary='\\n'.join(summary_lines(c,ns,ss,result,a))
+ print(summary,flush=True)
  try: b.mkdir(parents=True,exist_ok=True); (b/'logs').mkdir(parents=True,exist_ok=True)
  except OSError: return
- a=ips(); l=[f'HOSTNAME={c["HOSTNAME"]}']+[f'IPV4_{i}={v}' for i,v in enumerate(a,1)]
- if ss=='enabled': l.append(f'SSH=ssh -p {c["SSH_PORT"]} {c["USER_NAME"]}@{a[0] if a else c["HOSTNAME"]+".local"}')
- (b/'BMO-IP.txt').write_text('\n'.join(l)+'\n'); (b/'BMO-STATUS.txt').write_text('\n'.join([f'BMO_BASE_VERSION={BASE_VERSION}',f'FIRSTBOOT={result}',f'NETWORK={ns.get("network","unknown")}',f'WIFI={ns.get("wifi","unknown")}',f'WIRED={ns.get("wired","unknown")}',f'SSH={ss}',f'MDNS={ms}',f'HOSTNAME={c["HOSTNAME"]}',f'UPDATED_UTC={datetime.now(timezone.utc).isoformat()}'])+'\n')
+ l=[f'HOSTNAME={c["HOSTNAME"]}']+[f'IPV4_{i}={v}' for i,v in enumerate(a,1)]
+ if ss=='enabled' and a: l.append(f'SSH=ssh -p {c["SSH_PORT"]} {c["USER_NAME"]}@{a[0]}')
+ (b/'BMO-IP.txt').write_text('\\n'.join(l)+'\\n')
+ (b/'BMO-RESUMO.txt').write_text(summary+'\\n',encoding='utf-8')
+ (b/'BMO-STATUS.txt').write_text('\\n'.join([f'BMO_BASE_VERSION={BASE_VERSION}',f'FIRSTBOOT={result}',f'NETWORK={network_state}',f'WIFI={ns.get("wifi","unknown")}',f'WIRED={ns.get("wired","unknown")}',f'SSH={ss}',f'MDNS={ms}',f'HOSTNAME={c["HOSTNAME"]}',f'UPDATED_UTC={datetime.now(timezone.utc).isoformat()}'])+'\\n')
  if LOG_FILE.exists():
   try: shutil.copy2(LOG_FILE,b/'logs'/'firstboot.log')
   except OSError: pass
+
+def safe_error(e):
+ # CalledProcessError includes its command, which can contain a Wi-Fi password.
+ if isinstance(e,subprocess.CalledProcessError):
+  return 'Falha ao configurar o sistema/rede. Confira BMO-FIRSTBOOT.txt e o adaptador.'
+ if isinstance(e,(ValueError,RuntimeError)): return str(e)
+ return 'Nao foi possivel concluir a configuracao. Confira BMO-FIRSTBOOT.txt.'
+
 def sanitize(p):
  if not p.exists(): return
  out=[]
- for r in p.read_text(errors='replace').splitlines():
+ for r in p.read_text(encoding='utf-8-sig',errors='replace').splitlines():
   if '=' not in r or r.lstrip().startswith('#'): out.append(r); continue
   k,_=r.split('=',1); out.append(f'{k.strip()}=__APPLIED__' if k.strip() in SECRET_KEYS else r)
  p.write_text('\n'.join(out)+'\n')
 def main():
+ if '--summary' in sys.argv: show_summary(); return 0
  mode='network' if '--network-only' in sys.argv else 'apply'; p=ensure_boot_config(); c=parse_config(p); validate(c); s=read_state(); log(f'BMO firstboot {BASE_VERSION}: inicio mode={mode}')
  if mode!='network': s['USER_NAME']=ensure_user(c,s); identity(c)
  elif 'USER_PASSWORD_DEFAULT' not in s: s['USER_PASSWORD_DEFAULT']='yes'
- ns=network(c); ss=ssh(c,s); ms=mdns(c); s.update({'BMO_BASE_VERSION':BASE_VERSION,'FIRSTBOOT_LAST_UTC':datetime.now(timezone.utc).isoformat(),'FIRSTBOOT_DONE':'yes'}); write_state(s); MARKER.touch(); sanitize(p); status(c,ns,ss,ms,'OK'); log('BMO_FIRSTBOOT_OK'); return 0
+ print('Conectando a rede. Aguarde...',flush=True); ns=network(c); ss=ssh(c,s); ms=mdns(c); s.update({'BMO_BASE_VERSION':BASE_VERSION,'FIRSTBOOT_LAST_UTC':datetime.now(timezone.utc).isoformat(),'FIRSTBOOT_DONE':'yes'}); write_state(s); MARKER.touch(); sanitize(p); log('BMO_FIRSTBOOT_OK'); status(c,ns,ss,ms,'OK'); return 0
 if __name__=='__main__':
  try: raise SystemExit(main())
  except Exception as e:
-  log(f'BMO_FIRSTBOOT_ERROR: {e}')
+  message=safe_error(e); log(f'BMO_FIRSTBOOT_ERROR: {message}')
   try:
    c=dict(DEFAULTS); p=config_path(); c.update(parse_config(p) if p.exists() else {}); status(c,{'network':'error','wifi':'error','wired':'error'},'disabled','disabled','ERROR')
   except Exception: pass
-  print(f'ERRO: {e}',file=sys.stderr); raise SystemExit(1)
+  print(f'ERRO: {message}',file=sys.stderr); raise SystemExit(1)

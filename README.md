@@ -49,6 +49,23 @@ A imagem base deve ser pequena e previsível. Ela contém somente o necessário 
 
 Ela **não deve depender de XFCE** nem de um desktop tradicional.
 
+## Configuração simples do primeiro boot
+
+Abra `BMO-FIRSTBOOT.txt` na BOOT e preencha somente:
+
+```text
+REDE_WIFI=
+SENHA_WIFI=
+SENHA_USUARIO=r36s
+ACESSO_REMOTO=nao
+```
+
+O nome do Wi-Fi preenchido ativa sua configuração automaticamente. Para cabo/Ethernet, deixe Wi-Fi vazio. Para SSH, use `ACESSO_REMOTO=sim` e escolha uma senha diferente de `r36s`. Não use aspas nem envie senhas no chat.
+
+Ao concluir, a tela informa configuração, conexão local, IP e estado do SSH. O resumo também fica em `BMO-RESUMO.txt` na BOOT e reaparece ao entrar no terminal. Falta de IP é mostrada como tal; não se afirma conexão à internet sem teste.
+
+Os nomes antigos e opções avançadas continuam aceitos; não defina uma opção pelos dois nomes.
+
 ## Primeiro boot: retirar o TF2 de jogos
 
 **Mantenha o cartão TF2 de jogos fora do R36S durante todo o primeiro boot.** Inicie somente com o cartão do sistema na entrada TF1 e aguarde a configuração inicial terminar.

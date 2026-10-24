@@ -213,7 +213,20 @@ A nova imagem não deve `source` esse arquivo como Shell.
 
 O bootstrap deve usar um parser limitado a uma lista conhecida de chaves. Isso evita que caracteres especiais em SSID/senhas sejam interpretados como comandos e evita execução arbitrária como root.
 
-Formato proposto:
+Formato simples atual (v0.2, melhoria de UX de 2026-10-24):
+
+```text
+REDE_WIFI=
+SENHA_WIFI=
+SENHA_USUARIO=r36s
+ACESSO_REMOTO=nao
+```
+
+Aliases são normalizados pelo parser: REDE_WIFI → WIFI_SSID, SENHA_WIFI → WIFI_PASSWORD, SENHA_USUARIO → USER_PASSWORD e ACESSO_REMOTO → SSH_ENABLED. Nome de Wi-Fi preenchido ativa Wi-Fi se WIFI_ENABLED não foi explicitamente informado. `sim`/`nao` são aceitos; arquivo é dado literal, nunca Shell. Opções duplicadas via alias/nome antigo são recusadas para evitar ambiguidades. Senhas dos dois formatos são sanitizadas.
+
+O console mostra resumo com rede local/IP/SSH; `--summary` atualiza a visualização sem reaplicar configurações. `BMO-RESUMO.txt` fica na BOOT. O perfil de login reapresenta o resumo com o IP atual após reboot. O IP não comprova internet.
+
+Formato avançado legado, ainda aceito:
 
 ```text
 # Rede
