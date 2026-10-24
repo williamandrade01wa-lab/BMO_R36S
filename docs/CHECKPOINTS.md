@@ -107,31 +107,44 @@ Por isso ele é um baseline técnico, não o Gate 1 concluído.
 
 ## Gate atual — imagem base reproduzível
 
-### CP-IMAGE-002 — PENDENTE
+### CP-IMAGE-002 — CI e contrato da Base aprovados
 
 ```text
-STATUS=BLOCKED
+STATUS=SAFE
+SCOPE=CI_AND_IMAGE_CONTENT_CONTRACT
+BRANCH=feat/bmo-linux-base-v1
 R36S_REQUIRED=NO
+Run #8: 40057180564
+Commit compilado: 701ed1d7a2946a143cbbd90527f141e0b05c3867
+Preflight job: 120762624034 — success
+Build job: 120762650098 — success
+IMAGE_VALIDATION_CHECKS=16
+IMAGE_VALIDATION_FAILURES=0
+Artifact imagem: 12547459290
+Artifact relatório: 12547750769
+Imagem: bmo-linux-base-r36s-trixie-v0.2.img.xz
+SHA256 .img.xz: b365b4a976fb81a9dc85fd0536a24a4b980c327414c2d281f2f110afd7f38006
+SHA256 .img sem compressão: c1fbc6373d845c704db6b355a0e1f80876eb58ee3a2a84277d1425a238a14056
+Artifact ZIP: 420481297 bytes
+SHA256 ZIP: be3cb6139373ab327db1c96e9b6943866eb15f7863c83228ffb7202aae2a8314
+Artifact expira: 2026-10-31T04:21:41Z
 ```
 
-Só pode ser criado quando uma mesma run válida comprovar:
+Evidências:
+- [Run #8](https://github.com/williamandrade01wa-lab/BMO_R36S/actions/runs/40057180564)
+- [Imagem + checksum](https://github.com/williamandrade01wa-lab/BMO_R36S/actions/runs/40057180564/artifacts/12547459290)
+- [Relatório](https://github.com/williamandrade01wa-lab/BMO_R36S/actions/runs/40057180564/artifacts/12547750769)
 
-- preflight = success;
-- build = success;
-- image contract = success;
-- compressão = success;
-- SHA256 gerado;
-- artifact final publicado.
+Na mesma run passaram preflight, build, contrato, compressão, checksum e upload.
+Os dois templates ausentes na Run #7 estão agora na FAT e passaram no validator.
 
-Estado operacional conhecido:
+Limites do checkpoint:
+- boot físico, firstboot, painel, hardware e BMO Ready ainda não validados nesta imagem;
+- contrato atual tem oito entradas de arquivos, não comprova toda a execução do sistema;
+- upstream clona ScreenFiles/PanCho sem commit fixo e baixa U-Boot por tag sem checksum imposto; auditoria de pins externos permanece pendente no Gate 1;
+- `sd_fusing.sh:22: sudo: not found` corresponde a `sudo eject $1`, após três gravações dd e sync. Pacote público rc2-pancho inspecionado, SHA256 observado `e189c0af783ee0a13e5f375c3f486b9e89a33f4c0721d078fab617f40edb05af`. Não é evidência de falha do dd nem substitui teste de boot.
 
-```text
-Run #7
-Run ID: 39184063121
-HEAD técnico da execução: 8d967e34f07e013752e45b2478250b1e9b71e933
-```
-
-A interface observada pelo usuário já indicou falha do validator enquanto a API consultada ainda estava defasada. O próximo passo é obter o relatório completo e corrigir somente falhas comprovadas.
+Retorno seguro: usar o commit compilado e os hashes acima; não promover para main nem chamar de Ready/release pública somente por este checkpoint.
 
 ## Checkpoints planejados
 

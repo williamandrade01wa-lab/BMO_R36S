@@ -240,57 +240,47 @@ image/armbian/ci/validate-image.sh
 docs/BMO-CI-ARCHITECTURE.md
 ```
 
-## 10. Estado do bloqueio atual
+## 10. Estado atual — Run #8 aprovada
 
-Atualizado em 2026-10-24. HEAD inicial confirmado: `6b65731f24497d901bf5e125edbe575f9f212ae4`.
+Atualizado em 2026-10-24. O bloqueio dos templates na FAT foi resolvido e validado na CI integral.
 
-Run #7 (`39184063121`), job `117842763898`, finalizou:
-- preflight: success;
-- build: success;
-- validator: failure, exatamente dois arquivos ausentes na FAT:
-  `/BMO-FIRSTBOOT.txt` e `/README-FIRST-BOOT.txt`;
-- seis entradas do contrato root passaram;
-- compressão/artifact da imagem: skipped.
+```text
+Run #8: 40057180564
+Commit compilado: 701ed1d7a2946a143cbbd90527f141e0b05c3867
+Preflight job: 120762624034 — success
+Build job: 120762650098 — success
+IMAGE_VALIDATION_CHECKS=16
+IMAGE_VALIDATION_FAILURES=0
+Artifact imagem: 12547459290
+Artifact relatório: 12547750769
+Imagem: bmo-linux-base-r36s-trixie-v0.2.img.xz
+SHA256 .img.xz: b365b4a976fb81a9dc85fd0536a24a4b980c327414c2d281f2f110afd7f38006
+SHA256 .img sem compressão: c1fbc6373d845c704db6b355a0e1f80876eb58ee3a2a84277d1425a238a14056
+Artifact ZIP: 420481297 bytes
+SHA256 ZIP: be3cb6139373ab327db1c96e9b6943866eb15f7863c83228ffb7202aae2a8314
+Artifact expira: 2026-10-31T04:21:41Z
+```
 
-Correção preparada e testada: finalizar explicitamente a FAT no arquivo .img após os hooks upstream e antes de SHA256/validator. Fixture real passou, inclusive idempotência e preservação do rootfs. Nova CI integral: Run #8 `40057180564`, commit `701ed1d7a2946a143cbbd90527f141e0b05c3867`; preflight `120762624034` passou e build `120762650098` está em andamento. Resultado final pendente. BTF permanece resolvido com `KERNEL_BTF=no`.
-
-Meta solicitada nesta retomada: imagem Ready que inicia diretamente no BMO. A Base mínima é pré-requisito, não a entrega Ready. A receita antiga `install/build-ready-image.sh` existe, mas o build local anterior parou por falta de espaço; não considerá-lo validado.
+O aviso de `sudo` no script U-Boot é `sudo eject $1` na linha 22, após os três dd e sync; gravações aparecem concluídas. Foi inspecionado o pacote público rc2-pancho. Boot físico ainda não comprovado.
 
 ## 11. Checkpoint atual
 
-O projeto está entre:
+`CP-IMAGE-002` está SAFE para CI e contrato de conteúdo. Build, validator, compressão, SHA256 e artifact passaram na mesma run. Isso não declara BMO Ready nem boot/hardware validados.
 
-```text
-Gate 0 — estrutura/continuidade
-        ↓
-Gate 1 — imagem base reproduzível
-```
-
-A reestruturação documental desta sessão cria o checkpoint de organização do projeto.
-
-O **Gate 1 ainda não está concluído** até existir, na mesma run válida:
-
-- preflight success;
-- build success;
-- image contract success;
-- imagem comprimida;
-- SHA256;
-- artifact final.
-
-Critérios completos: `docs/CHECKPOINTS.md`.
+No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/PanCho de branch móvel e baixa U-Boot por tag sem exigir checksum. Não chamar a imagem plenamente reproduzível até fixar isso.
 
 ## 12. PRÓXIMO PASSO EXATO
 
-1. Consultar jobs e resultado final da Run #8 `40057180564` (build job `120762650098`), correção já publicada em `701ed1d7a2946a143cbbd90527f141e0b05c3867`.
-2. Registrar validator, SHA256 e artifacts antes de avançar.
-3. Concluir Gate 1 somente com validator, compressão, SHA256 e artifact final.
-4. Preparar Ready sobre a Base validada com espaço suficiente e BMO/kiosk habilitados, sem credenciais/ROMs.
-5. Validar boot físico diretamente no BMO no microSD extra confirmado pelo usuário, preservando o cartão atual.
+1. Recuperar o artifact #12547459290 e conferir SHA256 do .img.xz; preservar uma cópia local/remota antes da expiração.
+2. Auditar/fixar dependências externas com evidência, sem recompilar apenas por hipótese.
+3. Validar boot/firstboot/painel/rede da Base no microSD extra confirmado pelo usuário, preservando o cartão atual (`R36S_REQUIRED=YES`).
+4. Adaptar receita Ready a uma imagem Linux populada: preservar fstab, validar apenas links/artefatos BMO e reservar espaço antes de apt.
+5. Habilitar firstboot e kiosk sem exigir login manual, gerar candidato Ready e validar boot direto no BMO no cartão extra.
 
-Ready antiga precisa substituir checks globais de sandbox (zero symlinks/ausência de fstab/contagem total de binários) por validações específicas dos artefatos BMO. Aparelho de referência tem kernel 6.12.74 e serviços BMO ativos; API 8086 é apenas loopback.
+R36S atual tem kernel 6.12.74; a Base gerada usa 6.12.32. Não assumir equivalência de hardware sem teste.
+A API 8086 do aparelho de referência escuta somente em loopback.
 
-Build/contrato: `R36S_REQUIRED=NO`.
-Boot/Ready/hardware: `R36S_REQUIRED=YES`.
+`R36S_REQUIRED=NO` para análise/CI; `R36S_REQUIRED=YES` para boot/hardware/Ready.
 
 ## 13. ScreenFiles
 

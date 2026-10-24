@@ -272,3 +272,60 @@ R36S_REQUIRED=NO
 2. Registrar resultado antes de avançar.
 3. Se Gate 1 passar, adaptar receita Ready às imagens populadas, dimensionar espaço e habilitar firstboot/kiosk sem depender de login manual.
 4. Validar offline, gerar candidato e testar no microSD extra.
+
+## 2026-10-24 — Avaliação final da Run #8 / CP-IMAGE-002
+
+- Fase: CI/contrato da Base e revisão de riscos
+- Branch: `feat/bmo-linux-base-v1`
+- HEAD documental inicial: `da20d54334de52d6bbae42489cd641b17cdb7e17`
+- Commit compilado: `701ed1d7a2946a143cbbd90527f141e0b05c3867`
+- Objetivo: conferir resultado integral, artefatos, checksum e limites antes do próximo gate.
+- `R36S_REQUIRED=NO`
+
+### Ações / validação
+
+- Consultados jobs, artefatos e log completo do job de build.
+- Preflight, build, validator, compressão e upload concluídos com success.
+- Validator: 16 verificações, zero falhas; oito entradas do contrato aprovadas, inclusive os dois templates na FAT.
+- Confirmados artefatos não expirados. Checksums extraídos dos logs da CI, sem alegar download/verificação local da imagem nesta etapa.
+- Script `sd_fusing.sh` do pacote público rc2-pancho baixado e inspecionado sem execução: linha 22 é `sudo eject $1`. As linhas 16–18 são dd; upstream remove sudo apenas desses dd. Log mostra três gravações concluídas. Aviso de eject não comprova falha de gravação.
+- SHA256 observado do pacote público: `e189c0af783ee0a13e5f375c3f486b9e89a33f4c0721d078fab617f40edb05af`; tag pode ser substituída, portanto hash observado não substitui inspeção binária do artifact.
+- Identificado no upstream pinado clone móvel do PanCho/ScreenFiles e download de U-Boot sem checksum imposto. Item de pins externos mantido aberto no roadmap.
+
+### Evidência
+
+```text
+Run #8: 40057180564
+Commit compilado: 701ed1d7a2946a143cbbd90527f141e0b05c3867
+Preflight job: 120762624034 — success
+Build job: 120762650098 — success
+IMAGE_VALIDATION_CHECKS=16
+IMAGE_VALIDATION_FAILURES=0
+Artifact imagem: 12547459290
+Artifact relatório: 12547750769
+Imagem: bmo-linux-base-r36s-trixie-v0.2.img.xz
+SHA256 .img.xz: b365b4a976fb81a9dc85fd0536a24a4b980c327414c2d281f2f110afd7f38006
+SHA256 .img sem compressão: c1fbc6373d845c704db6b355a0e1f80876eb58ee3a2a84277d1425a238a14056
+Artifact ZIP: 420481297 bytes
+SHA256 ZIP: be3cb6139373ab327db1c96e9b6943866eb15f7863c83228ffb7202aae2a8314
+Artifact expira: 2026-10-31T04:21:41Z
+```
+
+### Arquivos alterados
+
+- `docs/WORKLOG.md`
+- `docs/PROJECT-CONTINUITY.md`
+- `docs/CHECKPOINTS.md`
+- `docs/ROADMAP.md`
+
+### Resultado esperado / obtido
+
+- Pipeline integral aprovado, correção da FAT comprovada e checkpoint CP-IMAGE-002 registrado para CI/contrato.
+- Não criada/promovida release Ready. Nenhum código funcional alterado nesta avaliação; main e aparelhos preservados.
+
+### Pendências / riscos / próximo passo
+
+1. Baixar e verificar artifact/SHA256 antes da expiração; preservar cópia na Potato e local quando disponível.
+2. Fechar auditoria/pins de dependências externas; Gate 1 ainda tem esse item aberto.
+3. Boot/firstboot/painel/rede em cartão extra: `R36S_REQUIRED=YES`.
+4. Adaptar receita Ready, dimensionar espaço e validar boot automático no BMO; CI verde não equivale a teste físico.

@@ -51,16 +51,18 @@ commit base: ed658f30c1a3a599b37557188cd8856b5ef54b2b
 
 Objetivo: gerar uma imagem mínima válida sem depender do R36S físico.
 
-- [ ] upstreams e pins fixados;
-- [ ] Debian Trixie minimal;
-- [ ] `BUILD_MINIMAL=yes`;
-- [ ] `BUILD_DESKTOP=no`;
-- [ ] preflight passa;
-- [ ] build conclui;
-- [ ] contrato da imagem passa;
-- [ ] imagem comprimida;
-- [ ] SHA256 gerado;
-- [ ] artifact final publicado pelo CI.
+- [ ] auditoria completa dos pins externos (ScreenFiles/PanCho e checksum obrigatório do U-Boot pendentes);
+- [x] Debian Trixie minimal;
+- [x] `BUILD_MINIMAL=yes`;
+- [x] `BUILD_DESKTOP=no`;
+- [x] preflight passa;
+- [x] build conclui;
+- [x] contrato da imagem passa;
+- [x] imagem comprimida;
+- [x] SHA256 gerado;
+- [x] artifact final publicado pelo CI.
+
+Evidência de CI/contrato: `CP-IMAGE-002`, Run #8 `40057180564`, commit `701ed1d7a2946a143cbbd90527f141e0b05c3867`. Pipeline completo aprovado; reprodutibilidade das dependências externas ainda precisa da auditoria acima. Boot físico não foi inferido do CI.
 
 ### Gate 2 — boot e firstboot
 
