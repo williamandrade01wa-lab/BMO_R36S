@@ -614,3 +614,46 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Corrigir somente falhas comprovadas de pacotes/integração.
 - Validar/comprimir, conferir SHA256 e entregar candidato para o microSD extra.
 - Registrar resultado antes do teste físico.
+
+## 2026-10-24 — Recuperação após desligamento, IP fixo e correções antes de remontar a beta
+
+- Fase: montagem Ready beta / diagnóstico comprovado
+- Branch: `feat/bmo-linux-base-v1`
+- Primeiro código de build: `85abb0669f89f5201977b1d2ce8dd08c7769b317`
+- `R36S_REQUIRED=NO` para correções/testes de montagem.
+
+### Diagnóstico / ações
+
+- Usuário informou desligamento acidental da Potato. Ela reiniciou; build ficou inactive durante unpack de pacotes. Unit transient não retoma após desligamento da máquina.
+- Saúde atual: 51 °C, 1,3 GB RAM disponível, swap zero, 40 GB livres, zero units failed, root rw, contador EXT4 errors_count=0; sem evidência de dano ao host nos dados coletados.
+- IP real confirmado por hostkey: 192.168.1.62. Conforme pedido do usuário, configurado USB Ethernet com IP fixo 192.168.1.50/24, gateway 192.168.1.1, DNS 8.8.8.8/9.9.9.9.
+- ARP probe sem conflito observado; backup /root/network-backups/ip50-20261025T010531Z; rollback temporizado armado e cancelado após SSH/gateway/DNS aprovados no novo IP.
+- Log do build comprovou uma chamada de firstboot no chroot: fase 60 usa bash -lc para configurar Moonlight, e o marcador Armbian da imagem disparou firstlogin. Host permaneceu lepotato/networkd; a falha ocorreu no alvo isolado.
+- Builder passa a remover o marcador interativo antes do apt e instalar firstboot com guarda de build; firstboot não altera usuário/rede enquanto o marcador .bmo-ready-build-root existir.
+- Corrigidas strings com backslash+n literal na UX de resumo/status; agora são quebras de linha reais.
+- Adicionados testes de roundtrip de BMO-STATUS/BMO-IP, linhas reais no stdout e bloqueio de apply durante build.
+- Atualizada fonte embutida no atualizador offline.
+- Builder limpa relatórios BOOT e estado do firstboot antes de empacotar, evitando IP/estado observado no ambiente de build.
+- O working image interrompido não será promovido; a remontagem usa cópia limpa da Base #9 preservada.
+
+### Arquivos
+
+- install/build-beta-image.sh.
+- image/armbian/userpatches/overlay/usr/local/sbin/bmo-firstboot.
+- image/armbian/ci/tests/test_firstboot_ux.py.
+- scripts/offline/bmo-update-firstboot-ux.sh.
+- Continuidade e Worklog.
+
+### Validação
+
+- 22 testes passaram em ambiente isolado, incluindo os três novos regressivos.
+- Preflight no checkout de teste: 89 verificações, zero falhas.
+- bash -n e git diff --check aprovados.
+- Sem alteração no kernel, DTB, frontend ou runtime auditado.
+- Commit usa [skip ci] para evitar recompilar kernel sem necessidade; a montagem nativa da beta é retomada a partir do commit corrigido.
+
+### Próximo passo
+
+1. Publicar correção, clone limpo e novo workdir ready-beta1-r2-20261024.
+2. Executar serviço persistente bmo-ready-beta1-build-r2 na Potato agora em .50.
+3. Validar pacote/units/dependências/sanitização e comprimir antes de entregar.

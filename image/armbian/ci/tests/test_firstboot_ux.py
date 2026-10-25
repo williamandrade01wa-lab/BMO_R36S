@@ -115,4 +115,26 @@ class FirstbootUX(unittest.TestCase):
   c=dict(b.DEFAULTS); c["SSH_ENABLED"]="sim"
   with self.assertRaisesRegex(RuntimeError,"SENHA_USUARIO"): b.ssh(c,{"USER_PASSWORD_DEFAULT":"yes"})
 
+ def test_status_roundtrip_real_newlines(self):
+  boot=self.root/"boot"; boot.mkdir()
+  with patch.object(b,"boot_dir",return_value=boot),patch.object(b,"ips",return_value=["192.168.1.60"]),patch.object(b,"LOG_FILE",self.root/"missinglog"),contextlib.redirect_stdout(io.StringIO()) as output:
+   b.status(dict(b.DEFAULTS),{},"disabled","enabled","OK")
+  fields=dict(line.split("=",1) for line in (boot/"BMO-STATUS.txt").read_text().splitlines())
+  self.assertEqual(fields["FIRSTBOOT"],"OK")
+  self.assertEqual(fields["NETWORK"],"connected")
+  self.assertEqual((boot/"BMO-IP.txt").read_text().splitlines(),["HOSTNAME=bmo-r36s","IPV4_1=192.168.1.60"])
+  self.assertIn("IP: 192.168.1.60",output.getvalue().splitlines())
+  self.assertNotIn(r"\n",(boot/"BMO-RESUMO.txt").read_text())
+ def test_summary_has_real_lines(self):
+  boot=self.root/"boot"; boot.mkdir(); (boot/"BMO-STATUS.txt").write_text("FIRSTBOOT=OK\n")
+  (boot/"BMO-FIRSTBOOT.txt").write_text("REDE_WIFI=\n")
+  with patch.object(b,"boot_dir",return_value=boot),patch.object(b,"ips",return_value=["192.168.1.61"]),patch.object(b,"run",return_value=subprocess.CompletedProcess([],3)),contextlib.redirect_stdout(io.StringIO()) as output:
+   b.show_summary()
+  self.assertIn("Configuracao: CONCLUIDA",output.getvalue().splitlines())
+  self.assertIn("IP: 192.168.1.61",output.getvalue().splitlines())
+ def test_build_marker_never_applies_firstboot(self):
+  marker=self.root/"build-marker"; marker.touch()
+  with patch.object(b,"BUILD_MARKER",marker),patch.object(b,"ensure_user",side_effect=AssertionError("must not change users")),patch.object(b,"network",side_effect=AssertionError("must not change network")),contextlib.redirect_stdout(io.StringIO()):
+   self.assertEqual(b.main(),0)
+
 unittest.main(verbosity=2)

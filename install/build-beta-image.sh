@@ -57,6 +57,9 @@ install -d "$ROOT/boot/u-boot";mount "$BOOT_PART" "$ROOT/boot/u-boot"
 [ -f "$ROOT/etc/bmo/base-version.env" ] || die 'not a BMO Base'
 [ "$(chroot "$ROOT" dpkg --print-architecture)" = arm64 ] || die 'target not arm64'
 touch "$ROOT/.bmo-ready-build-root" "$ROOT/.bmo-ready-sandbox" "$ROOT/.bmo-apply-v3-sandbox"
+# Suppress Armbian login hooks before any package setup invokes bash -l.
+rm -f "$ROOT/root/.not_logged_in_yet"
+install -m 0755 "$REPO/image/armbian/userpatches/overlay/usr/local/sbin/bmo-firstboot" "$ROOT/usr/local/sbin/bmo-firstboot"
 mount --rbind /dev "$ROOT/dev";mount --make-rslave "$ROOT/dev"
 mount -t proc proc "$ROOT/proc"
 mount --rbind /sys "$ROOT/sys";mount --make-rslave "$ROOT/sys"
@@ -120,6 +123,8 @@ rm -f "$ROOT/etc/resolv.conf";cp -a --no-dereference "$WORK/resolv.conf.original
 log 'Sanitizing image only'
 bash "$REPO/install/phases/70-sanitize.sh" --root "$ROOT"
 rm -rf "$ROOT/var/lib/bmo"
+rm -f "$ROOT/boot/u-boot/BMO-IP.txt" "$ROOT/boot/u-boot/BMO-STATUS.txt" "$ROOT/boot/u-boot/BMO-RESUMO.txt"
+rm -rf "$ROOT/boot/u-boot/logs"
 rm -f "$ROOT/.bmo-ready-build-root" "$ROOT/.bmo-ready-sandbox" "$ROOT/.bmo-apply-v3-sandbox"
 [ ! -e "$ROOT/root/.ssh" ] && [ ! -e "$ROOT/home/r36s/.ssh" ]
 [ -z "$(find "$ROOT/etc/NetworkManager/system-connections" -type f -print -quit)" ]

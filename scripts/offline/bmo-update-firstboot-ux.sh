@@ -195,21 +195,21 @@ def show_summary():
     key,value=line.split('=',1); saved[key]=value
  result=saved.get('FIRSTBOOT','PENDING')
  ss='enabled' if run(['systemctl','is-active','--quiet','ssh'],check=False).returncode==0 else 'disabled'
- print('\\n'.join(summary_lines(c,{},ss,result,ips())),flush=True)
+ print('\n'.join(summary_lines(c,{},ss,result,ips())),flush=True)
 
 def status(c,ns,ss,ms,result='OK'):
  b=boot_dir(); a=ips()
  network_state='offline' if not yes(c['NETWORK_ENABLED']) else ('connected' if a else 'disconnected')
  if result!='OK': network_state='error'
- summary='\\n'.join(summary_lines(c,ns,ss,result,a))
+ summary='\n'.join(summary_lines(c,ns,ss,result,a))
  print(summary,flush=True)
  try: b.mkdir(parents=True,exist_ok=True); (b/'logs').mkdir(parents=True,exist_ok=True)
  except OSError: return
  l=[f'HOSTNAME={c["HOSTNAME"]}']+[f'IPV4_{i}={v}' for i,v in enumerate(a,1)]
  if ss=='enabled' and a: l.append(f'SSH=ssh -p {c["SSH_PORT"]} {c["USER_NAME"]}@{a[0]}')
- (b/'BMO-IP.txt').write_text('\\n'.join(l)+'\\n')
- (b/'BMO-RESUMO.txt').write_text(summary+'\\n',encoding='utf-8')
- (b/'BMO-STATUS.txt').write_text('\\n'.join([f'BMO_BASE_VERSION={BASE_VERSION}',f'FIRSTBOOT={result}',f'NETWORK={network_state}',f'WIFI={ns.get("wifi","unknown")}',f'WIRED={ns.get("wired","unknown")}',f'SSH={ss}',f'MDNS={ms}',f'HOSTNAME={c["HOSTNAME"]}',f'UPDATED_UTC={datetime.now(timezone.utc).isoformat()}'])+'\\n')
+ (b/'BMO-IP.txt').write_text('\n'.join(l)+'\n')
+ (b/'BMO-RESUMO.txt').write_text(summary+'\n',encoding='utf-8')
+ (b/'BMO-STATUS.txt').write_text('\n'.join([f'BMO_BASE_VERSION={BASE_VERSION}',f'FIRSTBOOT={result}',f'NETWORK={network_state}',f'WIFI={ns.get("wifi","unknown")}',f'WIRED={ns.get("wired","unknown")}',f'SSH={ss}',f'MDNS={ms}',f'HOSTNAME={c["HOSTNAME"]}',f'UPDATED_UTC={datetime.now(timezone.utc).isoformat()}'])+'\n')
  if LOG_FILE.exists():
   try: shutil.copy2(LOG_FILE,b/'logs'/'firstboot.log')
   except OSError: pass
@@ -228,7 +228,11 @@ def sanitize(p):
   if '=' not in r or r.lstrip().startswith('#'): out.append(r); continue
   k,_=r.split('=',1); out.append(f'{k.strip()}=__APPLIED__' if k.strip() in SECRET_KEYS else r)
  p.write_text('\n'.join(out)+'\n')
+BUILD_MARKER=Path('/.bmo-ready-build-root')
+
 def main():
+ if BUILD_MARKER.exists():
+  print('BMO: imagem em preparacao; primeiro boot adiado.',flush=True); return 0
  if '--summary' in sys.argv: show_summary(); return 0
  mode='network' if '--network-only' in sys.argv else 'apply'; p=ensure_boot_config(); c=parse_config(p); validate(c); s=read_state(); log(f'BMO firstboot {BASE_VERSION}: inicio mode={mode}')
  if mode!='network': s['USER_NAME']=ensure_user(c,s); identity(c)

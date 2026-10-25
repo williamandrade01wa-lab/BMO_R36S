@@ -278,8 +278,8 @@ Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP
 
 Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
 
-1. Publicar receita e executar build persistente na Potato a partir do commit.
-2. Acompanhar apt/instalação e corrigir somente falhas comprovadas.
+1. Remontar a beta em cópia limpa após desligamento acidental da Potato. Usar código corrigido (firstboot bloqueado durante build, marcador interativo removido antes de apt, newlines do resumo corrigidos). Novo workdir ready-beta1-r2-20261024 e unit bmo-ready-beta1-build-r2.
+2. Acompanhar apt/instalação em 192.168.1.50 (IP fixo confirmado), validar que firstboot não executa no chroot e corrigir somente falhas comprovadas.
 3. Verificar manifestos, dependências, units offline, sanitização, compressão e SHA256.
 4. Entregar .img.xz candidata e manifesto para gravar em cartão extra de 16 GB ou maior.
 5. Testar boot direto no BMO, rede/IP/SSH, gamepad, áudio, brilho, jogos/TF2, streaming e retorno ao BMO.
@@ -366,3 +366,4 @@ Não repita etapas concluídas e não corrija no escuro.
 Continue exatamente do PRÓXIMO PASSO de PROJECT-CONTINUITY.md.
 Sempre informe R36S_REQUIRED=YES ou NO.
 ```
+Nota operacional de 2026-10-24: Potato recuperada após desligamento; saúde sem evidência de dano, zero serviços failed/erros EXT4. Build anterior interrompido e não promovido. Correções com 22 testes/89 checks aprovadas. IP USB fixo agora 192.168.1.50.
