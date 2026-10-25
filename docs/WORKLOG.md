@@ -730,3 +730,13 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Host 54 °C, 34 GB livres; sem novo reinício observado. Imagens de tentativas interrompidas por energia não usadas.
 - Arquivos alterados: continuidade e Worklog documental.
 - Próximo passo: aguardar BMO_READY_BETA_IMAGE_OK, conferir xz/checksum/manifest, copiar e verificar localmente, entregar candidata sem promover gate físico.
+
+## 2026-10-24 — Empacotamento paralelo da candidata já validada
+
+- Fase: compressão da Ready beta; branch feat/bmo-linux-base-v1; conteúdo gerado pelo commit 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7. R36S_REQUIRED=NO.
+- Compressão -T1 mostrou apenas 864,9 MiB lidos em 5:31. Alterada somente a execução de empacotamento para xz -T4 -3 --memlimit-compress=512MiB --check=crc64, mantendo o raw validado, desmontado e de 12 GiB.
+- Serviço r4 parado durante xz; xz apagou sua saída parcial ao receber TERM, preservando o raw. Nova unit bmo-ready-beta1-package.service, invocation fe6b3275269241c6b07201e9b77e70af, log /home/hipo/bmo-images/beta-1.0.0/package.log.
+- Script operacional /home/hipo/bmo-builds/package-beta1-checked.sh exige raw existente/tamanho e saída final ausente; executa compressão, xz -t, SHA256 e manifesto com parâmetros reais. Pré-condição manual: contrato offline e sanitização OK no log r4.
+- Resultado observado: processo ativo, 196 MB RSS, 61 °C; conteúdo da imagem não alterado. Receita de build no Git mantém default conservador -T1; esta substituição operacional consta no manifesto final.
+- Arquivos alterados no Git: somente documentação. Resultado esperado: artefato final íntegro com checksum, ainda pendente.
+- Próximo passo: acompanhar empacotamento, verificar e copiar para entregáveis locais. Futuras betas podem migrar montagem ao GitHub Actions ARM64; imagem base já é gerada na CI.
