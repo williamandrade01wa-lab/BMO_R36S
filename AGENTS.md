@@ -244,3 +244,9 @@ Sempre revisar o diff antes de deploy e sempre distinguir:
 - **estado de engenharia**;
 - **checkpoint validado**;
 - **release para usuário final**.
+
+## Uso da Le Potato — instrução do usuário em 2026-10-24
+
+Priorizar GitHub Actions ou o PC local para builds, compressão e armazenamento de imagens/artifacts grandes. Economizar o armazenamento da Le Potato; não tratá-la como builder ou depósito padrão de imagens por enquanto.
+
+Ao migrar trabalho já montado, verificar a cópia no PC antes de remover a origem. Limpar somente temporários gerados pelo agente e identificados como descartáveis; preservar backups/arquivos pessoais e o ambiente operacional. Registrar espaço recuperado e destino dos artefatos na continuidade/Worklog. Operações pontuais de leitura/transferência e diagnóstico continuam permitidas.
