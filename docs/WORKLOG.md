@@ -718,3 +718,15 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Validação: treze hashes runtime beta OK, quatro configs emulator OK, dry-run completo BMO_READY_INSTALL_DRY_RUN_OK, bash -n e diff --check OK. Revisão de diff identificou e corrigiu mkdir existente e preservação dos backups na retomada.
 - Esperado: retomar somente r3, parada limpa por checksum; não reutilizar r1/r2 interrompidas por energia.
 - Próximo passo: publicar pins/correção, clone limpo, retomar r3 via serviço separado, validar conteúdo/units/sanitização, comprimir e conferir checksum antes de entregar. Gate físico continua pendente.
+
+## 2026-10-24 — Integração Ready beta concluída e candidata em compressão
+
+- Fase: build offline Ready 1.0.0-beta.1; branch feat/bmo-linux-base-v1; código 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7. R36S_REQUIRED=NO para build, YES para boot físico.
+- r4: bmo-ready-beta1-build-r4.service, invocation 2c02ac000c4e499d9d6d412f30234c61, log /home/hipo/bmo-images/beta-1.0.0/build-r4.log. Retomada somente de r3 parada limpa.
+- Base/runtime SHA aprovados, e2fsck/arquitetura/marcador/dpkg audit aprovados antes da retomada. Pacotes idempotentes conferidos.
+- Log confirmou FRONTEND_IDENTICAL=YES, BMO_READY_INSTALL_APPLY_V3_OK, fases 40/50/60 OK, BMO_BETA_SYSTEM_INTEGRATION_OK, BMO_BETA_OFFLINE_CONTRACT_OK e BMO_READY_PHASE70_SANITIZE_OK.
+- systemd-analyze offline, comandos de execução e dependências PPSSPP aprovados. Zero ROMs, limpeza de credenciais/estado/relatórios de build executada.
+- Resultado esperado/obtido: conteúdo integrado e verificado; em xz -T1 -3, arquivo final ainda não pronto nesta anotação.
+- Host 54 °C, 34 GB livres; sem novo reinício observado. Imagens de tentativas interrompidas por energia não usadas.
+- Arquivos alterados: continuidade e Worklog documental.
+- Próximo passo: aguardar BMO_READY_BETA_IMAGE_OK, conferir xz/checksum/manifest, copiar e verificar localmente, entregar candidata sem promover gate físico.
