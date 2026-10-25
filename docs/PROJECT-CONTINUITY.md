@@ -278,10 +278,10 @@ Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP
 
 Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
 
-1. Remontar a beta em cópia limpa após desligamento acidental da Potato. Usar código corrigido (firstboot bloqueado durante build, marcador interativo removido antes de apt, newlines do resumo corrigidos). r2 também interrompida por mau contato ao movimentar, confirmado pelo usuário. r3 iniciada: workdir ready-beta1-r3-20261024, unit bmo-ready-beta1-build-r3, invocation c91068a8140a4988bd20492dcbe6d865. Código 94c151db8be8ac6e393a998d2220526db13a65fe; log /home/hipo/bmo-images/beta-1.0.0/build-r3.log. Usuário manterá energia sem movimentação.
-2. Acompanhar apt/instalação em 192.168.1.50 (IP fixo confirmado), validar que firstboot não executa no chroot e corrigir somente falhas comprovadas.
-3. Verificar manifestos, dependências, units offline, sanitização, compressão e SHA256.
-4. Entregar .img.xz candidata e manifesto para gravar em cartão extra de 16 GB ou maior.
+1. Aguardar fim da compressão e verificar o arquivo final da Ready beta. Unit ativa bmo-ready-beta1-build-r4.service, invocation 2c02ac000c4e499d9d6d412f30234c61; log /home/hipo/bmo-images/beta-1.0.0/build-r4.log. Código 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7.
+2. r1/r2 interrompidas por movimentação/mau contato confirmado pelo usuário. r3 concluiu pacotes e parou em pins antigos. r4 retoma somente esse workdir parado limpo: /home/hipo/bmo-builds/ready-beta1-r3-20261024. Novos manifests beta preservam hashes históricos e pinam fonte atual sem alterar frontend/launchers.
+3. Apply v3, fases 40/50/60, systemd-analyze offline, contrato beta e sanitização passaram. Em compressão xz -T1; imagem final ainda não entregue nesta anotação. Potato estável em 192.168.1.50, 54 °C, 34 GB livres.
+4. Conferir xz/checksum/manifest, copiar para entregáveis locais e entregar candidata para cartão extra de 16 GB ou maior.
 5. Testar boot direto no BMO, rede/IP/SSH, gamepad, áudio, brilho, jogos/TF2, streaming e retorno ao BMO.
 
 Não executar bmo install nessa beta: dependências já vêm instaladas. Pareamento Moonlight é pessoal e não vai na imagem.
