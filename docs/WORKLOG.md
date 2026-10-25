@@ -540,3 +540,38 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Teste do assistente em BOOT real do microSD extra e validação de boot com TF2 fora.
 - Conferir nova mensagem/IP/SSH da imagem #9 ou atualização offline.
 - Nenhum gate físico foi concluído automaticamente pela CI Windows.
+
+## 2026-10-24 — Preparação do primeiro BMO Ready Beta com componentes pré-instalados
+
+- Fase: integração Ready / build offline em cópia da imagem
+- Branch: `feat/bmo-linux-base-v1`
+- HEAD inicial: `5ee270cf24826f19118155651f9c17b7d95ecaec`
+- Objetivo autorizado: beta que já contenha BMO e dependências antes do primeiro boot e abra diretamente no kiosk.
+- `R36S_REQUIRED=NO` para montagem/validação offline; `R36S_REQUIRED=YES` para promoção após teste físico.
+
+### Diagnóstico / ações realizadas
+
+- Run #9 `40118103143` aprovada em preflight/build/contrato/compressão/upload.
+- Artifact Base #12571667623 baixado para a Potato; ZIP SHA256 `b496baa785145fb4a2b222e08121d669b3e0f8ff8f7658039a8272eb77981e88` conferido.
+- Integridade ZIP e checksum interno .img.xz conferidos na Potato; Base original preservada.
+- Runtime PPSSPP local SHA256 `1af91efd8374a2c164e5f2ffa37b3d65980b825a207cbb09c688b2997088c5ad` conferido contra manifest.
+- Checkout separado de beta criado na Potato; sem mudanças nos cartões ou sistemas em uso.
+- Confirmado bloqueio da receita antiga: checks de sandbox sobre raiz vazia não servem para uma imagem populada.
+- Identificadas dependências adicionais do kiosk (xdpyinfo/xauth/unclutter/dbus/Xorg) e áudio PulseAudio, requerido pela configuração RetroArch auditada.
+- Planejado firstboot automático por systemd antes do kiosk, sem exigir login manual. Configuração de rede/senhas continua na BOOT.
+- Nenhuma imagem Beta final foi declarada pronta nesta etapa.
+
+### Arquivos alterados
+
+- Apenas este registro inicial; adaptação da receita será registrada após testes.
+
+### Resultado esperado / validação / riscos
+
+- Reutilizar Base #9 validada e receitas auditadas, reservando espaço antes do apt.
+- Imagem deve conter fontes/versões/hashes manifestados, assistente Windows, sem ROMs/segredos.
+- Build nativo na Potato sobre arquivo de imagem; não instalar pacotes do beta no host.
+- Boot/hardware ainda exigirão cartão extra e TF2 fora no primeiro boot.
+
+### Próximo passo
+
+- Adaptar montagem e serviços, testar em alvo isolado, iniciar build persistente, validar conteúdo/serviços/binários antes de comprimir.
