@@ -695,3 +695,14 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Arquivos alterados: Worklog e continuidade operacional.
 - Próximo passo: nova montagem limpa r3 a partir da Base raw verificada, mesmo código corrigido, novo workdir; acompanhar até validação e compressão.
 - Risco: novo mau contato interrompe o trabalho. Não promover como pronta antes das verificações finais.
+
+## 2026-10-24 — Montagem limpa r3 em execução
+
+- Fase: montagem Ready beta; branch feat/bmo-linux-base-v1; código 94c151db8be8ac6e393a998d2220526db13a65fe.
+- Unit bmo-ready-beta1-build-r3.service; invocation c91068a8140a4988bd20492dcbe6d865.
+- Workdir /home/hipo/bmo-builds/ready-beta1-r3-20261024; log /home/hipo/bmo-images/beta-1.0.0/build-r3.log.
+- Base raw e runtime PPSSPP passaram SHA256 novamente. Cópia limpa concluída; instalação de dependências em andamento no alvo isolado. Host não reiniciou nesta tentativa até a consulta.
+- Resultado esperado: candidato completo com verificações offline, sanitização, xz e checksum. Resultado obtido: em execução, sem imagem final pronta.
+- Arquivos alterados: apenas documentação. R36S_REQUIRED=NO para build; YES para validação física posterior.
+- Pendência/risco: manter conector de energia imóvel; não usar imagens de trabalho interrompidas.
+- Próximo passo: acompanhar instalação, corrigir falhas comprovadas, verificar e entregar o arquivo final.
