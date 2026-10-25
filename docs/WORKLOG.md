@@ -751,3 +751,13 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Identificados temporários próprios descartáveis: /home/hipo/bmo-builds/ready-beta1-20261024 (3,4G) e ready-beta1-r2-20261024 (2,4G), tentativas interrompidas por energia; não são candidatas.
 - Próximo passo: limpar somente esses temporários após verificar caminhos reais e ausência de montagens; preservar r3 até roundtrip local confirmado. Depois remover dados grandes redundantes de build/inputs do agente, sem tocar backups pessoais/ambiente operacional.
 - Resultado esperado: concluir arquivo no PC e recuperar espaço na Potato. Migração ainda em andamento nesta anotação; sem gate físico fechado.
+
+## 2026-10-24 — Primeira limpeza de temporários próprios concluída
+
+- Fase: economia de armazenamento conforme instrução do usuário; branch feat/bmo-linux-base-v1; R36S_REQUIRED=NO.
+- Verificados realpath, diretórios sem symlink e ausência de montagens nos caminhos exatos /home/hipo/bmo-builds/ready-beta1-20261024 e /home/hipo/bmo-builds/ready-beta1-r2-20261024.
+- Removidas somente essas duas tentativas interrompidas e descartáveis: 3,4G + 2,4G. df passou de 24G usados/34G livres (41%) para 18G usados/40G livres (31%).
+- Raw r3 preservado até validação local; transferência gzip em fluxo continua, mais de 1 GB recebido. Logs r4 e packages.tsv já copiados ao PC.
+- Arquivos alterados: documentação; sem remover backups pessoais, PPSSPP auditado ou dados operacionais.
+- Resultado esperado/obtido: aproximadamente 5,8 GiB recuperados, sem tocar na candidata atual.
+- Próximo passo: confirmar raw SHA256/CRC no PC, gerar/verificar xz local, limpar origem somente após validação e entregar candidata com gate físico pendente.
