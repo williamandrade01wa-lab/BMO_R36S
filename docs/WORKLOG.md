@@ -830,3 +830,11 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Builder agora entra em namespace privado de montagens para impedir propagação de mounts do chroot ao runner. Hipótese de referências externas será testada, não tratada como causa confirmada. Falhas de e2fsck passam a registrar findmnt/lsblk/fuser para diagnóstico.
 - Usuário autorizou substituir assistente e logo diretamente noH; grantread/write foi concedido, porémCLI/Node continuam comEPERM. Explorador consegue listar; operação local viaComputerUse fazbackup somente dos3scripts e logo, sem abrirTXT comsenhas.
 - Próximo passo: CILight com namespace, concluirbackup/troca noH, revisar ai-memory por solicitação do usuário.
+
+## 2026-10-25 — Namespace passou; cálculo de margem final corrigido
+
+- Branchfeat/bmo-linux-base-v1; run40158293123. R36S_REQUIRED=NO.
+- Namespace privado permitiu e2fsck do core, com342356/513024blocos usados. Fixtures e demaisgates continuaram passando.
+- resize2fs-M manteve513024blocos na imagem real; havia170668blocos livres (~667MiB). A receita somava128MiB ao tamanho mínimo estimado e tentava crescer além da partição original.
+- Cálculo corrigido: max(mínimo aceito pelo resize2fs, blocos usados+margem), arredondado. Espaço livre já existente conta para a margem; não se promete que toda imagem encolhe abaixo do mínimo aceito. Sem forçar operações de fsck/partição.
+- Próximo passo: repetirCI, conferir gzip/manifesto e finalizar runtime noPC.

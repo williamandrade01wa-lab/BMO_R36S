@@ -42,7 +42,9 @@ fi
 resize2fs -M "$PART"
 BLOCKS="$(dumpe2fs -h "$PART" 2>/dev/null | awk '/^Block count:/ {print $3}')"
 BS="$(dumpe2fs -h "$PART" 2>/dev/null | awk '/^Block size:/ {print $3}')"
-FINAL_BLOCKS="$(( ((BLOCKS*BS+MARGIN_MIB*1024*1024+4194303)/4194304)*4194304/BS ))"
+FREE_BLOCKS="$(dumpe2fs -h "$PART" 2>/dev/null | awk '/^Free blocks:/ {print $3}')"
+FINAL_BLOCKS="$(( (((BLOCKS-FREE_BLOCKS)*BS+MARGIN_MIB*1024*1024+4194303)/4194304)*4194304/BS ))"
+[ "$FINAL_BLOCKS" -ge "$BLOCKS" ] || FINAL_BLOCKS="$BLOCKS"
 resize2fs "$PART" "$FINAL_BLOCKS"
 if e2fsck -pf "$PART";then :;else [ "$?" -le 1 ];fi
 zerofree "$PART"
