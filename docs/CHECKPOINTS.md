@@ -267,3 +267,10 @@ RAW_SHA256=a7f87a6b52d43f0e72f1d4020e097f4d25263add43b0f699ef52b243633d2193
 Finalizador local v02 validou 79 arquivos na ext4, injetou runtime PPSSPP pinado e logo no FAT com leitura de volta, preservou hash root e verificou SHA raw após descompressão XZ integral. Uso root 1402290176 bytes. Pacotes BMO grandes continuam para instalação online após expansão do SD. Sem teste físico concluído.
 
 Limite conhecido: esta candidata contém assistente v0.2.0, que falha no Windows PowerShell ao criar a raiz existente da unidade. Preparar cartão com assistente v0.2.1 externo ou reinjetar correção antes de nova entrega integrada. Não anunciar como release pronta. Retorno seguro: cartão anterior e Ready beta preservados; main intocada.
+
+
+### Atualização física CP-BETA-001 — 2026-10-25
+
+Assistente v0.2.1 e primeiro boot da Ready confirmados pelo usuário. SSH em 192.168.1.65 validado com chave; firstboot.done, kiosk/UI/control-api ativos, UI HTTP200, zero failed. Tradução Chromium eliminada com política e confirmação visual do usuário. Root 12G e ausência de marker Light identificam teste da Ready, sem validar candidata Light.
+
+STATUS=VALIDATING; R36S_REQUIRED=YES. Bloqueio atual: sem áudio em paplay e ALSA direto; Jack informa fone presente sem plugue. Selecionar SPK/50% não resolveu. Não houve troca DTB/kernel nem teste com fone. Próximo: estado DAPM e comparação com áudio do sistema anterior. Não declarar BMO completo ou release estável.

@@ -271,6 +271,13 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
+**Prioridade atual (2026-10-25): áudio no R36S em 192.168.1.65.** Assistente v0.2.1 e primeiro boot da Ready confirmados pelo usuário; SSH por chave validado, firstboot.done presente, BMO HTTP200 e três serviços ativos/zero failed. Root 12G e sem marker Light: não confundir com candidata Light ainda não testada. Tradução Chromium removida por política TranslateEnabled=false (root:root 0644), usuário confirmou; fonte/cópias/manifest corrigidos para próximas instalações. Main preservada.
+
+Som continua ausente mesmo com SPK, 50% e ALSA direto. Kernel detecta Headphones Jack=on sem fone. Usuário confirma som no cartão anterior; sem fone P2 disponível. Próximo passo acordado: usuário desligará e colocará o cartão original, testará o som e informará IP para comparar por SSH. Baseline Ready já salvo em work/audio-comparison/ready-20261025 (oito coletas completas + manifest SHA). Coletar kernel, DTB, mixer e áudio do original antes de mudar configurações. Não inverter GPIO nem substituir DTB sem evidência. Ainda não salvar mixer SPK como correção comprovada. CP-BETA-001 permanece VALIDATING devido a áudio e demais testes pendentes. Registro detalhado no Worklog.
+
+Histórico Light/pendências anteriores:
+
+
 Atualizado em 2026-10-25. Prioridade: corrigir preparação do cartão e validar BMO Light com instalação automática online e progresso, mantendo builds grandes no GitHub/PC.
 
 1. Falha real do assistente identificada pelo JSONL: PowerShell New-Item -Force rejeita raiz existente H:\\ ao copiar ScreenFile. v0.2.1 evita criar diretórios já existentes, usa criação literal e passou 30 selftests. ZIP no PC; ainda não instalado no H porque usuário interrompeu controle da tela com Escape. Executar assistente extraído no PC, selecionar H, preparar cartão; coletar novo log se falhar. Não alterar ACL nem executar como administrador como solução padrão.

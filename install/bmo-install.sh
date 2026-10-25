@@ -1126,6 +1126,11 @@ EOF
 phase 11 "system-config"
 
 plan_copy \
+    "install/system/chromium/bmo-kiosk.json" \
+    "/etc/chromium/policies/managed/bmo-kiosk.json" \
+    "0644"
+
+plan_copy \
     "deploy/r36s/bmo-kiosk.default" \
     "/etc/default/bmo-kiosk" \
     "0644"

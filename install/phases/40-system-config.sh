@@ -152,6 +152,11 @@ echo
 echo "[2/4] System config..."
 
 copy_root_file \
+    "install/system/chromium/bmo-kiosk.json" \
+    "/etc/chromium/policies/managed/bmo-kiosk.json" \
+    "0644"
+
+copy_root_file \
     "deploy/r36s/bmo-kiosk.default" \
     "/etc/default/bmo-kiosk" \
     "0644"

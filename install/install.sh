@@ -457,6 +457,7 @@ apply_bmo() {
         "deploy/r36s/bmo-deploy-helper|/usr/local/sbin/bmo-deploy-helper|0755"
         "deploy/r36s/bmo-kiosk.default|/etc/default/bmo-kiosk|0644"
 
+        "install/system/chromium/bmo-kiosk.json|/etc/chromium/policies/managed/bmo-kiosk.json|0644"
         "install/system/udev/99-bmo-usb-power.rules|/etc/udev/rules.d/99-bmo-usb-power.rules|0644"
     )
 
