@@ -250,3 +250,11 @@ Sempre revisar o diff antes de deploy e sempre distinguir:
 Priorizar GitHub Actions ou o PC local para builds, compressão e armazenamento de imagens/artifacts grandes. Economizar o armazenamento da Le Potato; não tratá-la como builder ou depósito padrão de imagens por enquanto.
 
 Ao migrar trabalho já montado, verificar a cópia no PC antes de remover a origem. Limpar somente temporários gerados pelo agente e identificados como descartáveis; preservar backups/arquivos pessoais e o ambiente operacional. Registrar espaço recuperado e destino dos artefatos na continuidade/Worklog. Operações pontuais de leitura/transferência e diagnóstico continuam permitidas.
+
+## Perfil Light — prioridade atual do usuário em 2026-10-24
+
+Priorizar imagem pequena com boot/rede/configuração e instalador. Após conectar à rede no primeiro boot, instalar automaticamente BMO e suas dependências com progresso visível, expandindo antes a partição do sistema para usar o cartão. Chromium/emuladores/pacotes de execução não devem ser pré-instalados na imagem Light. Aplicativos e ferramentas Linux de uso geral ficam para instalação posterior pelo usuário.
+
+Reaproveitar Base validada e fontes pinadas, sem recompilar kernel por rotina e sem exigir chave/token Git do usuário. Preservar hardware, gamepad, áudio, Wi-Fi, bootloader e fluxo de recuperação. Arquivos privados necessários ao BMO podem acompanhar o instalador; credenciais nunca. Medir separadamente download, raw reservado e ocupação após instalar. Não declarar uma estimativa como tamanho final medido.
+
+FTP local do roteador pode servir de depósito temporário de arquivos compactados/checksums, não de diretório de build ou filesystem do sistema. Autenticação deve continuar habilitada; senha somente por entrada local segura, nunca Git/log/relatório/imagem.

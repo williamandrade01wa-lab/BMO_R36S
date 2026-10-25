@@ -776,3 +776,15 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Backups pessoais, runtime PPSSPP original e ambiente operacional preservados. Potato permanece em 192.168.1.50. Não voltar a armazenar imagens/builds pesados nela; preferir GitHub Actions/PC conforme AGENTS.
 - Arquivos alterados: documentação/checkpoint; entregáveis locais. Main e cartão de produção não alterados.
 - Próximo passo: usuário grava .img descompactado em cartão extra 16 GB+, prepara BOOT pelo ABRIR-BMO.cmd, remove TF2 e testa primeiro boot, IP/SSH e BMO. Registrar evidência física antes de promoção. Futura otimização: reduzir tamanho reservado medindo ocupação; migrar receita beta para CI, sem refazer esta candidata automaticamente.
+
+## 2026-10-24 — Pivot autorizado para imagem Light com instalação automática online
+
+- Fase: medição de armazenamento e arquitetura Light; branch feat/bmo-linux-base-v1; HEAD inicial 7417fe93cd1148bbd78e26657cbc7a1cd044e4cc. R36S_REQUIRED=NO para engenharia, YES para validar novo fluxo físico.
+- Usuário prefere imagem pequena em vez de todos os pacotes pré-instalados. Confirmou instalação automática depois de conectar à rede no primeiro boot, com progresso. Expansão do SD antes de instalar dependências.
+- Medição local somente leitura da Ready beta: root total12599689216, usado4095193088, livre8504496128 bytes; 666 pacotes e Installed-Size total3006157824 bytes. Interface/scripts<1MiB, runtime PPSSPP~59MiB. Hash/arquivo da beta já entregue preservados.
+- Fontes extras326MiB e assetsRetroArch113MiB são dependências rígidas do pacote RetroArch Debian; --no-install-recommends sozinho não as elimina. Headers~76MiB, desenvolvimento~231MiB (grupos sobrepostos); firmware521MiB, dos quais qcom~324MiB, requer seleção por hardware. Não apagar bibliotecas/firmware por tamanho.
+- Root arquivos alocados3356061696 bytes e overhead/metadados739131392; FAT256MiB contém~1,29MiB. Tamanho raw12GiB era reserva, não necessidade.
+- FTP 192.168.1.1:21 /usb1_1_1 responde; anônimo recusado conforme segurança desejada. Usuário executou helper local com senha não persistida: 8MiB upload/download OK, SHA2562847b9da5f9f7f91b6869ec5f586b8f26a354a01c3c71125f8c459d09bd74d32, 3,14/3,12MiB/s, limpezaOK. Capacidade e arquivos>4GB não medidos.
+- Arquivos: AGENTS e Worklog; scripts de auditoria/helper no PC. Copiado runtime PPSSPP27MiB do backup existente para PC, sem build/novos arquivos grandes na Potato.
+- Esperado: Light baseada na Base9 validada, payload pequeno pinado, firstboot configura/rede/expansão, instalador baixa apenas dependências, mostra etapas e abre BMO; sem Git privado/token na instalação normal.
+- Próximo passo: implementar/validar instalador e receita Light em GitHub Actions ARM64; preservar runtime PPSSPP auditado, medir imagem final e entregar só após integridade/contrato aprovados. A Ready beta1 já gravando continua um teste separado; não promover gate físico automaticamente.
