@@ -42,6 +42,10 @@ Os testes remotos de voz (paplay) e success pela API não foram ouvidos pelo usu
 
 Os 12 hashes locais coincidem com sha256sum no aparelho original; arquivos WAV e ZIP foram verificados. Três scripts alterados passaram bash -n sem execução no cartão original. Não foram alterados mixer, volume, kernel, DTB ou serviços do original para essa coleta; a única configuração foi o cadastro da chave SSH autorizado pelo usuário.
 
-Falta aplicar os sons à Ready, retornar ao mesmo perfil HP do original e testar as carinhas com os botões físicos. Se continuar sem som, comparar os caminhos do player/API e só depois investigar kernel/driver. **R36S_REQUIRED=YES.** As imagens já geradas não recebem estes arquivos automaticamente; requerem patch no cartão ou nova montagem. Não declarar áudio da Ready/Light corrigido antes da confirmação física.
+Em 2026-10-25, os 12 WAV foram aplicados à Ready em 192.168.1.65, com backup em `/var/backups/bmo/sounds-20261025-015336-3405`, propriedade root:root 0644 e todos os SHA256 conferidos depois da instalação. Playback Mux voltou a HP, como no original, sem alterar volume. O usuário confirmou: **sons das carinhas voltaram ao apertar os botões**. Kernel 6.12.32 foi mantido. Portanto, a diferença de kernel não foi bloqueio para estes efeitos.
+
+Kiosk, UI, control-api e sound-api permaneceram ativos, zero unidades failed. A unidade alsa-restore tem ExecStop=alsactl store para salvar o mixer em desligamento normal; a persistência após reboot ainda precisa de teste físico. Não é necessário forçar SPK nem mudar polaridade/DTB.
+
+**Efeitos do BMO: validados no cartão Ready por confirmação do usuário.** Ainda faltam reboot e áudio em jogos/streaming. A candidata Light e imagens já geradas continuam sem patch até nova montagem ou aplicação do mesmo pacote. **R36S_REQUIRED=YES** para esses testes restantes; não declarar áudio de todos os componentes validado.
 
 Baselines completos, somente para engenharia no PC: work/audio-comparison/ready-20261025 e original-20261025. Nenhuma senha/ROM foi incluída nos arquivos versionados.

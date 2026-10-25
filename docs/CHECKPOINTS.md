@@ -274,3 +274,23 @@ Limite conhecido: esta candidata contém assistente v0.2.0, que falha no Windows
 Assistente v0.2.1 e primeiro boot da Ready confirmados pelo usuário. SSH em 192.168.1.65 validado com chave; firstboot.done, kiosk/UI/control-api ativos, UI HTTP200, zero failed. Tradução Chromium eliminada com política e confirmação visual do usuário. Root 12G e ausência de marker Light identificam teste da Ready, sem validar candidata Light.
 
 STATUS=VALIDATING; R36S_REQUIRED=YES. Bloqueio atual: sem áudio em paplay e ALSA direto; Jack informa fone presente sem plugue. Selecionar SPK/50% não resolveu. Não houve troca DTB/kernel nem teste com fone. Próximo: estado DAPM e comparação com áudio do sistema anterior. Não declarar BMO completo ou release estável.
+
+
+## CP-AUDIO-001 — Efeitos das carinhas na Ready confirmados
+
+```text
+STATUS=SAFE_PARTIAL
+SCOPE=BMO_FACE_EFFECTS_PHYSICAL_CONFIRMATION_ONLY
+SOURCE_COMMIT=7720902740afac95fb53d97c0637a0a8c88e5279
+BRANCH=feat/bmo-linux-base-v1
+VALIDATED_ON=2026-10-25
+HOST=bmo-r36s 192.168.1.65
+KERNEL=6.12.32-lts-rk3326
+SOUND_FILES=12
+SOUND_BYTES=2183032
+R36S_REQUIRED=YES
+```
+
+Após instalar os WAV preservados e restaurar Playback Mux=HP, usuário confirmou os efeitos ao apertar botões que mudam carinhas. Conferência SSH: 12 hashes iguais a assets/sounds/SHA256SUMS, root:root 0644, quatro serviços principais/áudio ativos, zero failed. Backup: /var/backups/bmo/sounds-20261025-015336-3405. Sem troca de kernel/DTB.
+
+Gate parcial: ainda testar persistência após reinício, áudio em jogos/streaming e Light. CP-BETA-001 continua VALIDATING, main preservada. Retorno: cartão original intacto e backup do patch; não declarar BMO completo nem release estável.

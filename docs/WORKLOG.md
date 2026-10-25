@@ -900,3 +900,14 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Validação: 12 WAV PCM 16 bits válidos; SHA256 de cada um conferido na origem/PC; blobs Git conferidos por SHA1 canônico; ZIP local testado e comparado por hash; bash -n dos três scripts passou sem executar instaladores no original. Cópia local entregável BMO-Sounds-Originais-2026-10-25.zip.
 - Resultado: sons preservados no projeto e inclusão prevista nos próximos builds. Imagens antigas não foram modificadas por esse commit; não declarar som da Ready/Light corrigido. R36S_REQUIRED=YES.
 - Próximo passo exato: usuário desligar e retornar ao cartão Ready, informar IP; aplicar somente os WAV faltantes com backup/validação, voltar ao perfil HP observado no original e testar as carinhas pelos botões. Se persistir, investigar player/API/driver com controles equivalentes antes de trocar kernel ou DTB. Card original permanece referência preservada.
+
+
+## 2026-10-25 — Sons das carinhas recuperados e confirmados na Ready
+
+- Fase/branch: validação física de áudio / feat/bmo-linux-base-v1; HEAD inicial 7720902740afac95fb53d97c0637a0a8c88e5279. Objetivo: aplicar os WAV preservados ao cartão novo em 192.168.1.65 e testar o mesmo gesto físico usado no original.
+- Ação: 12 WAV e SHA256SUMS enviados à pasta de preparação no home de r36s; todos os hashes e bash -n do patch conferidos antes de instalar. Usuário executou atalho local com sudo interativo; nenhuma senha no chat/relatório. Backup criado em /var/backups/bmo/sounds-20261025-015336-3405. Instalação em /opt/bmo-sounds com root:root 0644; perfil do mixer voltou a HP, como no original; volume preservado. Não alterados kernel, DTB, frontend ou serviços.
+- Obtido/validação: usuário respondeu “Sim, os sons voltaram” ao testar carinhas pelos botões. Conferência SSH posterior: 12/12 SHA256 iguais, HP selecionado, sound-api/kiosk/UI/control-api ativos e zero failed. Kernel continua 6.12.32-lts-rk3326: não precisou atualização para os efeitos BMO. Não atribuir a ausência anterior a defeito de jack com base no indicador on.
+- Persistência: alsa-restore.service ativo tem ExecStop=alsactl store para desligamento normal. Ainda não foi feito reboot após esta recuperação.
+- Arquivos: docs/AUDIO.md, CHECKPOINTS.md e PROJECT-CONTINUITY.md atualizados; sons/instaladores já versionados no commit inicial. Cópia local do relatório de comparação atualizada.
+- Resultado: checkpoint parcial dos efeitos BMO aprovado fisicamente. Sem validar jogos/streaming ou a imagem Light. R36S_REQUIRED=YES para reboot e áudio nos demais componentes.
+- Próximo passo exato: reiniciar normalmente em teste combinado com usuário, confirmar sons persistem e testar áudio em um jogo; manter cartão original como retorno. Nova montagem Light deve incluir os WAV do source atual antes da entrega.

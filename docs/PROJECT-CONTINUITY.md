@@ -271,11 +271,11 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-**Prioridade atual (2026-10-25): testar os sons recuperados no cartão Ready.** Original está em 192.168.1.28, r36s, SSH por chave validado. Usuário confirma sons das carinhas ao apertar botões. Os 12 WAV de /opt/bmo-sounds foram preservados em assets/sounds com manifest/SHA256 (2183032 bytes) e cópia local em outputs. Instaladores e payload Light incluem agora esses arquivos. Ver docs/AUDIO.md.
+**Estado atual (2026-10-25): sons das carinhas RECUPERADOS e confirmados no cartão Ready em 192.168.1.65.** Os 12 WAV preservados em assets/sounds (source 7720902740afac95fb53d97c0637a0a8c88e5279) foram instalados em /opt/bmo-sounds com hashes 12/12 conferidos, root:root 0644 e backup. Playback Mux restaurado para HP. Usuário confirmou sons ao apertar botões; kernel 6.12.32 mantido. Kiosk/UI/control-api/sound-api ativos e zero failed. Ver docs/AUDIO.md e CP-AUDIO-001.
 
-Comparação corrigiu hipóteses: original kernel 6.12.74 / Ready 6.12.32, mas DTB/DTBO idênticos e ambos mostram Jack=on/HP. Voz remota e success pela API não foram ouvidos nem no original; não usar esses testes para concluir kernel quebrado. Ready está sem /opt/bmo-sounds: primeiro defeito de conteúdo a corrigir. Não inverter GPIO nem forçar SPK permanentemente.
+Próximo teste físico: reinício normal para confirmar persistência e áudio em jogo. alsa-restore salva mixer no shutdown normal; ainda não validado após reboot. Não trocar kernel/DTB nem forçar SPK para estes efeitos. Áudio de jogos/streaming e candidata Light ainda não testados. Imagens antigas exigem patch ou nova montagem para incluir WAV; instaladores/fonte atuais já os incluem.
 
-Próximo passo: usuário desligar completamente, retornar ao cartão Ready e informar IP; aplicar WAV com validação e comparar carinhas pelos botões, mantendo HP como no original. Se falhar, investigar player/API/driver com testes equivalentes. Original preservado sem mudanças de áudio. Baselines no PC: work/audio-comparison/ready-20261025 e original-20261025. Imagens já geradas ainda exigem patch ou nova montagem. Main preservada; CP-BETA-001 continua VALIDATING. R36S_REQUIRED=YES.
+Original em 192.168.1.28 permanece referência preservada. Baselines no PC: work/audio-comparison/ready-20261025 e original-20261025. DTB/DTBO idênticos e Jack=on/HP em ambos; diferença de kernel não impediu recuperar efeitos da Ready. Main preservada; CP-BETA-001 continua VALIDATING por demais testes. R36S_REQUIRED=YES.
 
 Histórico Light/pendências anteriores:
 
