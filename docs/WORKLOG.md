@@ -684,3 +684,14 @@ Artifact expira: 2026-10-31T04:21:41Z
 
 - Acompanhar a execução, validar conteúdo/units e sanitização; depois comprimir e entregar SHA256.
 - Não tratar a candidata como pronta até o fim do processo e verificação do arquivo.
+
+## 2026-10-24 — Segunda interrupção por contato de energia confirmado pelo usuário
+
+- Fase: diagnóstico e retomada Ready beta; branch feat/bmo-linux-base-v1.
+- Código: 94c151db8be8ac6e393a998d2220526db13a65fe; R36S_REQUIRED=NO.
+- r2 interrompida durante unpack de mesa-libgallium. Host reiniciou; serviço transient inactive. Usuário confirmou movimentação e mau contato, e manterá equipamento sem mexer.
+- Diagnóstico: 50 °C, 1,3 GB RAM disponível, swap zero, 38 GB livres, zero unidades failed, contador EXT4 errors_count=0. Gateway responde 3/3, USB mantém 192.168.1.50. Sem registro de panic/OOM ou erro de I/O nos dados disponíveis; causa elétrica não inferida apenas do log.
+- Esperado/obtido: host acessível e sem evidência de dano; imagem final ainda inexistente. Imagens de trabalho interrompidas não são candidatas.
+- Arquivos alterados: Worklog e continuidade operacional.
+- Próximo passo: nova montagem limpa r3 a partir da Base raw verificada, mesmo código corrigido, novo workdir; acompanhar até validação e compressão.
+- Risco: novo mau contato interrompe o trabalho. Não promover como pronta antes das verificações finais.
