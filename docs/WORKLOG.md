@@ -800,3 +800,12 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Arquivos: install/light/**, .github/workflows/build-bmo-light.yml, docs/LIGHT-INSTALL.md. Fontes de frontend/launchers/kernel inalteradas.
 - Resultado esperado: CI comprova sintaxe, guardas/fixture, purge permitido, payload e core pequeno; resultado obtido nesta anotação: código preparado para a primeira execução, testes/size final ainda pendentes.
 - Próximo passo: executar CI, corrigir somente falhas comprovadas, incluir runtime no PC, verificar imagem final e registrar tamanho antes de entregar.
+
+## 2026-10-25 — Primeira CI Light: gates passaram, espera de detach corrigida
+
+- Branch feat/bmo-linux-base-v1; fonte f4e6175f0d6e15b5477930640d9a0bf79e559c24; run40156553455/job121059075612. R36S_REQUIRED=NO para CI.
+- Sintaxe e fixture de segurança/redução passaram; Base9/artifact/hash aprovados. Purge simulada e aplicada removeu somente lista permitida (240MB), sem cascata extra.
+- Payload, units e sanitização do core passaram. Falha somente ao iniciar redução: loop detach é lazy e a guarda viu imagem ainda anexada imediatamente após detach.
+- Adicionada espera limitada/udevadm antes de reabrir; guarda continua recusando imagem anexada. Nenhuma redução/artefato final foi declarado aprovado na run falha.
+- Teste FAT local em cópia da partição: inclusão/leitura do runtime27MiB com SHA original aprovadas. Runtime fora do Git.
+- Próximo passo: nova CI Light e revisão profissional do assistente conforme pedido novo (nome público, orientação2,4/5GHz, log sem senhas e diagnóstico de permissão).

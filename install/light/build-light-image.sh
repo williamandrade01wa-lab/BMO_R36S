@@ -76,6 +76,9 @@ bash "$REPO/install/phases/70-sanitize.sh" --root "$ROOT"
 rm -rf "$ROOT/var/lib/bmo"
 rm -f "$ROOT/boot/u-boot/BMO-IP.txt" "$ROOT/boot/u-boot/BMO-STATUS.txt" "$ROOT/boot/u-boot/BMO-RESUMO.txt" "$ROOT/.bmo-ready-build-root"
 sync;cleanup;ROOT="";LOOP=""
+# loop detach is lazy; wait for udev/blkid holders before reopening the file.
+udevadm settle
+for attempt in $(seq 1 50);do [ -z "$(losetup -j "$IMAGE")" ] && break;sleep 0.1;done
 bash "$REPO/install/light/minimize-image.sh" "$IMAGE" 128
 gzip -1 -c "$IMAGE" > "$OUT/$(basename "$IMAGE").gz"
 gzip -t "$OUT/$(basename "$IMAGE").gz"
