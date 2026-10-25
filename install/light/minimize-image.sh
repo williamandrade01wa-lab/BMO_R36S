@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 # Shrink only an unmounted regular MBR image; never a physical card.
 set -euo pipefail
-IMAGE="$(realpath -e "$1")";MARGIN_MIB="${2:-128}";LOOP=""
+IMAGE="$(realpath -e "$1")";MARGIN_MIB="${2:-128}";LOOP="";OWNED_LOOP="${3:-}"
 [ "$EUID" -eq 0 ] && [ -f "$IMAGE" ] && [ ! -b "$IMAGE" ] || exit 1
 [[ "$MARGIN_MIB" =~ ^[0-9]+$ ]] && [ "$MARGIN_MIB" -ge 16 ] && [ "$MARGIN_MIB" -le 1024 ]
-[ -z "$(losetup -j "$IMAGE")" ] || { echo 'image already attached' >&2;exit 1; }
+if [ -n "$OWNED_LOOP" ];then
+    [[ "$OWNED_LOOP" =~ ^/dev/loop[0-9]+$ ]] || exit 1
+    BACKING="$(losetup --list --noheadings --output BACK-FILE "$OWNED_LOOP")"
+    [ "$(realpath -e "$BACKING")" = "$IMAGE" ] || exit 1
+    for DEV in "$OWNED_LOOP" "$OWNED_LOOP"p1 "$OWNED_LOOP"p2;do
+        [ -z "$(findmnt -rn -S "$DEV")" ] || { echo 'owned image still mounted' >&2;exit 1; }
+    done
+    LOOP="$OWNED_LOOP"
+else
+    [ -z "$(losetup -j "$IMAGE")" ] || { echo 'image already attached' >&2;exit 1; }
+fi
 trap '[ -z "$LOOP" ] || losetup -d "$LOOP"' EXIT
 read -r START FIRST_START < <(sfdisk --json "$IMAGE" | python3 -c 'import json,sys;p=json.load(sys.stdin)["partitiontable"]["partitions"];assert len(p)==2 and p[1]["type"].lower()=="83";print(p[1]["start"],p[0]["start"])')
 prefix_hash(){
@@ -18,7 +28,7 @@ print(hashlib.sha256(b).hexdigest())
 PY
 }
 PREFIX="$(prefix_hash)"
-LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle
+if [ -z "$LOOP" ];then LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle;fi
 PART="$LOOP"p2
 if e2fsck -pf "$PART";then :;else [ "$?" -le 1 ];fi
 resize2fs -M "$PART"

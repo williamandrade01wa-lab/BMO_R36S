@@ -809,3 +809,16 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Adicionada espera limitada/udevadm antes de reabrir; guarda continua recusando imagem anexada. Nenhuma redução/artefato final foi declarado aprovado na run falha.
 - Teste FAT local em cópia da partição: inclusão/leitura do runtime27MiB com SHA original aprovadas. Runtime fora do Git.
 - Próximo passo: nova CI Light e revisão profissional do assistente conforme pedido novo (nome público, orientação2,4/5GHz, log sem senhas e diagnóstico de permissão).
+
+## 2026-10-25 — Assistente profissional v0.2, logs e diagnóstico Wi-Fi
+
+- Branch feat/bmo-linux-base-v1; R36S_REQUIRED=NO para assistente/CI, YES para hardware/rede no R36S.
+- Usuário relatou falha depois de Preparar cartao; screenshot mostrou apenas mensagem genérica de rollback. Causa original perdida pelo catch antigo; não afirmar diagnóstico confirmado.
+- Novo nome público Assistente de Preparacao BMO. Orientação2,4GHz e5GHz por compatibilidade real, não nomeSSID.
+- Escrita testa acesso só após confirmação; registra etapa/operação/path/attributes/exceção/HRESULT/stack, redige segredos conhecidos e não serializa config. Botão Abrir log, captura de falhas de inicialização, pasta localPC preferida/fallback. Erro de escrita mantém causa original, recuperação preserva atributos, config substituída por Copy-Item -Force e SHA256 conferido.
+- Permissão de leituraH foi concedida pelo sandbox, masWindows continuou negando acesso; nenhuma senha/config foi lida, nenhuma mudança de ACL/admin proposta. Na imagem original de teste, config/boot.ini têm atributoFATArchive, não ReadOnly; caso real continua aguardando log.
+- Testes locais27passaram, incluindo readonlyconfig, rollback e redaction; fluxoUI completo e screenshot revisados sem senhas/earlywrite. Pacote outputs/BMO-Assistente-de-Preparacao-v0.2.0.zip entregue para reprodução no cartão.
+- Light adiciona bmo-wifi-diagnose: interface/driver/USB-ID/bandas suportadas/habilitadas em BMO-WIFI.txt, semSSID/MAC/senhas. Três testes passaram, incluindo canal desabilitado e nenhum palpite porSSID.
+- SegundaCILight40156807193 também parou na guarda de imagem anexada apósdetach; esperar5s não resolveu. Novo finalizador recebe explicitamente apenas o loop pertencente ao builder, conferebackingfile e ausência de mounts, reduz offline e detacha. Fixture passou a cobrir também esse handover. Guarda de imagens anexadas por terceiros permanece.
+- Arquivos: scripts/windows/**, install/light/**, workflowLight, AGENTS/continuidade/Worklog.
+- Próximo passo: novaCILight+CIWindows, recolher log real se falhar de novo; completar core+runtime noPC e verificar antes de entregar. Não recompilar kernel nem montar imagens naPotato.

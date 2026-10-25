@@ -271,23 +271,16 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-Prioridade atual: usuário autorizou compilar o primeiro Ready beta com BMO e todas as dependências pré-instaladas, abrindo o kiosk após configurar no primeiro boot.
+Prioridade atual: **BMO Light**, por decisão explícita do usuário. Imagem pequena com boot/rede/instalador, expansão doSD antes dos pacotes e instalação automática online com progresso no primeiro boot. Ver docs/LIGHT-INSTALL.md e install/light/**. Chromium/emuladores não vêm pré-instalados; fonteBMO pequena e runtimePPSSPP pinado acompanham a entrega, sem chave/tokenGit ou senhaFTP.
 
-Receita implementada: `install/build-beta-image.sh`, `install/beta/**`, `docs/BETA-BUILD.md`.
-Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP pinado. Builder monta somente cópia .img, reserva root 12 GiB, instala tudo em chroot isolado do /run do host, integra firstboot automático, áudio, kiosk e assistente Windows.
+1. CILight executada em GitHubARM64 reutilizando Base9; semkernelbuild nemPotato. Runs40156553455 e40156807193 passaram fixtures/purge240MB/payload/sanitização, falharam somente na passagem do loop ao redutor. Nova correção transfere loop explicitamente combackingfile/mountguards efixture.
+2. AssistenteWindows atualizado para nome profissional, orientação2,4/5GHz, logs semsenha e diagnóstico de permissão. Pacote v0.2.0 entregue noPC,27testes+UIflow passaram. Usuário teve falha apósPrepararcartao naH; causa real ainda não comprovada porque catch antigo escondia erro. Aguardar log novo se repetir. Windows negou leituraH mesmo apósgrant; não lerTXT/segredos nem alterarACL.
+3. DiagnósticoWiFiLight roda antes dofirstboot e gravaBMO-WIFI.txt comdriver/bandas; testes3passaram. Suporte5GHz precisa dehardware/domínio/região, sempalpite porSSID.
+4. Concluir CI, baixarcore e incluir runtime noPC viaFAT, verificar payload/hash/gzip, registrar tamanho final e entregar candidataLight. Base9original/runtime já preservados noPC. Não usar core intermediário paraflashear.
+5. Readybeta1 anteriormente entregue continua separada: gzip2016381902bytes, raw12GiB. Seu teste não valida automaticamenteLight. TF2fora no primeiroboot; SDextra8GB+ paraLight; mantercartãoanterior de retorno.
+6. PriorizarGitHub/PC; Potato192.168.1.50 ficou46Glivres apóslimpeza. FTP192.168.1.1:21 /usb1_1_1 testado pelo usuário:8MiB, SHA/limpezaOK,3,14/3,12MiB/s. Mantersenha, usar paraarquivoscompactados/checksums; capacidade/limite>4GB não medidos.
 
-Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
-
-1. Candidata Ready beta 1.0.0-beta.1 pronta no PC: outputs/BMO-R36S-Ready-v1.0.0-beta.1.img.gz, 2016381902 bytes. Código 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7. Gzip SHA256 e21a446dccfde7e115a8e0cf79ae251d41aca02f3edfb4c274e4bc405b1794a7; raw SHA256 b7a9ab2567084f42da2c6a7628fbacd68c683ff120f64dca54fc252f15e35f7e, 12884901888 bytes (12 GiB reservados, não ocupação).
-2. Transferência validada por CRC gzip e SHA256 raw completo no PC. Conteúdo/serviços/dependências/sanitização offline passaram. Checksum, manifesto, packages.tsv e LEIA-ME disponíveis ao lado da imagem. Boot/hardware desta beta PENDENTES; CP-BETA-001 VALIDATING.
-3. Entregar/gravar .img descompactado em cartão extra de 16 GB ou maior. Abrir BOOT/ABRIR-BMO.cmd, escolher ScreenFiles e configurar rede/senha/SSH. TF2 fora durante todo primeiro boot. Depois desligar completamente antes de inserir TF2.
-4. Testar boot direto no BMO, resumo/IP/SSH, gamepad, áudio, volume/brilho, jogos/TF2, streaming e retorno. Não promover para main/estável sem evidência física.
-5. Priorizar GitHub Actions ou PC para próximos builds e arquivos grandes: instrução explícita do usuário registrada em AGENTS.md. Todos os temporários grandes próprios e inputs redundantes foram removidos da Potato após verificar cópias no PC. Aproximadamente 12 GiB recuperados; Potato agora 46G livres, IP 192.168.1.50. Backups pessoais preservados.
-6. Base #9 original compactada preservada no PC em work/base-run9-original.img.xz com SHA256 e32988972ecd085078f430d6988e7bca10b1e551c317773a22235e49c51cc3ee. Logs r4 e packages também salvos no PC. Não reconstruir nem recolocar grandes imagens na Potato por rotina. Otimização futura: dimensionar imagem menor pela ocupação real e automatizar a integração beta na CI.
-
-Não executar bmo install nessa beta: dependências já vêm instaladas. Pareamento Moonlight é pessoal e não vai na imagem.
-**TF2 de jogos fora durante todo o primeiro boot.** Desligar antes de inserir. Sem formatar.
-Main e cartão em produção preservados. `R36S_REQUIRED=YES` antes de promoção física.
+Main preservada. R36S_REQUIRED=YES antes de promover Light ou frontend/boot físico. Não anunciar previsões como tamanho medido.
 
 ## 13. ScreenFiles
 

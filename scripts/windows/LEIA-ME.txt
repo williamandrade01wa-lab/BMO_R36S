@@ -1,36 +1,32 @@
-BMO - MODO PREGUICA
-==================
-1. Extraia TODOS os arquivos deste ZIP para uma pasta no Windows.
-2. Coloque o cartao do sistema no computador.
-3. Dê dois cliques em ABRIR-BMO.cmd.
-4. Escolha a BOOT do cartao, que contem ScreenFiles e boot.ini.
-5. Responda as perguntas e confira o resumo.
-6. Clique em Preparar cartao.
-7. Remova o cartao com seguranca. Primeiro boot somente com TF1;
-   mantenha o TF2 de jogos FORA durante a configuracao inicial.
+BMO - ASSISTENTE DE PREPARACAO v0.2.0
+===================================
+1. Extraia TODOS os arquivos deste ZIP para uma pasta no PC.
+2. Coloque o cartao do sistema no computador e feche o assistente antigo.
+3. Abra ABRIR-BMO.cmd, escolha BOOT e siga as perguntas.
+4. Confira o resumo e clique em Preparar cartao.
+5. Remova com seguranca. TF2 de jogos FORA durante todo primeiro boot.
 
-O assistente copia as ScreenFiles do painel escolhido, preserva
-os originais e cria BMO-FIRSTBOOT.txt. Voce nao precisa editar
-o arquivo, colocar aspas ou saber o que e DHCP.
+O assistente copia as ScreenFiles, preserva originais, faz backup e cria
+BMO-FIRSTBOOT.txt. Sem editar o TXT ou colocar aspas.
 
-Rede: Wi-Fi com senha, Wi-Fi aberto, cabo/Ethernet ou sem rede.
-Acesso remoto: opcional, por SSH com o usuario r36s.
-Senhas ficam escondidas e nao aparecem no resumo.
-O painel precisa ser escolhido por voce: nao existe deteccao
-automatica do modelo da tela pelo computador.
+WI-FI
+Prefira rede de 2,4 GHz para maior compatibilidade. Usar 5 GHz exige que
+o adaptador USB do R36S suporte essa faixa. O computador nao consegue
+deduzir a capacidade do adaptador do R36S pelo nome da rede.
+Na imagem Light atualizada, BMO-WIFI.txt mostra o diagnostico do adaptador.
 
-Funciona com a Base da Run #8 e com o formato novo de firstboot.
-O TXT usa internamente nomes compativeis com as duas versoes.
-Use em cartao recem-gravado, ANTES do primeiro boot.
-No cartao que ja concluiu o firstboot, salvar o TXT nao reaplica
-a configuracao automaticamente.
+LOGS E PERMISSOES
+Em caso de erro, clique em Abrir log. O registro inclui operacao, arquivo,
+tipo de erro, HRESULT e ambiente; nao inclui senhas nem conteudo do TXT.
+A pasta preferida fica no PC em %LOCALAPPDATA%\BMO\Logs; ha fallback local.
+O CMD tambem registra falhas que acontecem antes de abrir a janela.
+Voce pode compartilhar o log de diagnostico. Nao compartilhe o TXT
+preenchido nem os backups do cartao, pois estes contem configuracoes reais.
 
-Nenhum cartao e formatado. Os destinos anteriores sao copiados
-para .BMO-backup-DATA-ID na BOOT antes de gravar.
-Em caso de falha de copia, o assistente tenta restaurar os
-arquivos anteriores. Confira qualquer erro antes de ligar.
+O assistente testa gravacao somente apos a confirmacao final. Tenta restaurar
+arquivos anteriores se uma copia falhar, preservando atributos de arquivo.
+Nenhum cartao e formatado; nao altera permissoes do Windows nem exige admin
+como solucao padrao. Confira protecao contra gravacao/arquivos em uso.
 
-Feche o assistente antes de remover o cartao.
-Nao compartilhe o TXT preenchido nem os backups com senhas.
-
-Versao inicial: 2026-10-24.
+Use antes do primeiro boot. Em cartao ja configurado, salvar o TXT nao
+reaplica a configuracao automaticamente.

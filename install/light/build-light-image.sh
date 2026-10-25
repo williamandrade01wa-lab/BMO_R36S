@@ -45,6 +45,8 @@ for item in CREDITS.md THIRD_PARTY.md LICENSE;do [ ! -f "$REPO/$item" ] || cp "$
 install -m 0755 "$REPO/install/light/bmo-light-install" "$ROOT/usr/local/sbin/bmo-light-install"
 install -m 0644 "$REPO/install/light/bmo-light-install.service" "$ROOT/etc/systemd/system/"
 install -m 0644 "$REPO/install/beta/bmo-ready-firstboot.service" "$ROOT/etc/systemd/system/"
+install -m 0755 "$REPO/install/light/bmo-wifi-diagnose" "$ROOT/usr/local/sbin/bmo-wifi-diagnose"
+sed -i '/^ExecStart=/i ExecStartPre=/usr/local/sbin/bmo-wifi-diagnose' "$ROOT/etc/systemd/system/bmo-ready-firstboot.service"
 install -m 0755 "$REPO/install/light/firstboot-finish" "$ROOT/usr/local/sbin/bmo-ready-firstboot-finish"
 mkdir -p "$ROOT/usr/local/libexec"
 install -m 0755 "$REPO/image/armbian/userpatches/overlay/usr/local/bin/bmo" "$ROOT/usr/local/libexec/bmo-base"
@@ -75,11 +77,10 @@ rm -f "$ROOT/etc/resolv.conf";cp -a --no-dereference "$WORK/resolv.original" "$R
 bash "$REPO/install/phases/70-sanitize.sh" --root "$ROOT"
 rm -rf "$ROOT/var/lib/bmo"
 rm -f "$ROOT/boot/u-boot/BMO-IP.txt" "$ROOT/boot/u-boot/BMO-STATUS.txt" "$ROOT/boot/u-boot/BMO-RESUMO.txt" "$ROOT/.bmo-ready-build-root"
-sync;cleanup;ROOT="";LOOP=""
-# loop detach is lazy; wait for udev/blkid holders before reopening the file.
-udevadm settle
-for attempt in $(seq 1 50);do [ -z "$(losetup -j "$IMAGE")" ] && break;sleep 0.1;done
-bash "$REPO/install/light/minimize-image.sh" "$IMAGE" 128
+sync
+umount -R "$ROOT";ROOT=""
+OWNED_LOOP="$LOOP";LOOP=""
+bash "$REPO/install/light/minimize-image.sh" "$IMAGE" 128 "$OWNED_LOOP"
 gzip -1 -c "$IMAGE" > "$OUT/$(basename "$IMAGE").gz"
 gzip -t "$OUT/$(basename "$IMAGE").gz"
 (cd "$OUT" && sha256sum "$(basename "$IMAGE").gz" > "$(basename "$IMAGE").gz.sha256")

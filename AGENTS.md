@@ -258,3 +258,9 @@ Priorizar imagem pequena com boot/rede/configuração e instalador. Após conect
 Reaproveitar Base validada e fontes pinadas, sem recompilar kernel por rotina e sem exigir chave/token Git do usuário. Preservar hardware, gamepad, áudio, Wi-Fi, bootloader e fluxo de recuperação. Arquivos privados necessários ao BMO podem acompanhar o instalador; credenciais nunca. Medir separadamente download, raw reservado e ocupação após instalar. Não declarar uma estimativa como tamanho final medido.
 
 FTP local do roteador pode servir de depósito temporário de arquivos compactados/checksums, não de diretório de build ou filesystem do sistema. Autenticação deve continuar habilitada; senha somente por entrada local segura, nunca Git/log/relatório/imagem.
+
+## Apresentação profissional e diagnóstico — 2026-10-25
+
+Usar nomes públicos profissionais, como Assistente de Preparação BMO; o apelido informal usado na conversa não deve aparecer no produto. Orientar Wi-Fi de2,4GHz para compatibilidade e verificar suporte real do adaptador antes de afirmar que5GHz funciona. Não deduzir bandas pelo SSID nem afirmar que todo adaptador é somente2,4GHz.
+
+Erros do assistente devem preservar a causa técnica em log local, com etapa/operação/HRESULT, sem senhas ou dump do BMO-FIRSTBOOT.txt. Oferecer recuperação e acesso ao log; não recomendar admin por padrão nem alterar permissões globais do Windows. Segredos do TXT/backups continuam fora dos relatórios/Git.

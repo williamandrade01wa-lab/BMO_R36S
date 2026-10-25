@@ -29,5 +29,10 @@ LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle
 e2fsck -fn "$LOOP"p2
 mount -o ro "$LOOP"p2 "$MNT"
 grep -Fxq preserve-me "$MNT/etc/fixture"
+umount "$MNT"
+OWNED="$LOOP";LOOP=""
+bash "$REPO/install/light/minimize-image.sh" "$IMAGE" 16 "$OWNED"
+LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle
+mount -o ro "$LOOP"p2 "$MNT";grep -Fxq preserve-me "$MNT/etc/fixture"
 umount "$MNT";losetup -d "$LOOP";LOOP=""
 echo BMO_LIGHT_SAFETY_AND_SHRINK_TESTS_OK

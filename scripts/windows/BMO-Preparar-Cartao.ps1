@@ -3,6 +3,70 @@ param([switch]$SelfTest,[switch]$SmokeTest,[string]$PreviewPath)
 Set-StrictMode -Version 2.0
 $ErrorActionPreference='Stop'
 
+
+$script:BmoLogPath=''
+$script:BmoLogRootOverride=''
+$script:BmoLogSecrets=@()
+$script:BmoOperation='Inicializar'
+$script:BmoOperationPath=''
+function Protect-BmoLogText([string]$Text){
+    foreach($secret in @($script:BmoLogSecrets | Where-Object {-not [string]::IsNullOrEmpty($_)} | Sort-Object Length -Descending)){
+        $Text=$Text.Replace([string]$secret,'[REDACTED]')
+    }
+    return $Text
+}
+function Write-BmoDiagnostic([object]$Record,[string]$Step='unknown'){
+    try{
+        $ex=$Record.Exception
+        while($null -ne $ex.InnerException){$ex=$ex.InnerException}
+        $attrs='unavailable'
+        if($script:BmoOperationPath){try{$attrs=[string](Get-Item -LiteralPath $script:BmoOperationPath -Force -ErrorAction Stop).Attributes}catch{}}
+        $entry=[ordered]@{
+            timestamp_utc=[DateTime]::UtcNow.ToString('o');product='Assistente de Preparacao BMO';version='0.2.0'
+            step=$Step;operation=$script:BmoOperation;path=$script:BmoOperationPath;attributes=$attrs
+            exception_type=$ex.GetType().FullName;hresult=('{0:X8}' -f $ex.HResult)
+            message=[string]$ex.Message;category=[string]$Record.CategoryInfo.Category
+            error_id=[string]$Record.FullyQualifiedErrorId;stack=[string]$Record.ScriptStackTrace
+            powershell=[string]$PSVersionTable.PSVersion;os=[Environment]::OSVersion.VersionString
+        }
+        $text=Protect-BmoLogText ($entry | ConvertTo-Json -Compress -Depth 3)
+        $dirs=@()
+        if($script:BmoLogRootOverride){$dirs+=@($script:BmoLogRootOverride)}
+        else{
+            $local=[Environment]::GetFolderPath('LocalApplicationData')
+            if($local){$dirs+=@(Join-Path $local 'BMO\Logs')}
+            $dirs+=@((Join-Path $PSScriptRoot 'BMO-Logs'),(Join-Path ([IO.Path]::GetTempPath()) 'BMO-Logs'))
+        }
+        foreach($dir in $dirs){
+            try{
+                [void][IO.Directory]::CreateDirectory($dir)
+                if(-not $script:BmoLogPath){$file=Join-Path $dir ('BMO-Assistente-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,6)+'.jsonl')}
+                else{$file=$script:BmoLogPath}
+                [IO.File]::AppendAllText($file,$text+[Environment]::NewLine,[Text.UTF8Encoding]::new($false))
+                $script:BmoLogPath=$file;return $file
+            }catch{$script:BmoLogPath=''}
+        }
+    }catch{}
+    return ''
+}
+function Test-BmoWritable([string]$Boot){
+    $script:BmoOperation='Testar gravacao na BOOT'
+    $probe=Join-Path $Boot ('.bmo-write-test-'+[guid]::NewGuid().ToString('N')+'.tmp')
+    $script:BmoOperationPath=$probe;$stream=$null;$created=$false
+    try{
+        $stream=[IO.FileStream]::new($probe,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
+        $created=$true;$stream.WriteByte(0);$stream.Flush($true)
+    }finally{
+        if($null -ne $stream){$stream.Dispose()}
+        if($created){Remove-Item -LiteralPath $probe -Force}
+    }
+}
+trap{
+    $log=Write-BmoDiagnostic $_ 'startup'
+    [Console]::Error.WriteLine('Falha no Assistente BMO. Log: '+$log)
+    exit 1
+}
+
 function Resolve-BmoBoot([string]$Path) {
     if([string]::IsNullOrWhiteSpace($Path)){throw 'Escolha a pasta BOOT do cartao.'}
     $root=[IO.Path]::GetFullPath($Path).TrimEnd('\')+'\'
@@ -96,47 +160,66 @@ function Get-BmoCopyPlan([string]$Boot,[string]$PanelPath){
     return $plan
 }
 function Write-BmoCard([string]$Boot,[string]$PanelPath,[hashtable]$Settings,[int]$TestFailAfter=-1){
+    $script:BmoLogSecrets=@([string]$Settings.WifiPassword,[string]$Settings.UserPassword)
+    $script:BmoOperation='Validar destino';$script:BmoOperationPath=$Boot
     $root=Resolve-BmoBoot $Boot;$config=New-BmoConfig $Settings
     $plan=@(Get-BmoCopyPlan $root $PanelPath);$configPath=Join-Path $root 'BMO-FIRSTBOOT.txt'
     if((Test-Path -LiteralPath $configPath) -and ((Get-Item -LiteralPath $configPath).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Configuracao usa atalho. Operacao recusada.'}
+    Test-BmoWritable $root
     $backup=Join-Path $root ('.BMO-backup-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8))
+    $script:BmoOperation='Criar backup';$script:BmoOperationPath=$backup
     [void](New-Item -ItemType Directory -Path $backup)
     $targets=@($plan | ForEach-Object {$_.Dest})+@($configPath);$saved=@()
     foreach($dest in $targets){
-        $relative=$dest.Substring($root.Length);$existed=Test-Path -LiteralPath $dest
+        $script:BmoOperation='Copiar arquivo para backup';$script:BmoOperationPath=$dest
+        $relative=$dest.Substring($root.Length);$existed=Test-Path -LiteralPath $dest;$attributes=$null
         if($existed -and (Test-Path -LiteralPath $dest -PathType Container)){throw 'Um arquivo de destino e uma pasta. Nada foi alterado.'}
         $copy=Join-Path $backup $relative
         if($existed){
+            $attributes=(Get-Item -LiteralPath $dest -Force).Attributes
             [void](New-Item -ItemType Directory -Force -Path ([IO.Path]::GetDirectoryName($copy)))
-            Copy-Item -LiteralPath $dest -Destination $copy
+            Copy-Item -LiteralPath $dest -Destination $copy -Force
         }
-        $saved+=[pscustomobject]@{Dest=$dest;Copy=$copy;Existed=$existed}
+        $saved+=[pscustomobject]@{Dest=$dest;Copy=$copy;Existed=$existed;Attributes=$attributes}
     }
     $temp=Join-Path $root ('.bmo-config-'+[guid]::NewGuid().ToString('N')+'.tmp')
     try{
         $count=0
         foreach($item in $plan){
+            $script:BmoOperation='Copiar ScreenFile';$script:BmoOperationPath=$item.Dest
             [void](New-Item -ItemType Directory -Force -Path ([IO.Path]::GetDirectoryName($item.Dest)))
             Copy-Item -LiteralPath $item.Source -Destination $item.Dest -Force
+            $script:BmoOperation='Conferir ScreenFile'
             if((Get-FileHash -LiteralPath $item.Source -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $item.Dest -Algorithm SHA256).Hash){throw 'Falha ao conferir uma ScreenFile.'}
             $count++
             if($TestFailAfter -ge 0 -and $count -ge $TestFailAfter){throw 'Falha simulada de recuperacao.'}
         }
+        $script:BmoOperation='Criar configuracao temporaria';$script:BmoOperationPath=$temp
         [IO.File]::WriteAllText($temp,$config,[Text.UTF8Encoding]::new($false))
-        [IO.File]::Copy($temp,$configPath,$true)
+        $script:BmoOperation='Substituir BMO-FIRSTBOOT.txt';$script:BmoOperationPath=$configPath
+        Copy-Item -LiteralPath $temp -Destination $configPath -Force
+        $script:BmoOperation='Conferir BMO-FIRSTBOOT.txt'
+        if((Get-FileHash -LiteralPath $temp -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $configPath -Algorithm SHA256).Hash){throw 'Falha ao conferir a configuracao.'}
         return [pscustomobject]@{Backup=$backup;Files=$plan.Count;Config=$configPath}
     }catch{
+        $failure=$_;[void](Write-BmoDiagnostic $failure 'write-card')
         $restored=$true
         for($i=$saved.Count-1;$i -ge 0;$i--){
             try{
-                if($saved[$i].Existed){Copy-Item -LiteralPath $saved[$i].Copy -Destination $saved[$i].Dest -Force}
+                $script:BmoOperation='Restaurar arquivo';$script:BmoOperationPath=$saved[$i].Dest
+                if($saved[$i].Existed){
+                    Copy-Item -LiteralPath $saved[$i].Copy -Destination $saved[$i].Dest -Force
+                    [IO.File]::SetAttributes($saved[$i].Dest,$saved[$i].Attributes)
+                }
                 elseif(Test-Path -LiteralPath $saved[$i].Dest -PathType Leaf){Remove-Item -LiteralPath $saved[$i].Dest -Force}
-            }catch{$restored=$false}
+            }catch{$restored=$false;[void](Write-BmoDiagnostic $_ 'rollback')}
         }
-        if(-not $restored){throw "A gravacao falhou. Confira o backup em $backup antes de ligar."}
-        throw 'A gravacao falhou; os arquivos anteriores foram restaurados. Confira espaco e protecao do cartao.'
+        $message=if($restored){'Falha ao preparar o cartao. Os arquivos anteriores foram restaurados. Use Abrir log para ver a causa.'}else{"Falha na gravacao e recuperacao incompleta. Confira o backup em $backup. Use Abrir log."}
+        throw [InvalidOperationException]::new($message,$failure.Exception)
     }finally{
-        if(Test-Path -LiteralPath $temp -PathType Leaf){Remove-Item -LiteralPath $temp -Force}
+        if(Test-Path -LiteralPath $temp -PathType Leaf){
+            try{Remove-Item -LiteralPath $temp -Force}catch{[void](Write-BmoDiagnostic $_ 'cleanup')}
+        }
     }
 }
 function Test-BmoWizard{
@@ -148,6 +231,7 @@ function Test-BmoWizard{
     [IO.File]::WriteAllText((Join-Path $boot 'BMO-FIRSTBOOT.txt'),'OLD_CONFIG')
     [IO.File]::WriteAllText((Join-Path $boot 'mipi-panel.dtbo'),'OLD_PANEL')
     [IO.File]::WriteAllText((Join-Path $panel 'mipi-panel.dtbo'),'NEW_PANEL')
+    $script:BmoLogRootOverride=Join-Path $root 'logs'
     $s=@{Mode='wifi';SSID='Minha Rede #= exemplo';WifiPassword='senha$()#=123';UserPassword='senha teste';SSH=$true};$passed=0
     function Assert-Test($Ok,$Message){if(-not $Ok){throw "TEST FAILED: $Message"}}
     Assert-Test (@(Get-BmoPanels $boot).Count -eq 1) 'panel discovery';$passed++
@@ -191,6 +275,15 @@ function Test-BmoWizard{
     $bad=$s.Clone();$bad.UserPassword='__APPLIED__'
     $rejected=$false;try{[void](New-BmoConfig $bad)}catch{$rejected=$true}
     Assert-Test $rejected 'reserved password rejected';$passed++
+    [IO.File]::SetAttributes((Join-Path $boot 'BMO-FIRSTBOOT.txt'),[IO.FileAttributes]::ReadOnly)
+    [void](Write-BmoCard $boot $panel $s)
+    Assert-Test ([IO.File]::ReadAllText((Join-Path $boot 'BMO-FIRSTBOOT.txt')).Contains('USER_NAME=r36s')) 'readonly config replaced';$passed++
+    $script:BmoLogSecrets=@($s.WifiPassword,$s.UserPassword)
+    try{throw ('diagnostic '+$s.WifiPassword+' '+$s.UserPassword)}catch{$diagnostic=Write-BmoDiagnostic $_ 'selftest'}
+    Assert-Test (Test-Path -LiteralPath $diagnostic) 'diagnostic saved';$passed++
+    $logText=[IO.File]::ReadAllText($diagnostic)
+    Assert-Test (-not $logText.Contains($s.WifiPassword) -and -not $logText.Contains($s.UserPassword)) 'diagnostic redacts secrets';$passed++
+    Assert-Test ($logText.Contains('exception_type') -and $logText.Contains('operation')) 'diagnostic retains cause';$passed++
     Write-Output "BMO_WIZARD_TESTS_OK=$passed"
     Write-Output "FIXTURE=$root"
 }
@@ -199,10 +292,10 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [Windows.Forms.Application]::EnableVisualStyles()
 $script:Wizard=@{State=@{Boot='';Panel='';Mode='wifi';SSID='';WifiPassword='';UserPassword='';SSH=$false};Step='boot';History=[Collections.Generic.List[string]]::new();Panels=@()}
-$form=[Windows.Forms.Form]::new();$form.Text='BMO - Modo preguica'
+$form=[Windows.Forms.Form]::new();$form.Text='BMO - Assistente de Preparacao'
 $form.ClientSize=[Drawing.Size]::new(720,680);$form.StartPosition='CenterScreen';$form.FormBorderStyle='FixedDialog';$form.MaximizeBox=$false
 $form.BackColor=[Drawing.Color]::FromArgb(18,25,34);$form.ForeColor=[Drawing.Color]::FromArgb(234,241,245);$form.Font=[Drawing.Font]::new('Segoe UI',10)
-$title=[Windows.Forms.Label]::new();$title.Text='BMO  /  MODO PREGUICA';$title.SetBounds(28,22,650,34);$title.Font=[Drawing.Font]::new('Segoe UI',20,[Drawing.FontStyle]::Bold);$form.Controls.Add($title)
+$title=[Windows.Forms.Label]::new();$title.Text='BMO  /  PREPARACAO DO CARTAO';$title.SetBounds(28,22,650,34);$title.Font=[Drawing.Font]::new('Segoe UI',20,[Drawing.FontStyle]::Bold);$form.Controls.Add($title)
 $sub=[Windows.Forms.Label]::new();$sub.Text='Prepare o cartao com perguntas simples. Sem editar o TXT.';$sub.SetBounds(30,65,650,26);$form.Controls.Add($sub)
 $chat=[Windows.Forms.TextBox]::new();$chat.Multiline=$true;$chat.ScrollBars='Vertical';$chat.WordWrap=$true;$chat.SetBounds(28,105,664,300);$chat.ReadOnly=$true;$chat.BorderStyle='None'
 $chat.BackColor=[Drawing.Color]::FromArgb(27,37,49);$chat.ForeColor=$form.ForeColor;$chat.Font=[Drawing.Font]::new('Segoe UI',11);$form.Controls.Add($chat)
@@ -213,8 +306,10 @@ $browse=[Windows.Forms.Button]::new();$browse.Text='Escolher BOOT...';$browse.Se
 $reveal=[Windows.Forms.CheckBox]::new();$reveal.Text='Mostrar senha';$reveal.SetBounds(28,521,180,26);$reveal.Visible=$false;$form.Controls.Add($reveal)
 $errorLabel=[Windows.Forms.Label]::new();$errorLabel.SetBounds(28,550,664,44);$errorLabel.ForeColor=[Drawing.Color]::FromArgb(255,192,128);$form.Controls.Add($errorLabel)
 $back=[Windows.Forms.Button]::new();$back.Text='Voltar';$back.SetBounds(28,610,100,40);$form.Controls.Add($back)
+$openLog=[Windows.Forms.Button]::new();$openLog.Text='Abrir log';$openLog.SetBounds(145,610,110,40);$openLog.Visible=$false;$form.Controls.Add($openLog)
+$openLog.Add_Click({if($script:BmoLogPath -and (Test-Path -LiteralPath $script:BmoLogPath)){Invoke-Item -LiteralPath $script:BmoLogPath}})
 $next=[Windows.Forms.Button]::new();$next.Text='Continuar';$next.SetBounds(490,610,202,40);$next.BackColor=[Drawing.Color]::FromArgb(75,210,175);$next.ForeColor=[Drawing.Color]::FromArgb(12,31,29);$next.FlatStyle='Flat';$form.Controls.Add($next);$form.AcceptButton=$next
-$script:Wizard.Ui=@{Form=$form;Chat=$chat;Prompt=$prompt;Field=$field;Choices=$choices;Browse=$browse;Reveal=$reveal;Error=$errorLabel;Back=$back;Next=$next}
+$script:Wizard.Ui=@{Form=$form;Chat=$chat;Prompt=$prompt;Field=$field;Choices=$choices;Browse=$browse;Reveal=$reveal;Error=$errorLabel;OpenLog=$openLog;Back=$back;Next=$next}
 function Add-BmoChat([string]$Who,[string]$Text){
     $box=$script:Wizard.Ui.Chat;$nl=[Environment]::NewLine
     $box.AppendText($Who+$nl+$Text+$nl+$nl);$box.SelectionStart=$box.TextLength;$box.ScrollToCaret()
@@ -233,11 +328,11 @@ function Show-BmoStep([string]$Step){
             $u.Choices.SelectedIndex=$index
         }
         network{
-            $question='Como o R36S vai se conectar?';$hint='O endereco IP sera automatico (DHCP).';$u.Field.Visible=$false;$u.Choices.Visible=$true
+            $question='Como o R36S vai se conectar?';$hint='IP automatico. Para Wi-Fi, prefira 2,4 GHz; 5 GHz exige adaptador compativel.';$u.Field.Visible=$false;$u.Choices.Visible=$true
             foreach($label in @('Wi-Fi com senha','Wi-Fi sem senha (rede aberta)','Cabo / adaptador Ethernet USB','Sem rede por enquanto')){[void]$u.Choices.Items.Add($label)}
             $u.Choices.SelectedIndex=@('wifi','open','cable','offline').IndexOf($s.Mode)
         }
-        ssid{$question='Qual e o nome do seu Wi-Fi?';$hint='Digite exatamente como aparece. Sem aspas; espacos sao permitidos.';$u.Field.Text=$s.SSID}
+        ssid{$question='Qual e o nome do seu Wi-Fi?';$hint='Prefira uma rede de 2,4 GHz. Confira se o adaptador do R36S suporta 5 GHz. Digite o nome sem aspas.';$u.Field.Text=$s.SSID}
         wifiPass{$question='Qual e a senha desse Wi-Fi?';$hint='Sem aspas. Ela fica escondida e nao aparece no resumo.';$u.Field.Text=$s.WifiPassword;$u.Field.UseSystemPasswordChar=$true;$u.Reveal.Visible=$true}
         userPass{$question='Crie uma senha para entrar no R36S.';$hint='Guarde com voce. Para SSH, use uma senha diferente de r36s.';$u.Field.Text=$s.UserPassword;$u.Field.UseSystemPasswordChar=$true;$u.Reveal.Visible=$true}
         confirmPass{$question='Repita a senha do R36S.';$hint='Isso evita gravar uma senha digitada sem querer.';$u.Field.Text='';$u.Field.UseSystemPasswordChar=$true;$u.Reveal.Visible=$true}
@@ -259,6 +354,9 @@ function Show-BmoStep([string]$Step){
 function Move-BmoStep([string]$Step,[string]$Answer){Add-BmoChat 'VOCE' $Answer;$script:Wizard.History.Add($script:Wizard.Step);Show-BmoStep $Step}
 function Invoke-BmoNext{
     $w=$script:Wizard;$u=$w.Ui;$s=$w.State
+    $script:BmoLogSecrets=@([string]$s.WifiPassword,[string]$s.UserPassword)
+    if($w.Step -in @('wifiPass','userPass','confirmPass')){$script:BmoLogSecrets+=@($u.Field.Text)}
+    $script:BmoOperation='Validar etapa';$script:BmoOperationPath=[string]$s.Boot
     try{
         switch($w.Step){
             boot{$root=Resolve-BmoBoot $u.Field.Text;if($root -ne $s.Boot){$s.Panel=''};$s.Boot=$root;$w.Panels=@(Get-BmoPanels $root)
@@ -301,7 +399,13 @@ function Invoke-BmoNext{
             }
             done{$u.Form.Close()}
         }
-    }catch{$u.Error.Text=$_.Exception.Message}
+    }catch{
+        $record=$_;$log=Write-BmoDiagnostic $record $w.Step
+        $message=$record.Exception.Message
+        if($record.Exception -is [UnauthorizedAccessException]){$message='Acesso negado ao cartao. Confira protecao contra gravacao, espaco e arquivos em uso.'}
+        $u.Error.Text=$message
+        if($log){$u.OpenLog.Visible=$true;Add-BmoChat 'BMO' ('Diagnostico salvo em: '+$log+' (sem senhas).')}
+    }
 }
 $browse.Add_Click({
     $dialog=[Windows.Forms.FolderBrowserDialog]::new();$dialog.Description='Escolha a BOOT (ScreenFiles e boot.ini).';$dialog.ShowNewFolderButton=$false
