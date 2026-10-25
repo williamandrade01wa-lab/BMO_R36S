@@ -1,0 +1,60 @@
+name: Build BMO Light
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/bmo-linux-base-v1]
+    paths:
+      - 'install/light/**'
+      - '.github/workflows/build-bmo-light.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: bmo-light-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  light:
+    name: Light image and filesystem gates (ARM64)
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Host tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends e2fsprogs dosfstools util-linux xz-utils zerofree
+      - name: Syntax and safety fixtures
+        shell: bash
+        run: |
+          for f in install/light/*.sh install/light/bmo-light-install install/light/bmo-light-cli install/light/firstboot-finish; do bash -n "$f"; done
+          sudo bash install/light/tests/test-safety.sh
+      - name: Download pinned Base 9
+        uses: actions/download-artifact@v4
+        with:
+          name: bmo-linux-base-r36s-trixie-v0.2
+          run-id: 40118103143
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: base-input
+      - name: Validate base and unpack
+        run: |
+          echo 'e32988972ecd085078f430d6988e7bca10b1e551c317773a22235e49c51cc3ee  base-input/bmo-linux-base-r36s-trixie-v0.2.img.xz' | sha256sum -c -
+          xz -d -k base-input/bmo-linux-base-r36s-trixie-v0.2.img.xz
+      - name: Build Light core without BMO runtime packages
+        shell: bash
+        run: |
+          mkdir -p light-output
+          set -o pipefail
+          sudo bash install/light/build-light-image.sh \
+            base-input/bmo-linux-base-r36s-trixie-v0.2.img \
+            "$RUNNER_TEMP/bmo-light-work" "$GITHUB_WORKSPACE/light-output" \
+            2>&1 | tee light-output/build.log
+      - name: Upload core and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmo-light-core-${{ github.run_id }}
+          path: light-output/
+          if-no-files-found: warn
+          retention-days: 7

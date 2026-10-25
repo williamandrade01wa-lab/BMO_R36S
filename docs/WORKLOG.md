@@ -788,3 +788,15 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Arquivos: AGENTS e Worklog; scripts de auditoria/helper no PC. Copiado runtime PPSSPP27MiB do backup existente para PC, sem build/novos arquivos grandes na Potato.
 - Esperado: Light baseada na Base9 validada, payload pequeno pinado, firstboot configura/rede/expansão, instalador baixa apenas dependências, mostra etapas e abre BMO; sem Git privado/token na instalação normal.
 - Próximo passo: implementar/validar instalador e receita Light em GitHub Actions ARM64; preservar runtime PPSSPP auditado, medir imagem final e entregar só após integridade/contrato aprovados. A Ready beta1 já gravando continua um teste separado; não promover gate físico automaticamente.
+
+## 2026-10-24 — Implementação inicial da receita Light e gates no GitHub
+
+- Fase: Light com instalação online automática; branch feat/bmo-linux-base-v1; código anterior a23501c5dc54abe0502e2cda456bf80c99247580; R36S_REQUIRED=NO para CI, YES para boot físico.
+- Implementados install/light: instalador marcado/ARM64, payload/hash/runtime, rede/expansão/espaço, sete etapas visíveis, APT sem recomendados, staging auditado, áudio/TF2/units e início do kiosk só após checagens. Serviço repete falhas em60s; marcador de sucesso no final. CLI local bmo install evita clone privado.
+- Receita usa Base9 pinada, simula purge explícito de ferramentas de desenvolvimento antes de permitir remoção e preserva boot/kernel/rede/firmware. Payload fonte pequeno local; PPSSPP binário privado será injetado na BOOT no PC, não Git.
+- Finalizador encolhe só arquivo regular desmontado, e2fsck/resize2fs/zerofree com128MiB margem, preserva prefixo/offsets e corta fim. Fixture verifica UUID e arquivo sobreviventes, rejeição de runtime ausente/payload corrompido.
+- Workflow ARM64 somente para perfil Light, reaproveita artifactBase9, sem recompilar kernel nem usar Potato. Não gravar core intermediário sem runtime.
+- Medição Base9 no PC: gzip430645444, raw2386558976, root usado1784623104bytes. PPSSPP27.790.924bytes/SHA auditado conferido no PC.
+- Arquivos: install/light/**, .github/workflows/build-bmo-light.yml, docs/LIGHT-INSTALL.md. Fontes de frontend/launchers/kernel inalteradas.
+- Resultado esperado: CI comprova sintaxe, guardas/fixture, purge permitido, payload e core pequeno; resultado obtido nesta anotação: código preparado para a primeira execução, testes/size final ainda pendentes.
+- Próximo passo: executar CI, corrigir somente falhas comprovadas, incluir runtime no PC, verificar imagem final e registrar tamanho antes de entregar.

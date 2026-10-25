@@ -1,0 +1,20 @@
+[Unit]
+Description=BMO Light automatic online installation
+After=local-fs.target NetworkManager.service network-online.target armbian-resize-filesystem.service bmo-ready-firstboot.service
+Wants=NetworkManager.service network-online.target
+Requires=bmo-ready-firstboot.service
+Before=bmo-xorg.service bmo-kiosk.service bmo-ui.service bmo-control-api.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bmo-light-install
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=60
+TimeoutStartSec=infinity
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
