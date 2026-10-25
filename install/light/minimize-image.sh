@@ -30,7 +30,15 @@ PY
 PREFIX="$(prefix_hash)"
 if [ -z "$LOOP" ];then LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle;fi
 PART="$LOOP"p2
-if e2fsck -pf "$PART";then :;else [ "$?" -le 1 ];fi
+if e2fsck -pf "$PART";then :;else
+    RC="$?"
+    if [ "$RC" -gt 1 ];then
+        findmnt -rn -S "$PART" || true
+        lsblk -o NAME,MAJ:MIN,FSTYPE,MOUNTPOINTS "$LOOP" || true
+        if command -v fuser >/dev/null;then fuser -v "$PART" || true;fi
+        exit "$RC"
+    fi
+fi
 resize2fs -M "$PART"
 BLOCKS="$(dumpe2fs -h "$PART" 2>/dev/null | awk '/^Block count:/ {print $3}')"
 BS="$(dumpe2fs -h "$PART" 2>/dev/null | awk '/^Block size:/ {print $3}')"

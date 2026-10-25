@@ -3,6 +3,9 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 BASE="$(realpath -e "$1")";WORK="$2";OUT="$3";LOOP="";ROOT=""
 [ "$EUID" -eq 0 ] && [ "$(uname -m)" = aarch64 ]
+if [ "${BMO_LIGHT_PRIVATE_MOUNT_NS:-0}" != 1 ];then
+    exec unshare --mount --propagation private env BMO_LIGHT_PRIVATE_MOUNT_NS=1 bash "$0" "$@"
+fi
 [ ! -e "$WORK" ];mkdir -p "$WORK" "$OUT";WORK="$(realpath -e "$WORK")";OUT="$(realpath -e "$OUT")"
 echo "33e250518619c9cfecc2a846fa9a68e4bc213a5f1731d93cd07cffcaa61e9996  $BASE" | sha256sum -c -
 cleanup(){ if [ -n "$ROOT" ] && mountpoint -q "$ROOT";then umount -R "$ROOT";fi;[ -z "$LOOP" ] || losetup -d "$LOOP"; }

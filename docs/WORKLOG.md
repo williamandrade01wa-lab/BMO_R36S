@@ -822,3 +822,11 @@ Artifact expira: 2026-10-31T04:21:41Z
 - SegundaCILight40156807193 também parou na guarda de imagem anexada apósdetach; esperar5s não resolveu. Novo finalizador recebe explicitamente apenas o loop pertencente ao builder, conferebackingfile e ausência de mounts, reduz offline e detacha. Fixture passou a cobrir também esse handover. Guarda de imagens anexadas por terceiros permanece.
 - Arquivos: scripts/windows/**, install/light/**, workflowLight, AGENTS/continuidade/Worklog.
 - Próximo passo: novaCILight+CIWindows, recolher log real se falhar de novo; completar core+runtime noPC e verificar antes de entregar. Não recompilar kernel nem montar imagens naPotato.
+
+## 2026-10-25 — CI Windows verde e isolamento das montagens Light
+
+- Branch feat/bmo-linux-base-v1; fonte3f41782e8b59273b49c466578233186b70968409. CIWindows40157690739 success.
+- CILight40157690715 passou testes de segurança/duas reduções de fixture/purge/payload/sanitização, mas e2fsck do core recusou /dev/loop0p2 como em uso, mesmo sem mounts visíveis apósumount. Nenhum e2fsck -f ou relaxamento deguardas foi usado.
+- Builder agora entra em namespace privado de montagens para impedir propagação de mounts do chroot ao runner. Hipótese de referências externas será testada, não tratada como causa confirmada. Falhas de e2fsck passam a registrar findmnt/lsblk/fuser para diagnóstico.
+- Usuário autorizou substituir assistente e logo diretamente noH; grantread/write foi concedido, porémCLI/Node continuam comEPERM. Explorador consegue listar; operação local viaComputerUse fazbackup somente dos3scripts e logo, sem abrirTXT comsenhas.
+- Próximo passo: CILight com namespace, concluirbackup/troca noH, revisar ai-memory por solicitação do usuário.
