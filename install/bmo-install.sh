@@ -637,6 +637,21 @@ if [ "$MODE" = "apply" ]; then
 fi
 
 
+# Sound effects are part of the app payload, not optional Linux packages.
+require_file "$REPO_ROOT/assets/sounds/SHA256SUMS"
+(
+    cd "$REPO_ROOT/assets/sounds"
+    sha256sum -c SHA256SUMS
+)
+for SOUND in angry.wav error.wav happy.wav laugh.wav love.wav sad.wav shocked.wav sleep.wav success.wav talking.wav thinking.wav wink.wav; do
+    plan_copy "assets/sounds/$SOUND" "/opt/bmo-sounds/$SOUND" "0644"
+    if [ "$MODE" = "apply" ]; then
+        apply_copy "assets/sounds/$SOUND" "/opt/bmo-sounds/$SOUND" "0644"
+    fi
+done
+echo "BMO_SOUNDS_SOURCE_OK"
+
+
 # ============================================================
 # 06 backend
 # ============================================================

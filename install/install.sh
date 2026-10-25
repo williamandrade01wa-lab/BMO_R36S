@@ -432,6 +432,18 @@ apply_bmo() {
         || die "production e candidate divergiram"
 
 
+    (
+        cd "$ROOT/assets/sounds"
+        sha256sum -c SHA256SUMS
+    )
+    local sound
+    for sound in angry.wav error.wav happy.wav laugh.wav love.wav sad.wav shocked.wav sleep.wav success.wav talking.wav thinking.wav wink.wav; do
+        install -D -o root -g root -m 0644 \
+            "$ROOT/assets/sounds/$sound" "/opt/bmo-sounds/$sound"
+        cmp -s "$ROOT/assets/sounds/$sound" "/opt/bmo-sounds/$sound" || die "som instalado divergente: $sound"
+    done
+
+
     # --------------------------------------------------------
     # Runtime executavel
     # --------------------------------------------------------

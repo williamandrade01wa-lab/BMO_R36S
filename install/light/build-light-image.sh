@@ -39,7 +39,7 @@ if [ "${#REMOVE[@]}" -gt 0 ];then
     chroot "$ROOT" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get -y -o APT::Get::AutomaticRemove=false purge "${REMOVE[@]}"
 fi
 SOURCE="$ROOT/usr/share/bmo/light/source";mkdir -p "$SOURCE"
-for item in backend frontend launchers configs system systemd deploy/r36s scripts/runtime install/manifests install/packages install/system install/phases install/beta install/light install/bmo-install.sh;do
+for item in assets/sounds backend frontend launchers configs system systemd deploy/r36s scripts/runtime install/manifests install/packages install/system install/phases install/beta install/light install/bmo-install.sh;do
     mkdir -p "$SOURCE/$(dirname "$item")";cp -a "$REPO/$item" "$SOURCE/$item"
 done
 # Payload contains source/config only, never .git, runtime archives or credentials.

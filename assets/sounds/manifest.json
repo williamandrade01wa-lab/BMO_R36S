@@ -1,0 +1,116 @@
+{
+  "source": "R36S original /opt/bmo-sounds",
+  "captured_date": "2026-10-25",
+  "user_confirmed": "Sons das carinhas ao apertar botoes no BMO original",
+  "files": [
+    {
+      "name": "angry.wav",
+      "bytes": 115244,
+      "sha256": "f9a68d4ec6c8bbff203556289787634d6bbdfccdfc54e83077cef0af78c62fe9",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 57600
+    },
+    {
+      "name": "error.wav",
+      "bytes": 120044,
+      "sha256": "bb809c8a3389ff923499d01d8755f130bfc5dedd32305c7d97456507932832d3",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 60000
+    },
+    {
+      "name": "happy.wav",
+      "bytes": 120044,
+      "sha256": "cfa034cd75e8b402fae2676a94847e6d211e3670d0d76ac6703553f74d7207ec",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 60000
+    },
+    {
+      "name": "laugh.wav",
+      "bytes": 115244,
+      "sha256": "ad4abe98e42fc3599c8db1d5cc00f904de3a771c90a279383ac9abfb51d7bc3e",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 57600
+    },
+    {
+      "name": "love.wav",
+      "bytes": 134444,
+      "sha256": "42382a4af23be60c14dab48e90da9ddd841b4f999b0f85241d873c3c9601ab8a",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 67200
+    },
+    {
+      "name": "sad.wav",
+      "bytes": 144044,
+      "sha256": "90f5854b1a7139e4bf8dcad78fa8d49bfba7b8600e23c4795e1bd1021e771c78",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 72000
+    },
+    {
+      "name": "shocked.wav",
+      "bytes": 100844,
+      "sha256": "44abf6f731e5c70eab3819cf77e1cedd4133224ee94ddfaa079750b45cb049fa",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 50400
+    },
+    {
+      "name": "sleep.wav",
+      "bytes": 862550,
+      "sha256": "a184cced52e95048a023442533576600923f6e3257e35c7146c94074c855b443",
+      "channels": 2,
+      "sample_rate": 44100,
+      "sample_width": 2,
+      "frames": 215600
+    },
+    {
+      "name": "success.wav",
+      "bytes": 129644,
+      "sha256": "0d43f667d0bd5af6a6c3249bd9160626841778f0ee734a03ee88c99b019457f2",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 64800
+    },
+    {
+      "name": "talking.wav",
+      "bytes": 110442,
+      "sha256": "959dceade84d2c57f410dbd5c70d382b50ef81966ecac2413e7c7b43c8662f55",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 55199
+    },
+    {
+      "name": "thinking.wav",
+      "bytes": 134444,
+      "sha256": "e2337571b021c22c29a6246c70d744a69be0ee7abf51863c28c069efaf64b72c",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 67200
+    },
+    {
+      "name": "wink.wav",
+      "bytes": 96044,
+      "sha256": "b59c956d92134de66d2ab07a9c3e394e5dd0544a9252fe3affba265596a589b4",
+      "channels": 1,
+      "sample_rate": 48000,
+      "sample_width": 2,
+      "frames": 48000
+    }
+  ],
+  "total_bytes": 2183032
+}

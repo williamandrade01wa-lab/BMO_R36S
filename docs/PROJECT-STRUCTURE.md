@@ -131,6 +131,10 @@ Responsabilidades:
 - retorno seguro ao BMO;
 - argumentos e ambiente de execução.
 
+### `assets/sounds/`
+
+Efeitos WAV do BMO, preservados do cartão funcional do usuário, com SHA256SUMS e inventário. O instalador copia para /opt/bmo-sounds; o payload Light inclui estes pequenos arquivos. Detalhes e validação em docs/AUDIO.md. Não colocar ROMs, saves ou credenciais neste diretório.
+
 ### `configs/`
 
 Configurações versionadas e públicas.

@@ -271,9 +271,11 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-**Prioridade atual (2026-10-25): áudio no R36S em 192.168.1.65.** Assistente v0.2.1 e primeiro boot da Ready confirmados pelo usuário; SSH por chave validado, firstboot.done presente, BMO HTTP200 e três serviços ativos/zero failed. Root 12G e sem marker Light: não confundir com candidata Light ainda não testada. Tradução Chromium removida por política TranslateEnabled=false (root:root 0644), usuário confirmou; fonte/cópias/manifest corrigidos para próximas instalações. Main preservada.
+**Prioridade atual (2026-10-25): testar os sons recuperados no cartão Ready.** Original está em 192.168.1.28, r36s, SSH por chave validado. Usuário confirma sons das carinhas ao apertar botões. Os 12 WAV de /opt/bmo-sounds foram preservados em assets/sounds com manifest/SHA256 (2183032 bytes) e cópia local em outputs. Instaladores e payload Light incluem agora esses arquivos. Ver docs/AUDIO.md.
 
-Som continua ausente mesmo com SPK, 50% e ALSA direto. Kernel detecta Headphones Jack=on sem fone. Usuário confirma som no cartão anterior; sem fone P2 disponível. Próximo passo acordado: usuário desligará e colocará o cartão original, testará o som e informará IP para comparar por SSH. Baseline Ready já salvo em work/audio-comparison/ready-20261025 (oito coletas completas + manifest SHA). Coletar kernel, DTB, mixer e áudio do original antes de mudar configurações. Não inverter GPIO nem substituir DTB sem evidência. Ainda não salvar mixer SPK como correção comprovada. CP-BETA-001 permanece VALIDATING devido a áudio e demais testes pendentes. Registro detalhado no Worklog.
+Comparação corrigiu hipóteses: original kernel 6.12.74 / Ready 6.12.32, mas DTB/DTBO idênticos e ambos mostram Jack=on/HP. Voz remota e success pela API não foram ouvidos nem no original; não usar esses testes para concluir kernel quebrado. Ready está sem /opt/bmo-sounds: primeiro defeito de conteúdo a corrigir. Não inverter GPIO nem forçar SPK permanentemente.
+
+Próximo passo: usuário desligar completamente, retornar ao cartão Ready e informar IP; aplicar WAV com validação e comparar carinhas pelos botões, mantendo HP como no original. Se falhar, investigar player/API/driver com testes equivalentes. Original preservado sem mudanças de áudio. Baselines no PC: work/audio-comparison/ready-20261025 e original-20261025. Imagens já geradas ainda exigem patch ou nova montagem. Main preservada; CP-BETA-001 continua VALIDATING. R36S_REQUIRED=YES.
 
 Histórico Light/pendências anteriores:
 
