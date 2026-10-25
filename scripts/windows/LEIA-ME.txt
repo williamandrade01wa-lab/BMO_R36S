@@ -1,4 +1,4 @@
-BMO - ASSISTENTE DE PREPARACAO v0.2.0
+BMO - ASSISTENTE DE PREPARACAO v0.2.1
 ===================================
 1. Extraia TODOS os arquivos deste ZIP para uma pasta no PC.
 2. Coloque o cartao do sistema no computador e feche o assistente antigo.
@@ -30,3 +30,4 @@ como solucao padrao. Confira protecao contra gravacao/arquivos em uso.
 
 Use antes do primeiro boot. Em cartao ja configurado, salvar o TXT nao
 reaplica a configuracao automaticamente.
+

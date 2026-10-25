@@ -22,7 +22,7 @@ function Write-BmoDiagnostic([object]$Record,[string]$Step='unknown'){
         $attrs='unavailable'
         if($script:BmoOperationPath){try{$attrs=[string](Get-Item -LiteralPath $script:BmoOperationPath -Force -ErrorAction Stop).Attributes}catch{}}
         $entry=[ordered]@{
-            timestamp_utc=[DateTime]::UtcNow.ToString('o');product='Assistente de Preparacao BMO';version='0.2.0'
+            timestamp_utc=[DateTime]::UtcNow.ToString('o');product='Assistente de Preparacao BMO';version='0.2.1'
             step=$Step;operation=$script:BmoOperation;path=$script:BmoOperationPath;attributes=$attrs
             exception_type=$ex.GetType().FullName;hresult=('{0:X8}' -f $ex.HResult)
             message=[string]$ex.Message;category=[string]$Record.CategoryInfo.Category
@@ -48,6 +48,11 @@ function Write-BmoDiagnostic([object]$Record,[string]$Step='unknown'){
         }
     }catch{}
     return ''
+}
+function Ensure-BmoDirectory([string]$Path){
+    # New-Item -Force rejects existing drive roots on Windows PowerShell 5.1.
+    if([IO.Directory]::Exists($Path)){return}
+    [void][IO.Directory]::CreateDirectory($Path)
 }
 function Test-BmoWritable([string]$Boot){
     $script:BmoOperation='Testar gravacao na BOOT'
@@ -177,7 +182,7 @@ function Write-BmoCard([string]$Boot,[string]$PanelPath,[hashtable]$Settings,[in
         $copy=Join-Path $backup $relative
         if($existed){
             $attributes=(Get-Item -LiteralPath $dest -Force).Attributes
-            [void](New-Item -ItemType Directory -Force -Path ([IO.Path]::GetDirectoryName($copy)))
+            Ensure-BmoDirectory ([IO.Path]::GetDirectoryName($copy))
             Copy-Item -LiteralPath $dest -Destination $copy -Force
         }
         $saved+=[pscustomobject]@{Dest=$dest;Copy=$copy;Existed=$existed;Attributes=$attributes}
@@ -187,7 +192,7 @@ function Write-BmoCard([string]$Boot,[string]$PanelPath,[hashtable]$Settings,[in
         $count=0
         foreach($item in $plan){
             $script:BmoOperation='Copiar ScreenFile';$script:BmoOperationPath=$item.Dest
-            [void](New-Item -ItemType Directory -Force -Path ([IO.Path]::GetDirectoryName($item.Dest)))
+            Ensure-BmoDirectory ([IO.Path]::GetDirectoryName($item.Dest))
             Copy-Item -LiteralPath $item.Source -Destination $item.Dest -Force
             $script:BmoOperation='Conferir ScreenFile'
             if((Get-FileHash -LiteralPath $item.Source -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $item.Dest -Algorithm SHA256).Hash){throw 'Falha ao conferir uma ScreenFile.'}
@@ -284,6 +289,14 @@ function Test-BmoWizard{
     $logText=[IO.File]::ReadAllText($diagnostic)
     Assert-Test (-not $logText.Contains($s.WifiPassword) -and -not $logText.Contains($s.UserPassword)) 'diagnostic redacts secrets';$passed++
     Assert-Test ($logText.Contains('exception_type') -and $logText.Contains('operation')) 'diagnostic retains cause';$passed++
+    $driveRoot=[IO.Path]::GetPathRoot($root)
+    Ensure-BmoDirectory $driveRoot
+    Assert-Test ([IO.Directory]::Exists($driveRoot)) 'existing drive root accepted';$passed++
+    $nested=Join-Path $boot 'subfolder [literal]\child'
+    Ensure-BmoDirectory $nested
+    Assert-Test ([IO.Directory]::Exists($nested)) 'nested literal directory created';$passed++
+    Ensure-BmoDirectory $nested
+    Assert-Test ([IO.Directory]::Exists($nested)) 'existing directory idempotent';$passed++
     Write-Output "BMO_WIZARD_TESTS_OK=$passed"
     Write-Output "FIXTURE=$root"
 }
@@ -455,3 +468,4 @@ if($SmokeTest){
     Write-Output 'BMO_WIZARD_UI_CREATED_OK';$form.Dispose();return
 }
 [void]$form.ShowDialog();$form.Dispose()
+

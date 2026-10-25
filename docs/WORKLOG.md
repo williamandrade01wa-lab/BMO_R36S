@@ -859,3 +859,17 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Lightcore run40159128087/source91a8139690404fb544174b56e980bc12cc43ebf2 success. Artifact12585920303 ZIP402024835bytes/SHA c912b03f51c236ccc1b0ca27151d66bbd549deb1c15d966356fb04566e11f374 conferido noPC; extraçãoCRCpassou. Finalização de runtime/logo em cópia local, fonte79arquivosverificada.
 - Primeira cópia local de montagemv01 falhou ao truncarlogoexistente na bibliotecaFAT; não promovida. Atualizado para remover/criar somente os arquivosFAT da cópia e refazer do core íntegro. Nova cópiav02 em compressão após root/runtime/logoSHA aprovados. Aguardar roundtrip final.
 - Próximo passo: finalizarchecksum/manifest Light e entregar candidata; recolher novo log de erro se preparação real falhar; testar boot/progresso/expansão/autoinstalação noR36S.
+
+
+## 2026-10-25 — Assistente v0.2.1: falha na raiz da unidade e Light finalizada no PC
+
+- Fase/branch: preparação do cartão / feat/bmo-linux-base-v1. HEAD inicial ee27134219eccc6274cd1a5471c0fb4b8d10dc02; main preservada.
+- Objetivo: diagnosticar a nova falha real após Preparar cartão, corrigir sem alterar permissões e registrar a finalização Light.
+- Evidência: log v0.2.0 indica Copiar ScreenFile, destino H:\\rg351mp-kernel.dtb, ArgumentException 80070057, CreateDirectoryArgumentError na linha 190. Reproduzido no Windows PowerShell: New-Item -ItemType Directory -Force na raiz de unidade existente retorna caminho inválido. Não é diagnóstico de falta de permissão do cartão.
+- Ação/arquivos: scripts/windows/BMO-Preparar-Cartao.ps1 usa Ensure-BmoDirectory, retorna quando a pasta já existe e cria diretórios novos com API literal. scripts/windows/LEIA-ME.txt atualizado para v0.2.1. Mantidos backup, rollback, hashes e logs com redação de senhas.
+- Validação: 30 selftests aprovados, incluindo raiz existente, diretório aninhado com colchetes e idempotência; testes anteriores de cópia, configuração, rollback e segredos continuam passando. Tentativa adicional de teste com unidade subst bloqueada pelo sandbox; não declarar end-to-end em H validado.
+- Resultado: ZIP v0.2.1 gerado no PC, SHA256 708bb4ff0cdafb433ddcc8acc41d02e9bed32117666fc7caccbe499581126ed2. Usuário interrompeu Computer Use com Escape; nenhuma nova interação com a tela. v0.2.1 ainda NÃO copiada ao H. Pode rodar extraída no PC e selecionar H.
+- Light: CI 40159128087 / fonte 91a8139690404fb544174b56e980bc12cc43ebf2 aprovada. Finalizador local v02 concluiu BMO_LIGHT_FINAL_IMAGE_OK, 79 arquivos de payload verificados, runtime pinado e logo lidos de volta na FAT; root preservada; XZ descomprimida com SHA raw completo conferido. Resultado 424096916 bytes XZ / 2386558976 raw. SHA XZ f890fb74311145f943a9a43bf6527892dff899a871ee003fce388382068e87a2, raw a7f87a6b52d43f0e72f1d4020e097f4d25263add43b0f699ef52b243633d2193. Root usada 1402290176 bytes. Construção/compressão no GitHub/PC, sem novo uso pesado da Potato.
+- Limite: candidata Light contém assistente v0.2.0; usar v0.2.1 externo ou reinjetar correção antes de nova entrega integrada. Não tratar candidata como release pronta. Instalador online/expansão/BMO ainda requerem teste físico.
+- R36S_REQUIRED=YES para Light; NO para regressão isolada do assistente Windows.
+- Próximo passo exato: usuário executar v0.2.1 do PC e preparar H; se falhar coletar novo JSONL. Atualizar assistente na próxima imagem candidata e testar Light no cartão extra com TF2 fora.

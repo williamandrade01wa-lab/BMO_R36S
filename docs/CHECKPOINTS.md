@@ -246,3 +246,24 @@ RAW_SHA256=b7a9ab2567084f42da2c6a7628fbacd68c683ff120f64dca54fc252f15e35f7e
 Em 2026-10-24, Base #9 foi integrada ao BMO/RetroArch/PPSSPP/Moonlight e dependências. Passaram pins específicos da beta, Apply v3, fases 40/50/60, systemd-analyze offline, bibliotecas PPSSPP, contrato beta e sanitização. Arquivo transferido ao PC e validado por gzip CRC e SHA256 raw completo. Entregáveis e base original preservados localmente; arquivos grandes temporários removidos da Potato por instrução explícita do usuário.
 
 Este checkpoint não declara boot, hardware nem abertura física do kiosk desta beta. O relato de boot da Base #8 não se aplica automaticamente à Ready beta. Testar cartão extra de 16 GB+, configurar pelo assistente BOOT, TF2 fora no primeiro boot; depois desligar antes de recolocar TF2. Retorno seguro: cartão anterior preservado; não promover main.
+
+
+## CP-LIGHT-001 — Conteúdo e integridade offline, validação física pendente
+
+```text
+STATUS=VALIDATING
+SCOPE=OFFLINE_CONTENT_HASH_VERIFIED_PHYSICAL_BOOT_PENDING
+BRANCH=feat/bmo-linux-base-v1
+CORE_SOURCE_COMMIT=91a8139690404fb544174b56e980bc12cc43ebf2
+CI_RUN=40159128087
+R36S_REQUIRED=YES
+IMAGE=BMO-R36S-Light-v0.1.0.img.xz
+XZ_BYTES=424096916
+XZ_SHA256=f890fb74311145f943a9a43bf6527892dff899a871ee003fce388382068e87a2
+RAW_BYTES=2386558976
+RAW_SHA256=a7f87a6b52d43f0e72f1d4020e097f4d25263add43b0f699ef52b243633d2193
+```
+
+Finalizador local v02 validou 79 arquivos na ext4, injetou runtime PPSSPP pinado e logo no FAT com leitura de volta, preservou hash root e verificou SHA raw após descompressão XZ integral. Uso root 1402290176 bytes. Pacotes BMO grandes continuam para instalação online após expansão do SD. Sem teste físico concluído.
+
+Limite conhecido: esta candidata contém assistente v0.2.0, que falha no Windows PowerShell ao criar a raiz existente da unidade. Preparar cartão com assistente v0.2.1 externo ou reinjetar correção antes de nova entrega integrada. Não anunciar como release pronta. Retorno seguro: cartão anterior e Ready beta preservados; main intocada.

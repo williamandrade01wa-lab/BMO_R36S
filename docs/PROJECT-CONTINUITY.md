@@ -271,16 +271,17 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-Prioridade atual: **BMO Light**, por decisão explícita do usuário. Imagem pequena com boot/rede/instalador, expansão doSD antes dos pacotes e instalação automática online com progresso no primeiro boot. Ver docs/LIGHT-INSTALL.md e install/light/**. Chromium/emuladores não vêm pré-instalados; fonteBMO pequena e runtimePPSSPP pinado acompanham a entrega, sem chave/tokenGit ou senhaFTP.
+Atualizado em 2026-10-25. Prioridade: corrigir preparação do cartão e validar BMO Light com instalação automática online e progresso, mantendo builds grandes no GitHub/PC.
 
-1. CILight executada em GitHubARM64 reutilizando Base9; semkernelbuild nemPotato. Runs40156553455 e40156807193 passaram fixtures/purge240MB/payload/sanitização, falharam somente na passagem do loop ao redutor. Nova correção transfere loop explicitamente combackingfile/mountguards efixture.
-2. AssistenteWindows atualizado para nome profissional, orientação2,4/5GHz, logs semsenha e diagnóstico de permissão. Pacote v0.2.0 entregue noPC,27testes+UIflow passaram. Usuário teve falha apósPrepararcartao naH; causa real ainda não comprovada porque catch antigo escondia erro. Aguardar log novo se repetir. Windows negou leituraH mesmo apósgrant; não lerTXT/segredos nem alterarACL.
-3. DiagnósticoWiFiLight roda antes dofirstboot e gravaBMO-WIFI.txt comdriver/bandas; testes3passaram. Suporte5GHz precisa dehardware/domínio/região, sempalpite porSSID.
-4. Concluir CI, baixarcore e incluir runtime noPC viaFAT, verificar payload/hash/gzip, registrar tamanho final e entregar candidataLight. Base9original/runtime já preservados noPC. Não usar core intermediário paraflashear.
-5. Readybeta1 anteriormente entregue continua separada: gzip2016381902bytes, raw12GiB. Seu teste não valida automaticamenteLight. TF2fora no primeiroboot; SDextra8GB+ paraLight; mantercartãoanterior de retorno.
-6. PriorizarGitHub/PC; Potato192.168.1.50 ficou46Glivres apóslimpeza. FTP192.168.1.1:21 /usb1_1_1 testado pelo usuário:8MiB, SHA/limpezaOK,3,14/3,12MiB/s. Mantersenha, usar paraarquivoscompactados/checksums; capacidade/limite>4GB não medidos.
+1. Falha real do assistente identificada pelo JSONL: PowerShell New-Item -Force rejeita raiz existente H:\\ ao copiar ScreenFile. v0.2.1 evita criar diretórios já existentes, usa criação literal e passou 30 selftests. ZIP no PC; ainda não instalado no H porque usuário interrompeu controle da tela com Escape. Executar assistente extraído no PC, selecionar H, preparar cartão; coletar novo log se falhar. Não alterar ACL nem executar como administrador como solução padrão.
+2. H já recebeu e teve hash de leitura conferido para logo.bmp novo e assistente v0.2.0. Logo 640x480 RGB BMP 24-bit sem compressão, formato original preservado. Configuração com senhas não foi lida nem versionada.
+3. Light CI 40159128087 aprovada, fonte 91a8139690404fb544174b56e980bc12cc43ebf2. Finalização local v02 concluída e hashes verificados: BMO-R36S-Light-v0.1.0.img.xz 424096916 bytes, raw 2386558976. Ver CP-LIGHT-001. A candidata ainda embute assistente v0.2.0: usar ZIP v0.2.1 externo ou reinjetar correção antes da próxima entrega integrada. Finalizador/ext4_reader estão em work/light-source/install/light no PC e ainda precisam ser versionados após revisão.
+4. Light leva fonte BMO, instalador e pequeno runtime PPSSPP pinado; baixa os pacotes grandes após conectar, expande SD antes e mostra progresso. Requer validação física: cartão extra 8 GB+, TF2 fora durante primeiro boot; verificar rede/IP, expansão, instalação e abertura BMO. Não promover main por CI/hash apenas.
+5. Wi-Fi: preferência 2,4 GHz; 5 GHz depende do adaptador. BMO-WIFI.txt informa driver/bandas sem SSID/senhas. Três testes de bandas aprovados.
+6. Ready beta anterior permanece separada (raw 12 GiB), não valida Light. Potato 192.168.1.50 preservada de builds/arquivos grandes. FTP privado do roteador: teste 8 MiB OK, 3,14/3,12 MiB/s, capacidade/limite >4GB desconhecidos. Nenhuma senha FTP foi solicitada no chat.
+7. ai-memory avaliado: integração MCP local no PC é viável, Windows nativo experimental; relatório e exemplo desativado estão em outputs. Sem instalação, hooks, captura global ou alteração de configuração do Codex. Preferir resumos curados complementando documentação Git.
 
-Main preservada. R36S_REQUIRED=YES antes de promover Light ou frontend/boot físico. Não anunciar previsões como tamanho medido.
+R36S_REQUIRED=YES antes de promover a imagem. Próximo teste imediato: assistente v0.2.1 no PC contra o cartão H.
 
 ## 13. ScreenFiles
 
