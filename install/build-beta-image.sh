@@ -2,6 +2,7 @@
 set -euo pipefail
 REPO="$(cd -- "$(dirname -- "$0")/.." && pwd)"
 BASE="";PPSSPP="";OUT="";WORK="";LOOP="";ROOT=""
+RESUME=NO
 VERSION=1.0.0-beta.1
 BASE_SHA=33e250518619c9cfecc2a846fa9a68e4bc213a5f1731d93cd07cffcaa61e9996
 PPSSPP_SHA=1af91efd8374a2c164e5f2ffa37b3d65980b825a207cbb09c688b2997088c5ad
@@ -13,6 +14,7 @@ cleanup(){
 }
 trap cleanup EXIT
 while [ "$#" -gt 0 ];do case "$1" in
+    --resume-work) RESUME=YES;shift;;
     --base-raw) BASE="$2";shift 2;;
     --ppsspp-runtime) PPSSPP="$2";shift 2;;
     --output-dir) OUT="$2";shift 2;;
@@ -23,7 +25,11 @@ esac;done
 [ "$(uname -m)" = aarch64 ] || die 'native aarch64 builder required'
 [ -f "$BASE" ] && [ -f "$PPSSPP" ] && [ -n "$OUT" ] && [ -n "$WORK" ] || die 'base/runtime/output/work required'
 BASE="$(realpath -e "$BASE")";PPSSPP="$(realpath -e "$PPSSPP")"
-[ ! -e "$WORK" ] || die 'work directory must be new'
+if [ "$RESUME" = NO ];then
+    [ ! -e "$WORK" ] || die 'work directory must be new'
+else
+    [ -d "$WORK" ] && [ ! -L "$WORK" ] || die 'resume requires existing real work directory'
+fi
 install -d -m 0755 "$OUT" "$WORK"
 OUT="$(realpath -e "$OUT")";WORK="$(realpath -e "$WORK")"
 OUTPUT="$OUT/BMO-R36S-Ready-v$VERSION.img.xz"
@@ -36,6 +42,7 @@ echo "$BASE_SHA  $BASE" | sha256sum -c -
 echo "$PPSSPP_SHA  $PPSSPP" | sha256sum -c -
 [ "$(df --output=avail -B1 "$WORK" | tail -1)" -gt 16000000000 ] || die '16 GB free required'
 IMAGE="$WORK/BMO-R36S-Ready-v$VERSION.img"
+if [ "$RESUME" = NO ];then
 cp --reflink=auto --sparse=always "$BASE" "$IMAGE"
 sfdisk --json "$IMAGE" > "$WORK/partition-before.json"
 read -r START SECTORS < <(python3 - "$WORK/partition-before.json" <<'PY'
@@ -48,14 +55,23 @@ PY
 )
 truncate -s 12G "$IMAGE"
 printf 'start=%s,size=%s,type=83\n' "$START" "$SECTORS" | sfdisk --no-reread --force -N 2 "$IMAGE"
+else
+    [ -f "$IMAGE" ] && [ ! -L "$IMAGE" ] || die 'resume image missing or symlink'
+    [ "$(stat -c %s "$IMAGE")" = 12884901888 ] || die 'resume image size mismatch'
+    log 'Resuming stopped image work; checks and installation are repeated'
+fi
 LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle
 ROOT_PART="$LOOP"p2;BOOT_PART="$LOOP"p1
 if e2fsck -pf "$ROOT_PART";then :;else rc=$?;[ "$rc" -le 1 ] || die 'ext4 check failed';fi
 resize2fs "$ROOT_PART"
-ROOT="$WORK/root";mkdir "$ROOT";mount "$ROOT_PART" "$ROOT"
+ROOT="$WORK/root";mkdir -p "$ROOT";mount "$ROOT_PART" "$ROOT"
 install -d "$ROOT/boot/u-boot";mount "$BOOT_PART" "$ROOT/boot/u-boot"
 [ -f "$ROOT/etc/bmo/base-version.env" ] || die 'not a BMO Base'
 [ "$(chroot "$ROOT" dpkg --print-architecture)" = arm64 ] || die 'target not arm64'
+if [ "$RESUME" = YES ];then
+    [ -f "$ROOT/.bmo-ready-build-root" ] || die 'resume target lacks build marker'
+    [ -z "$(chroot "$ROOT" dpkg --audit)" ] || die 'resume target has incomplete packages'
+fi
 touch "$ROOT/.bmo-ready-build-root" "$ROOT/.bmo-ready-sandbox" "$ROOT/.bmo-apply-v3-sandbox"
 # Suppress Armbian login hooks before any package setup invokes bash -l.
 rm -f "$ROOT/root/.not_logged_in_yet"
@@ -65,16 +81,20 @@ mount -t proc proc "$ROOT/proc"
 mount --rbind /sys "$ROOT/sys";mount --make-rslave "$ROOT/sys"
 # Do not expose the host systemd/D-Bus sockets.
 mount -t tmpfs -o mode=0755 tmpfs "$ROOT/run"
-cp -a --no-dereference "$ROOT/etc/resolv.conf" "$WORK/resolv.conf.original"
+if [ "$RESUME" = NO ];then
+    cp -a --no-dereference "$ROOT/etc/resolv.conf" "$WORK/resolv.conf.original"
+    if [ -e "$ROOT/usr/sbin/policy-rc.d" ];then cp -a "$ROOT/usr/sbin/policy-rc.d" "$WORK/policy.original";fi
+else
+    [ -e "$WORK/resolv.conf.original" ] || [ -L "$WORK/resolv.conf.original" ] || die 'resume lacks original resolver backup'
+fi
 rm -f "$ROOT/etc/resolv.conf";cp -L /etc/resolv.conf "$ROOT/etc/resolv.conf"
-if [ -e "$ROOT/usr/sbin/policy-rc.d" ];then cp -a "$ROOT/usr/sbin/policy-rc.d" "$WORK/policy.original";fi
 printf '#!/bin/sh\nexit 101\n' > "$ROOT/usr/sbin/policy-rc.d";chmod 755 "$ROOT/usr/sbin/policy-rc.d"
 log 'Installing prerequisites inside the image'
 bash "$REPO/install/phases/60-prereqs.sh" --root "$ROOT" --apply
 mapfile -t EXTRAS < <(grep -Ev '^[[:space:]]*(#|$)' "$REPO/install/beta/extra-packages.txt")
 chroot "$ROOT" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${EXTRAS[@]}"
 log 'Installing audited BMO frontend/backend/launchers/emulators'
-bash "$REPO/install/bmo-install.sh" --apply --root "$ROOT" --ppsspp-runtime "$PPSSPP"
+bash "$REPO/install/bmo-install.sh" --beta-pins --apply --root "$ROOT" --ppsspp-runtime "$PPSSPP"
 bash "$REPO/install/beta/integrate-system.sh" --root "$ROOT"
 install -m 0755 "$REPO/image/armbian/userpatches/overlay/usr/local/sbin/bmo-firstboot" "$ROOT/usr/local/sbin/bmo-firstboot"
 install -D -m 0644 "$REPO/image/armbian/userpatches/overlay/etc/profile.d/90-bmo-welcome.sh" "$ROOT/etc/profile.d/90-bmo-welcome.sh"

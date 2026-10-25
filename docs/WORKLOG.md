@@ -706,3 +706,15 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Arquivos alterados: apenas documentação. R36S_REQUIRED=NO para build; YES para validação física posterior.
 - Pendência/risco: manter conector de energia imóvel; não usar imagens de trabalho interrompidas.
 - Próximo passo: acompanhar instalação, corrigir falhas comprovadas, verificar e entregar o arquivo final.
+
+## 2026-10-24 — r3 parou corretamente em manifesto histórico divergente
+
+- Fase: integração Ready beta; branch feat/bmo-linux-base-v1; código inicial 94c151db8be8ac6e393a998d2220526db13a65fe. R36S_REQUIRED=NO para validação offline.
+- Objetivo: manter integridade do conteúdo atual sem reverter funcionalidades posteriores ao freeze de 17/10.
+- Resultado: pacotes/RetroArch/Moonlight/PulseAudio concluídos; instalador bloqueou frontend atual 946f7596... versus manifesto histórico ba55304d.... Sem novo reinício.
+- Auditoria: manifests históricos também divergem em game launcher e Moonlight launcher. Compare desde 613fb076 confirma fallback de ROMs locais/detecção de mount sem UUID fixo e host Moonlight configurável, alterações já versionadas. Backend, outros onze runtime arquivos e configs de emulador passam os pins existentes. Frontend production/candidate idênticos, com marcadores das funções preservadas.
+- Arquivos: novos install/beta/ready-beta.env e runtime-bin.sha256 pinam exatamente o conteúdo do commit 94c151d; --beta-pins no instalador é opt-in e exige marcador da imagem em apply. Manifestos históricos intactos; sem editar frontend/launchers.
+- Builder usa pins beta e permite --resume-work somente em diretório/imagem regular existente de 12 GiB, com marcador do build, arquitetura/base válidas, e2fsck e dpkg audit. Reexecuta instalação/verificação; mantém backups originais de resolv/policy entre retomadas. Destino / continua bloqueado.
+- Validação: treze hashes runtime beta OK, quatro configs emulator OK, dry-run completo BMO_READY_INSTALL_DRY_RUN_OK, bash -n e diff --check OK. Revisão de diff identificou e corrigiu mkdir existente e preservação dos backups na retomada.
+- Esperado: retomar somente r3, parada limpa por checksum; não reutilizar r1/r2 interrompidas por energia.
+- Próximo passo: publicar pins/correção, clone limpo, retomar r3 via serviço separado, validar conteúdo/units/sanitização, comprimir e conferir checksum antes de entregar. Gate físico continua pendente.

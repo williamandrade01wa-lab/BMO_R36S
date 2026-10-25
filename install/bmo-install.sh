@@ -34,6 +34,7 @@ OPTIONAL_SERVICES="$SCRIPT_DIR/manifests/optional-services.txt"
 RUNTIME_BIN_MANIFEST="$SCRIPT_DIR/manifests/runtime-bin.sha256"
 EMULATOR_CONFIG_MANIFEST="$SCRIPT_DIR/manifests/emulator-config.sha256"
 
+BETA_PINS=NO
 MODE=""
 PPSSPP_RUNTIME=""
 TARGET_ROOT="/"
@@ -249,6 +250,11 @@ while [ "$#" -gt 0 ]; do
             shift 2
             ;;
 
+        --beta-pins)
+            BETA_PINS=YES
+            shift
+            ;;
+
         --apply)
             MODE="apply"
             shift
@@ -363,6 +369,14 @@ fi
 # ============================================================
 
 phase 1 "validate-base"
+
+if [ "$BETA_PINS" = YES ]; then
+    if [ "$MODE" = apply ]; then
+        [ -f "$TARGET_ROOT/.bmo-ready-build-root" ] || die "beta pins require image build marker"
+    fi
+    MANIFEST="$SCRIPT_DIR/beta/ready-beta.env"
+    RUNTIME_BIN_MANIFEST="$SCRIPT_DIR/beta/runtime-bin.sha256"
+fi
 
 require_file "$MANIFEST"
 
