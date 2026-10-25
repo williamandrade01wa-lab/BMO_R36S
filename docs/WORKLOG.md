@@ -761,3 +761,18 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Arquivos alterados: documentação; sem remover backups pessoais, PPSSPP auditado ou dados operacionais.
 - Resultado esperado/obtido: aproximadamente 5,8 GiB recuperados, sem tocar na candidata atual.
 - Próximo passo: confirmar raw SHA256/CRC no PC, gerar/verificar xz local, limpar origem somente após validação e entregar candidata com gate físico pendente.
+
+## 2026-10-24 — Primeira Ready beta entregue ao PC e Potato liberada
+
+- Fase: candidato Ready 1.0.0-beta.1; branch feat/bmo-linux-base-v1; código 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7. R36S_REQUIRED=NO para integridade/offline; YES para primeiro teste físico desta beta.
+- Resultado: BMO_READY_BETA_IMAGE_OK local. Arquivo outputs/BMO-R36S-Ready-v1.0.0-beta.1.img.gz, 2016381902 bytes; raw descompactado 12884901888 bytes (12 GiB). O tamanho raw é a capacidade reservada pela receita, não ocupação de programas. Requer cartão extra de pelo menos 16 GB.
+- SHA256 gzip: e21a446dccfde7e115a8e0cf79ae251d41aca02f3edfb4c274e4bc405b1794a7.
+- SHA256 raw: b7a9ab2567084f42da2c6a7628fbacd68c683ff120f64dca54fc252f15e35f7e.
+- Exportação gzip em fluxo concluiu com 12 GiB e hash da origem; no PC leitura completa verificou CRC gzip e raw SHA256 idêntico. Recompressão xz local interrompida para evitar trabalho redundante; parcial xz removida. Arquivo gzip completo movido ao diretório de entregáveis, SHA256 calculado e manifesto emitido.
+- Conteúdo offline já aprovado no r4: BMO frontend/candidate idênticos, backend/runtime/emuladores, serviços, PPSSPP libs, fases 40/50/60, contrato beta e sanitização. Sem ROMs/segredos/pareamento. Firstboot/boot direto no BMO desta beta ainda não testados fisicamente.
+- outputs inclui checksum, manifesto, packages.tsv e LEIA-ME com descompressão e TF2 fora no primeiro boot.
+- Base #9 original compactada preservada no PC em work/base-run9-original.img.xz, 430645444 bytes, SHA256 e32988972ecd085078f430d6988e7bca10b1e551c317773a22235e49c51cc3ee conferido após cópia.
+- Após integridade confirmada, removidos somente diretórios próprios r3 (3,7G) e bmo-beta-inputs (2,4G), com realpath/ausência de symlinks/montagens verificados; inventário de inputs continha somente quatro arquivos gerados nesta tarefa. Somados a r1/r2, aproximadamente 12 GiB recuperados. df final: 12169957376 usados e 48708218880 disponíveis (20%; 46G livres), versus 24G usados/34G livres antes da limpeza. Zero unidades failed na última checagem.
+- Backups pessoais, runtime PPSSPP original e ambiente operacional preservados. Potato permanece em 192.168.1.50. Não voltar a armazenar imagens/builds pesados nela; preferir GitHub Actions/PC conforme AGENTS.
+- Arquivos alterados: documentação/checkpoint; entregáveis locais. Main e cartão de produção não alterados.
+- Próximo passo: usuário grava .img descompactado em cartão extra 16 GB+, prepara BOOT pelo ABRIR-BMO.cmd, remove TF2 e testa primeiro boot, IP/SSH e BMO. Registrar evidência física antes de promoção. Futura otimização: reduzir tamanho reservado medindo ocupação; migrar receita beta para CI, sem refazer esta candidata automaticamente.

@@ -278,11 +278,12 @@ Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP
 
 Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
 
-1. Concluir transferência e empacotamento no PC. Usuário determinou priorizar GitHub Actions/PC e economizar armazenamento da Potato; regra em AGENTS.md (commit 3e5f814338e2433b583ae310898b1a6ada61c550). Não retomar compressão/build pesado na Potato.
-2. Conteúdo da beta gerado por 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7 passou Apply v3, fases 40/50/60, systemd-analyze offline, contrato beta e sanitização. Raw desmontado preservado temporariamente em /home/hipo/bmo-builds/ready-beta1-r3-20261024 enquanto é exportado por gzip em fluxo, sem imagem adicional remota.
-3. Processo local work/finish-beta-local.py transfere, verifica raw SHA256+gzip CRC, comprime no PC e verifica roundtrip raw SHA256 do xz. Só depois remover origem r3/inputs grandes gerados pelo agente. Saídas finais em outputs/ do chat; não tratar como pronta antes de BMO_READY_BETA_IMAGE_OK local.
-4. Duas tentativas interrompidas (ready-beta1-20261024 e ready-beta1-r2-20261024) removidas após verificar caminhos reais e ausência de montagens. Potato agora ~40 GB livres contra 34 GB; backups pessoais e ambiente operacional preservados. IP fixo USB 192.168.1.50.
-5. Conferir manifesto/checksum, entregar candidata para cartão extra de 16 GB ou maior; testar boot direto no BMO, rede/IP/SSH, gamepad, áudio, brilho, jogos/TF2, streaming e retorno.
+1. Candidata Ready beta 1.0.0-beta.1 pronta no PC: outputs/BMO-R36S-Ready-v1.0.0-beta.1.img.gz, 2016381902 bytes. Código 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7. Gzip SHA256 e21a446dccfde7e115a8e0cf79ae251d41aca02f3edfb4c274e4bc405b1794a7; raw SHA256 b7a9ab2567084f42da2c6a7628fbacd68c683ff120f64dca54fc252f15e35f7e, 12884901888 bytes (12 GiB reservados, não ocupação).
+2. Transferência validada por CRC gzip e SHA256 raw completo no PC. Conteúdo/serviços/dependências/sanitização offline passaram. Checksum, manifesto, packages.tsv e LEIA-ME disponíveis ao lado da imagem. Boot/hardware desta beta PENDENTES; CP-BETA-001 VALIDATING.
+3. Entregar/gravar .img descompactado em cartão extra de 16 GB ou maior. Abrir BOOT/ABRIR-BMO.cmd, escolher ScreenFiles e configurar rede/senha/SSH. TF2 fora durante todo primeiro boot. Depois desligar completamente antes de inserir TF2.
+4. Testar boot direto no BMO, resumo/IP/SSH, gamepad, áudio, volume/brilho, jogos/TF2, streaming e retorno. Não promover para main/estável sem evidência física.
+5. Priorizar GitHub Actions ou PC para próximos builds e arquivos grandes: instrução explícita do usuário registrada em AGENTS.md. Todos os temporários grandes próprios e inputs redundantes foram removidos da Potato após verificar cópias no PC. Aproximadamente 12 GiB recuperados; Potato agora 46G livres, IP 192.168.1.50. Backups pessoais preservados.
+6. Base #9 original compactada preservada no PC em work/base-run9-original.img.xz com SHA256 e32988972ecd085078f430d6988e7bca10b1e551c317773a22235e49c51cc3ee. Logs r4 e packages também salvos no PC. Não reconstruir nem recolocar grandes imagens na Potato por rotina. Otimização futura: dimensionar imagem menor pela ocupação real e automatizar a integração beta na CI.
 
 Não executar bmo install nessa beta: dependências já vêm instaladas. Pareamento Moonlight é pessoal e não vai na imagem.
 **TF2 de jogos fora durante todo o primeiro boot.** Desligar antes de inserir. Sem formatar.

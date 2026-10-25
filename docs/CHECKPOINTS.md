@@ -227,3 +227,22 @@ R36S_REQUIRED=YES
 Nunca promover para `main` ou tratar uma versão como pública estável usando apenas um checkpoint parcial.
 
 A release pública depende da cadeia de checkpoints necessária ao Gate 7.
+
+## CP-BETA-001 — Ready beta integrada, aguardando teste no cartão extra
+
+```text
+STATUS=VALIDATING
+SCOPE=OFFLINE_CONTENT_VERIFIED_PHYSICAL_BOOT_PENDING
+BRANCH=feat/bmo-linux-base-v1
+SOURCE_COMMIT=17d07a9350bc5db8a4bda4838eb3e34f97f24ca7
+R36S_REQUIRED=YES
+IMAGE=BMO-R36S-Ready-v1.0.0-beta.1.img.gz
+GZIP_BYTES=2016381902
+GZIP_SHA256=e21a446dccfde7e115a8e0cf79ae251d41aca02f3edfb4c274e4bc405b1794a7
+RAW_BYTES=12884901888
+RAW_SHA256=b7a9ab2567084f42da2c6a7628fbacd68c683ff120f64dca54fc252f15e35f7e
+```
+
+Em 2026-10-24, Base #9 foi integrada ao BMO/RetroArch/PPSSPP/Moonlight e dependências. Passaram pins específicos da beta, Apply v3, fases 40/50/60, systemd-analyze offline, bibliotecas PPSSPP, contrato beta e sanitização. Arquivo transferido ao PC e validado por gzip CRC e SHA256 raw completo. Entregáveis e base original preservados localmente; arquivos grandes temporários removidos da Potato por instrução explícita do usuário.
+
+Este checkpoint não declara boot, hardware nem abertura física do kiosk desta beta. O relato de boot da Base #8 não se aplica automaticamente à Ready beta. Testar cartão extra de 16 GB+, configurar pelo assistente BOOT, TF2 fora no primeiro boot; depois desligar antes de recolocar TF2. Retorno seguro: cartão anterior preservado; não promover main.
