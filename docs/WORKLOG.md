@@ -838,3 +838,11 @@ Artifact expira: 2026-10-31T04:21:41Z
 - resize2fs-M manteve513024blocos na imagem real; havia170668blocos livres (~667MiB). A receita somava128MiB ao tamanho mínimo estimado e tentava crescer além da partição original.
 - Cálculo corrigido: max(mínimo aceito pelo resize2fs, blocos usados+margem), arredondado. Espaço livre já existente conta para a margem; não se promete que toda imagem encolhe abaixo do mínimo aceito. Sem forçar operações de fsck/partição.
 - Próximo passo: repetirCI, conferir gzip/manifesto e finalizar runtime noPC.
+
+## 2026-10-25 — Light core aprovada; empacotamento xz para entrega
+
+- Branchfeat/bmo-linux-base-v1; run40158544128/sourceca899649e45cadf649eee8588793bd3fd230e068 success. R36S_REQUIRED=NO paraCI, YES para novo primeiroboot.
+- Todos gates passaram: fixtures, Basehash, purgepermitida240MB, payload/units/redePython, sanitização, e2fsck, margem/redução e integridade gzip. Core é intermediário semPPSSPPruntime.
+- Artifact12585338848 tem562266673bytes. Conector de download rejeitou por excederlimite536870912; sem downloadparcial tratado como válido.
+- Alterado somente empacotamento da próxima execução para xz-T2-3 CRC64/limite512MiB. Deve reduzir arquivo e permitir baixar pelo conector; receita continua noGitHub.
+- Próximo passo: baixar corexz, incluirruntimepinado noPC, conferir imagem e registrar tamanhoconcreto. Trocaassistente/logoH está emverificação, backup4originais noPC.

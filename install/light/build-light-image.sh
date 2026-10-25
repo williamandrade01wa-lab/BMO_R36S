@@ -84,7 +84,8 @@ sync
 umount -R "$ROOT";ROOT=""
 OWNED_LOOP="$LOOP";LOOP=""
 bash "$REPO/install/light/minimize-image.sh" "$IMAGE" 128 "$OWNED_LOOP"
-gzip -1 -c "$IMAGE" > "$OUT/$(basename "$IMAGE").gz"
-gzip -t "$OUT/$(basename "$IMAGE").gz"
-(cd "$OUT" && sha256sum "$(basename "$IMAGE").gz" > "$(basename "$IMAGE").gz.sha256")
+xz -T2 -3 --memlimit-compress=512MiB --check=crc64 --keep "$IMAGE"
+mv "$IMAGE.xz" "$OUT/$(basename "$IMAGE").xz"
+xz -t "$OUT/$(basename "$IMAGE").xz"
+(cd "$OUT" && sha256sum "$(basename "$IMAGE").xz" > "$(basename "$IMAGE").xz.sha256")
 echo BMO_LIGHT_CORE_OK_RUNTIME_INJECTION_PENDING
