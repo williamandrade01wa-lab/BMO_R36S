@@ -657,3 +657,30 @@ Artifact expira: 2026-10-31T04:21:41Z
 1. Publicar correção, clone limpo e novo workdir ready-beta1-r2-20261024.
 2. Executar serviço persistente bmo-ready-beta1-build-r2 na Potato agora em .50.
 3. Validar pacote/units/dependências/sanitização e comprimir antes de entregar.
+
+## 2026-10-24 — Remontagem limpa r2 iniciada após recuperação
+
+- Fase: montagem integral da Ready beta
+- Branch: `feat/bmo-linux-base-v1`
+- Commit executado: `94c151db8be8ac6e393a998d2220526db13a65fe`
+- `R36S_REQUIRED=NO` para montagem.
+
+### Execução / evidência
+
+- Checkout limpo: /home/hipo/bmo/BMO_R36S-beta-build-r2-20261024.
+- Unit: bmo-ready-beta1-build-r2.service.
+- Invocation ID: adfa18ac05b5486b8a64ae3165fe4d7b.
+- Log: /home/hipo/bmo-images/beta-1.0.0/build-r2.log.
+- Work: /home/hipo/bmo-builds/ready-beta1-r2-20261024.
+- Inputs Base raw e PPSSPP verificados novamente com sucesso após o desligamento.
+- Na consulta: active/running, preparando cópia da imagem.
+- IP fixo 192.168.1.50 validado; rollback cancelado após conexão/gateway/DNS aprovados.
+
+### Arquivos alterados
+
+- Apenas este registro documental.
+
+### Próximo passo
+
+- Acompanhar a execução, validar conteúdo/units e sanitização; depois comprimir e entregar SHA256.
+- Não tratar a candidata como pronta até o fim do processo e verificação do arquivo.
