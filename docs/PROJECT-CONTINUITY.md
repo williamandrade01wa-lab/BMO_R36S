@@ -278,7 +278,7 @@ Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP
 
 Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
 
-1. Remontar a beta em cópia limpa após desligamento acidental da Potato. Usar código corrigido (firstboot bloqueado durante build, marcador interativo removido antes de apt, newlines do resumo corrigidos). Novo workdir ready-beta1-r2-20261024 e unit bmo-ready-beta1-build-r2.
+1. Remontar a beta em cópia limpa após desligamento acidental da Potato. Usar código corrigido (firstboot bloqueado durante build, marcador interativo removido antes de apt, newlines do resumo corrigidos). r2 também interrompida por mau contato ao movimentar, confirmado pelo usuário. r3 iniciada: workdir ready-beta1-r3-20261024, unit bmo-ready-beta1-build-r3, invocation c91068a8140a4988bd20492dcbe6d865. Código 94c151db8be8ac6e393a998d2220526db13a65fe; log /home/hipo/bmo-images/beta-1.0.0/build-r3.log. Usuário manterá energia sem movimentação.
 2. Acompanhar apt/instalação em 192.168.1.50 (IP fixo confirmado), validar que firstboot não executa no chroot e corrigir somente falhas comprovadas.
 3. Verificar manifestos, dependências, units offline, sanitização, compressão e SHA256.
 4. Entregar .img.xz candidata e manifesto para gravar em cartão extra de 16 GB ou maior.
