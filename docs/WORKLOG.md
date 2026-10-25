@@ -846,3 +846,16 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Artifact12585338848 tem562266673bytes. Conector de download rejeitou por excederlimite536870912; sem downloadparcial tratado como válido.
 - Alterado somente empacotamento da próxima execução para xz-T2-3 CRC64/limite512MiB. Deve reduzir arquivo e permitir baixar pelo conector; receita continua noGitHub.
 - Próximo passo: baixar corexz, incluirruntimepinado noPC, conferir imagem e registrar tamanhoconcreto. Trocaassistente/logoH está emverificação, backup4originais noPC.
+
+## 2026-10-25 — Assistente e logo substituídos no H com readback verificado
+
+- Fase: manutenção BOOT; branchfeat/bmo-linux-base-v1; R36S_REQUIRED=NO para cópia, YES para validar exibição/boot no aparelho.
+- Usuário confirmou Ambos: assistente e imagem de boot. Windows negava CLI/NodeH mesmo apósgrant; operação viaExplorador comComputerUse, sem alterarpermissões/segurança nem abrirTXTcomsenhas.
+- Backup local dos4originais em work/H-backup-20261025. NovoBMP da imagem fornecida pelo usuário mantém composição, adaptado ao formatooriginal:640x480,24bits,BI_RGBsemcompressão,921654bytes.
+- Copiados ABRIR-BMO.cmd, BMO-Preparar-Cartao.ps1, LEIA-ME.txt e logo.bmp. Depois copiados de voltaHpara work/H-verify-v02; SHA256dos4iguais aos preparados.
+- LogoSHA256f1ccc5457edf1573e5e896a815c5c67583ceea960a6f9cdd21c7a6e2a947c797. AssistentePS1b7aca348b3855f976fe023b7f1ead8c25a4fb603a08aef4237ba75f2b4d6e839.
+- CLIHnão foi usada para contornar ACL; Explorer normal consegueoperar comautorização explícita. Configuração pessoal/BMO-FIRSTBOOT e partições preservadas.
+- Avaliado ai-memory por pedido do usuário: integraçãoMCPviávelnoPC, Windowsnativoexperimental. Relatório e exemploMCPdesabilitado em outputs; nenhumservidor/hook/captura global instalado por essa revisão.
+- Lightcore run40159128087/source91a8139690404fb544174b56e980bc12cc43ebf2 success. Artifact12585920303 ZIP402024835bytes/SHA c912b03f51c236ccc1b0ca27151d66bbd549deb1c15d966356fb04566e11f374 conferido noPC; extraçãoCRCpassou. Finalização de runtime/logo em cópia local, fonte79arquivosverificada.
+- Primeira cópia local de montagemv01 falhou ao truncarlogoexistente na bibliotecaFAT; não promovida. Atualizado para remover/criar somente os arquivosFAT da cópia e refazer do core íntegro. Nova cópiav02 em compressão após root/runtime/logoSHA aprovados. Aguardar roundtrip final.
+- Próximo passo: finalizarchecksum/manifest Light e entregar candidata; recolher novo log de erro se preparação real falhar; testar boot/progresso/expansão/autoinstalação noR36S.
