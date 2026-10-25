@@ -278,11 +278,11 @@ Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP
 
 Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
 
-1. Aguardar fim da compressão e verificar o arquivo final da Ready beta. Unit ativa bmo-ready-beta1-build-r4.service, invocation 2c02ac000c4e499d9d6d412f30234c61; log /home/hipo/bmo-images/beta-1.0.0/build-r4.log. Código 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7.
-2. r1/r2 interrompidas por movimentação/mau contato confirmado pelo usuário. r3 concluiu pacotes e parou em pins antigos. r4 retoma somente esse workdir parado limpo: /home/hipo/bmo-builds/ready-beta1-r3-20261024. Novos manifests beta preservam hashes históricos e pinam fonte atual sem alterar frontend/launchers.
-3. Apply v3, fases 40/50/60, systemd-analyze offline, contrato beta e sanitização passaram. Em compressão xz -T1; imagem final ainda não entregue nesta anotação. Potato estável em 192.168.1.50, 54 °C, 34 GB livres.
-4. Conferir xz/checksum/manifest, copiar para entregáveis locais e entregar candidata para cartão extra de 16 GB ou maior.
-5. Testar boot direto no BMO, rede/IP/SSH, gamepad, áudio, brilho, jogos/TF2, streaming e retorno ao BMO.
+1. Concluir transferência e empacotamento no PC. Usuário determinou priorizar GitHub Actions/PC e economizar armazenamento da Potato; regra em AGENTS.md (commit 3e5f814338e2433b583ae310898b1a6ada61c550). Não retomar compressão/build pesado na Potato.
+2. Conteúdo da beta gerado por 17d07a9350bc5db8a4bda4838eb3e34f97f24ca7 passou Apply v3, fases 40/50/60, systemd-analyze offline, contrato beta e sanitização. Raw desmontado preservado temporariamente em /home/hipo/bmo-builds/ready-beta1-r3-20261024 enquanto é exportado por gzip em fluxo, sem imagem adicional remota.
+3. Processo local work/finish-beta-local.py transfere, verifica raw SHA256+gzip CRC, comprime no PC e verifica roundtrip raw SHA256 do xz. Só depois remover origem r3/inputs grandes gerados pelo agente. Saídas finais em outputs/ do chat; não tratar como pronta antes de BMO_READY_BETA_IMAGE_OK local.
+4. Duas tentativas interrompidas (ready-beta1-20261024 e ready-beta1-r2-20261024) removidas após verificar caminhos reais e ausência de montagens. Potato agora ~40 GB livres contra 34 GB; backups pessoais e ambiente operacional preservados. IP fixo USB 192.168.1.50.
+5. Conferir manifesto/checksum, entregar candidata para cartão extra de 16 GB ou maior; testar boot direto no BMO, rede/IP/SSH, gamepad, áudio, brilho, jogos/TF2, streaming e retorno.
 
 Não executar bmo install nessa beta: dependências já vêm instaladas. Pareamento Moonlight é pessoal e não vai na imagem.
 **TF2 de jogos fora durante todo o primeiro boot.** Desligar antes de inserir. Sem formatar.
