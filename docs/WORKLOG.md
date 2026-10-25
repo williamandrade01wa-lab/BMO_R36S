@@ -740,3 +740,14 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Resultado observado: processo ativo, 196 MB RSS, 61 °C; conteúdo da imagem não alterado. Receita de build no Git mantém default conservador -T1; esta substituição operacional consta no manifesto final.
 - Arquivos alterados no Git: somente documentação. Resultado esperado: artefato final íntegro com checksum, ainda pendente.
 - Próximo passo: acompanhar empacotamento, verificar e copiar para entregáveis locais. Futuras betas podem migrar montagem ao GitHub Actions ARM64; imagem base já é gerada na CI.
+
+## 2026-10-24 — Usuário priorizou Git/PC e economia de armazenamento da Potato
+
+- Fase: migração do empacotamento; branch feat/bmo-linux-base-v1; R36S_REQUIRED=NO.
+- Instrução explícita: economizar armazenamento da Potato e focar Git ou PC local por enquanto. Registrada em AGENTS.md, commit 3e5f814338e2433b583ae310898b1a6ada61c550.
+- Compressão na Potato parada. Candidata validada raw preservada enquanto transfere por gzip em fluxo, sem novo arquivo grande remoto. PC tem aproximadamente 39,9 GB livres.
+- Transferência calcula SHA256 do raw na origem; destino verifica CRC gzip e raw SHA256, comprime em xz localmente, descomprime e compara SHA256 novamente antes da entrega.
+- Scripts locais work/export-beta1-stream.py e work/finish-beta-local.py; script remoto pequeno somente para leitura/exportação. Pacotes já copiados ao PC.
+- Identificados temporários próprios descartáveis: /home/hipo/bmo-builds/ready-beta1-20261024 (3,4G) e ready-beta1-r2-20261024 (2,4G), tentativas interrompidas por energia; não são candidatas.
+- Próximo passo: limpar somente esses temporários após verificar caminhos reais e ausência de montagens; preservar r3 até roundtrip local confirmado. Depois remover dados grandes redundantes de build/inputs do agente, sem tocar backups pessoais/ambiente operacional.
+- Resultado esperado: concluir arquivo no PC e recuperar espaço na Potato. Migração ainda em andamento nesta anotação; sem gate físico fechado.
