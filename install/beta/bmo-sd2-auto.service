@@ -1,0 +1,12 @@
+[Unit]
+Description=BMO optional TF2 Games card
+After=local-fs.target bmo-ready-firstboot.service
+Requires=bmo-ready-firstboot.service
+Before=bmo-kiosk.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bmo-sd2-auto
+RemainAfterExit=yes
+TimeoutStartSec=20
+[Install]
+WantedBy=multi-user.target

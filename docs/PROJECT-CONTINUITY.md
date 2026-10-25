@@ -271,30 +271,22 @@ No Gate 1 resta auditoria de dependências externas: upstream clona ScreenFiles/
 
 ## 12. PRÓXIMO PASSO EXATO
 
-Pedido atual: "modo preguiça", com perguntas/opções, seleção de ScreenFiles e preenchimento automático do TXT.
+Prioridade atual: usuário autorizou compilar o primeiro Ready beta com BMO e todas as dependências pré-instaladas, abrindo o kiosk após configurar no primeiro boot.
 
-Implementado assistente Windows em `scripts/windows/BMO-Preparar-Cartao.ps1`, aberto por `ABRIR-BMO.cmd`:
-- conversa guiada: escolher BOOT, painel, rede, nome/senha, senha R36S/confirmar e SSH;
-- resumo sem senhas; grava somente ao clicar Preparar cartão;
-- cópia preserva ScreenFiles originais, cria backup e restaura arquivos em falha simulada;
-- TXT usa nomes compatíveis com as imagens #8 e nova UX;
-- sem Python/administrador/rede; não formata cartão;
-- painel é escolhido pelo usuário, sem inventar autodetecção;
-- avisa se BOOT já registra FIRSTBOOT=OK: salvar TXT não reaplica automaticamente.
+Receita implementada: `install/build-beta-image.sh`, `install/beta/**`, `docs/BETA-BUILD.md`.
+Usa Base #9 (artifact 12571667623), hashes conferidos na Potato e runtime PPSSPP pinado. Builder monta somente cópia .img, reserva root 12 GiB, instala tudo em chroot isolado do /run do host, integra firstboot automático, áudio, kiosk e assistente Windows.
 
-Validação local no Windows:
-- 23 verificações de arquivos/configuração/backup/rollback e caminhos;
-- fluxo completo da janela exercitado em cartão simulado, sem gravação antes da confirmação e sem senhas no histórico;
-- 8 combinações de parsing: quatro modos de rede x parsers antigo/novo;
-- ZIP conferido; nenhuma BOOT real do usuário foi modificada nos testes.
+Fixture de integração passou preservando fstab e symlinks existentes. Build completo ainda pendente nesta anotação.
 
-1. CI leve Windows aprovada: Run `40141713783`, job `121014650099`, commit `f4469114b6a0d74c50d2fbfb007bddf20dac301d`. Prosseguir com teste no cartão real.
-2. Usuário testar o assistente com a BOOT do cartão extra antes de seu primeiro boot; escolher o painel conhecido correto.
-3. Run #9 `40118103143` consta success na API; avaliar logs/artifacts e testar a mensagem de rede/IP/SSH no R36S. O assistente Windows não modifica os artifacts já publicados.
-4. Seguir testes físicos e integração Ready. CP-BOOT-001 continua VALIDATING.
+1. Publicar receita e executar build persistente na Potato a partir do commit.
+2. Acompanhar apt/instalação e corrigir somente falhas comprovadas.
+3. Verificar manifestos, dependências, units offline, sanitização, compressão e SHA256.
+4. Entregar .img.xz candidata e manifesto para gravar em cartão extra de 16 GB ou maior.
+5. Testar boot direto no BMO, rede/IP/SSH, gamepad, áudio, brilho, jogos/TF2, streaming e retorno ao BMO.
 
-**TF2 de jogos fora durante todo o primeiro boot.** Desligar completamente antes de reinserir; não formatar.
-`R36S_REQUIRED=NO` para assistente/testes Windows; `R36S_REQUIRED=YES` para validar boot final.
+Não executar bmo install nessa beta: dependências já vêm instaladas. Pareamento Moonlight é pessoal e não vai na imagem.
+**TF2 de jogos fora durante todo o primeiro boot.** Desligar antes de inserir. Sem formatar.
+Main e cartão em produção preservados. `R36S_REQUIRED=YES` antes de promoção física.
 
 ## 13. ScreenFiles
 

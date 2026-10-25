@@ -575,3 +575,42 @@ Artifact expira: 2026-10-31T04:21:41Z
 ### Próximo passo
 
 - Adaptar montagem e serviços, testar em alvo isolado, iniciar build persistente, validar conteúdo/serviços/binários antes de comprimir.
+
+## 2026-10-24 — Receita BMO Ready beta e integração offline testadas
+
+- Fase: implementação do candidato Ready 1.0.0-beta.1
+- Branch: `feat/bmo-linux-base-v1`
+- Objetivo: BMO e dependências instalados antes do boot, firstboot automático e abertura do kiosk.
+- `R36S_REQUIRED=NO` para fixture/build; `R36S_REQUIRED=YES` para validar o candidato.
+
+### Ações / resultado
+
+- Builder nativo de imagem criado com Base #9 pinada por hash, workdir novo, partição root da cópia ampliada a 12 GiB antes do apt.
+- Mantida FAT, bootloader, kernel, fstab/UUIDs. Runtime PPSSPP pinado e verificado.
+- Fase 40 reaproveitada em staging vazio e aplicada ao alvo; fase 50 habilita units sem contagem global.
+- Primeiro boot por systemd antes dos dez serviços BMO; remove dependência do login interativo/root autologin.
+- Áudio PulseAudio via user manager/linger e socket esperado pelo runtime.
+- TF2 opcional detectado separadamente do root, apenas exFAT/FAT com EASYROMS; sem formatação ou edição de partições.
+- Pacotes/runtime completos e Windows wizard previstos na imagem antes de ligar.
+- Builder bloqueia sockets systemd/D-Bus do host, verifica manifests/binários/units, sanitiza e comprime em um thread.
+- Montagem integral ainda não executada nesta anotação.
+
+### Validação
+
+- bash -n passou nos scripts novos.
+- Fixture real de filesystem temporário: fstab preservado, unit/symlink existente preservado, kiosk e firstboot habilitados, áudio/drop-ins presentes; BMO_BETA_INTEGRATION_FIXTURE_OK.
+- Validações source SHA da fase 40 passaram.
+- Nenhum cartão físico ou serviço em produção foi alterado pelos testes.
+- Avisos da fixture sobre targets ausentes são esperados na raiz mínima; a imagem real será verificada com systemd-analyze.
+
+### Arquivos
+
+- install/build-beta-image.sh e install/beta/**.
+- docs/BETA-BUILD.md, continuidade e Worklog.
+
+### Pendências / próximo passo
+
+- Publicar receita e executar build persistente na Potato a partir do commit.
+- Corrigir somente falhas comprovadas de pacotes/integração.
+- Validar/comprimir, conferir SHA256 e entregar candidato para o microSD extra.
+- Registrar resultado antes do teste físico.

@@ -1,0 +1,18 @@
+[Unit]
+Description=BMO Ready first boot configuration
+After=local-fs.target NetworkManager.service armbian-resize-filesystem.service
+Wants=NetworkManager.service
+Before=bmo-xorg.service bmo-kiosk.service bmo-ui.service bmo-control-api.service
+ConditionPathExists=!/var/lib/bmo/firstboot.done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bmo-firstboot --apply
+ExecStartPost=/usr/local/sbin/bmo-ready-firstboot-finish
+RemainAfterExit=yes
+TimeoutStartSec=240
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
