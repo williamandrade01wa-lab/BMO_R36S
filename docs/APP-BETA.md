@@ -24,3 +24,7 @@ A branch de imagem já contém sons e política Chromium nos instaladores. A nov
 ## Desenvolvimento visual
 
 Manter alterações pequenas em HTML/CSS/JS, preservar contratos do backend e gamepad, testar candidate no R36S e só então sincronizar produção no Git e promover. Consulte VISUAL-UPDATE.md.
+
+## Integração
+
+PR #5 integrado à main em c8e218953ce3d710d47042db16448fc664ad3997, após CI 40257425587 aprovada e nova CI de main 40257577056 aprovada. Branch beta/app-v0.1.0 preservada como referência. Próxima montagem da imagem recebe a nova arte pelo commit ad0bca4b8de36edbd5d5b98df7ac3fa3248a35b1 em feat/bmo-linux-base-v1.

@@ -13,3 +13,5 @@ Confirmados navegação e efeitos das carinhas, envio de frontend idêntico para
 Limites: não é release pública estável nem valida todos os jogos/streaming. Novo visual exige novo teste físico. Light e instalação inicial permanecem na branch de imagem. Nova logo foi gravada/hash conferido; falta confirmação no boot.
 
 Retorno seguro: helper rollback-frontend com BACKUP_ID e reinício do kiosk; cartão original preservado. Branch de beta e PR conservam a referência de fonte para main.
+
+Integração confirmada: PR #5, main c8e218953ce3d710d47042db16448fc664ad3997; CI PR40257425587 e main40257577056 verdes. A base é beta privada do App. Próximas imagens recebem a arte pelo commit ad0bca4b8de36edbd5d5b98df7ac3fa3248a35b1 na branch de imagem, ainda sujeitas a novo build/teste.

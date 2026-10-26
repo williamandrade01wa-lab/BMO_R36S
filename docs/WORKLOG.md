@@ -15,3 +15,8 @@ O histórico de construção da imagem anterior a esta separação permanece na 
 - Resultado esperado: base beta privada do App em main e evolução visual por branches/PR, sem regravar cartão para HTML/CSS/JS. CI do commit final e PR são gates antes da integração.
 - R36S_REQUIRED=YES para novo visual e regressões de jogos/streaming; fluxo básico testado no aparelho com HTML idêntico.
 - Próximo passo exato: CI, PR para main, integrar se checks passarem; depois branch de visual conforme direção do usuário. Manter imagem experimental separada e incorporar nova logo na próxima montagem dessa imagem.
+
+
+### Fechamento da beta em main
+
+PR #5 integrado por autorização do usuário após candidate e confirmação física, validação de promoção/retorno e CI verde. Merge main c8e218953ce3d710d47042db16448fc664ad3997. CI PR 40257425587 e main 40257577056 concluíram com sucesso, incluindo fetch do Git autenticado. Diff preservou a imagem experimental na branch própria. A nova arte e cópia/checksum nos finalizadores Base/Light/Ready foram versionadas em feat/bmo-linux-base-v1 ad0bca4b8de36edbd5d5b98df7ac3fa3248a35b1; os três scripts passaram bash -n, sem novo build de imagem nesta etapa. Exibição da arte no próximo boot ainda pendente. Próximo passo: alteração visual em branch a partir de main, com novo teste físico. R36S_REQUIRED=YES para novo visual e boot renderizado.

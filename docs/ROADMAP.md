@@ -6,7 +6,7 @@
 - [x] update visual PC com candidate, promoção e backup;
 - [x] 13 testes unitários do update;
 - [x] candidate e retorno testados com HTML idêntico no R36S;
-- [ ] CI da nova branch e integração em main;
+- [x] CI da nova branch e integração em main (PR #5, runs 40257425587/40257577056);
 - [ ] primeira mudança visual em branch própria, com teste físico;
 - [ ] áudio/regressão de jogos e streaming após mudanças relevantes;
 - [ ] falta de energia/rede durante update com recuperação;
