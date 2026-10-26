@@ -16,9 +16,9 @@ para esta conversa; preserve trabalho de outros agentes.
 O Git é a memória obrigatória: registre cada etapa significativa no WORKLOG,
 atualize continuidade/checkpoints quando necessário e deixe próximo passo exato
 antes de encerrar. Nunca grave credenciais/ROMs/saves nem dependa só do chat.
-O App v0.1.0-beta.1 está na main. A PureLight v0.1.0-beta já foi montada e
-verificada no PC: teste físico do usuário ainda pendente; não publicar Releases.
-Leia o manifesto em docs/releases antes de repetir build ou chamar imagem de pronta.
+O estado do App, imagens e testes deve vir da continuidade e dos manifestos atuais.
+Leia docs/releases antes de repetir build ou chamar imagem de pronta.
+Não publique uma candidata sem teste e autorização do usuário.
 Priorize GitHub/PC e economize Le Potato. Continue a prioridade atual registrada
 ou a área que eu indicar, mantendo as funções do BMO durante mudanças visuais.
 ```

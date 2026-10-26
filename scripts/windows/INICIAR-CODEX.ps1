@@ -69,8 +69,9 @@ Confirme Git/HEAD/CI e alteracoes locais antes de editar; branch de referencia: 
 Use checkout/branch isolado e preserve o trabalho de outras conversas.
 O Git e a memoria permanente: registre cada etapa significativa antes de avancar,
 atualize a continuidade da area sem apagar outras frentes e deixe proximo passo exato.
-A PureLight v0.1.0-beta ja foi gerada/verificada; teste fisico pendente e sem Release.
-Confira manifesto em docs/releases; nao repita build nem publique sem necessidade/autorizacao.
+Consulte PROJECT-CONTINUITY e docs/releases para estado atual, imagens e testes.
+Nao repita etapas concluidas sem evidencia nova nem publique sem teste/autorizacao.
+O status deve vir dos documentos atuais, nao de versoes fixas neste prompt.
 Priorize GitHub/PC e economize Potato. Nunca grave credenciais/ROMs/saves no Git.
 Continue o ponto atual documentado ou a tarefa especifica que o usuario informar.
 "@
