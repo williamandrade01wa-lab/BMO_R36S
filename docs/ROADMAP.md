@@ -14,3 +14,13 @@
 - [ ] publicação pública estável e auditoria de distribuição.
 
 Imagem Linux/Light e bootstrap possuem roadmap separado em feat/bmo-linux-base-v1. Não marcar gates de imagem usando evidência do App.
+
+
+## Continuidade e PureLight — 2026-10-26
+
+- [x] PureLight v0.1.0-beta montada/verificada no PC, manifesto/checksum registrados;
+- [ ] teste físico da PureLight pelo usuário;
+- [ ] publicação dessa candidata após teste/autorização;
+- [x] requisitos, ambiente e regra permanente de memória documentados;
+- [x] inicializador Codex com selftest local aprovado;
+- [ ] CI/handoff final do inicializador registrado.

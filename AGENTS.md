@@ -1,5 +1,20 @@
 # AGENTS.md
 
+## Memória permanente e continuidade entre agentes — regra do usuário
+
+Esta regra se aplica a todas as conversas/agentes/áreas futuras do BMO até alteração explícita do usuário. O Git é a memória do projeto; não depender da lembrança do chat.
+
+Antes de agir, ler AGENTS.md, docs/USER-REQUIREMENTS.md, PROJECT-CONTINUITY, ENVIRONMENT, entradas recentes/relevantes de WORKLOG, ROADMAP, PROJECT-STRUCTURE e CHECKPOINTS em docs; depois a documentação da área. Confirmar branch/HEAD, CI e alterações locais. Se abrir branch/snapshot antigo, consultar as regras atuais da main e reconciliar as particularidades da branch.
+
+Após cada etapa significativa e antes da próxima, registrar no WORKLOG: data/fase, branch/commit inicial, escopo/decisão, ações/arquivos, validação/evidência, resultado, riscos, R36S_REQUIRED e próximo passo exato. Atualizar continuidade quando mudar arquitetura, bloqueio, imagem, branch ou prioridade; checkpoint quando um gate for atingido. Antes de encerrar/migrar/compactar contexto, deixar estado suficiente no Git para outro agente continuar sem reconstruir a conversa.
+
+Conversas em paralelo devem usar branches/checkouts/worktrees isolados. Nunca apagar trabalho alheio, resetar/forçar refs para resolver conflito ou sobrescrever o andamento de outras frentes no documento de continuidade. Ao encontrar HEAD movido, reler e preservar as alterações novas. Manter seções por App/Imagem/Infra e registrar a responsabilidade/escopo da tarefa no Worklog. Não iniciar subagentes nem enviar mensagens a outros chats sem autorização do usuário.
+
+Não repetir etapa marcada concluída sem evidência nova. Não transformar teste da Ready em teste da PureLight, CI em teste físico ou candidata em release. Consultar manifesto/hashes antes de reconstruir imagem. Senhas, chaves privadas, tokens, ROMs/saves, pareamentos e TXT/backups preenchidos nunca entram nesta memória. Usar resumos técnicos curados; não instalar captura global/hooks de ai-memory por inferência.
+
+Para iniciar, use INICIAR-CODEX.cmd ou docs/HANDOFF.md. Este inicializador não substitui leitura/registro dos documentos e não configura memória global fora do projeto.
+
+
 ## Missão do projeto
 
 Este repositório mantém o código e a configuração versionável do BMO para R36S.
