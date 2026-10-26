@@ -66,6 +66,9 @@ if e2fsck -pf "$ROOT_PART";then :;else rc=$?;[ "$rc" -le 1 ] || die 'ext4 check 
 resize2fs "$ROOT_PART"
 ROOT="$WORK/root";mkdir -p "$ROOT";mount "$ROOT_PART" "$ROOT"
 install -d "$ROOT/boot/u-boot";mount "$BOOT_PART" "$ROOT/boot/u-boot"
+(cd "$REPO/assets/boot" && sha256sum -c logo.bmp.sha256)
+cp "$REPO/assets/boot/logo.bmp" "$ROOT/boot/u-boot/logo.bmp"
+cmp "$REPO/assets/boot/logo.bmp" "$ROOT/boot/u-boot/logo.bmp"
 [ -f "$ROOT/etc/bmo/base-version.env" ] || die 'not a BMO Base'
 [ "$(chroot "$ROOT" dpkg --print-architecture)" = arm64 ] || die 'target not arm64'
 if [ "$RESUME" = YES ];then

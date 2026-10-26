@@ -7,9 +7,7 @@ BMO_REPO_ROOT="$(
     pwd
 )"
 
-BMO_DEPLOY_CONFIG="${
-    BMO_DEPLOY_CONFIG:-$HOME/.config/bmo/deploy.env
-}"
+BMO_DEPLOY_CONFIG="${BMO_DEPLOY_CONFIG:-$HOME/.config/bmo/deploy.env}"
 
 
 if [ -r "$BMO_DEPLOY_CONFIG" ]; then

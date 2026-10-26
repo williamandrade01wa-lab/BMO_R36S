@@ -1,5 +1,7 @@
 # BMO R36S — Continuidade do Projeto
 
+> Atualização 2026-10-25: App v0.1.0-beta.1 integrado à main via PR #5 (merge c8e218953ce3d710d47042db16448fc664ad3997), com CI aprovada e update visual PC testado no aparelho. Alterações visuais devem partir de main; esta branch continua responsável pela imagem Light. Nova arte de assets/boot está aplicada no aparelho e incluída nos finalizadores das próximas imagens. Imagens já geradas mantêm seus hashes anteriores.
+
 > **LEITURA OBRIGATÓRIA EM TODO NOVO CHAT / AGENTE / SESSÃO DE DESENVOLVIMENTO**
 >
 > Este arquivo é o snapshot operacional atual. Histórico detalhado fica em `docs/WORKLOG.md`.

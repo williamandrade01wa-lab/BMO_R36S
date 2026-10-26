@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SOURCES="$SCRIPT_DIR/../userpatches/overlay/usr/share/bmo"
 IMAGE="${1:?usage: finalize-boot.sh IMAGE}"
+BOOT_LOGO="$SCRIPT_DIR/../../../assets/boot/logo.bmp"
+(cd "$(dirname "$BOOT_LOGO")" && sha256sum -c logo.bmp.sha256)
 LOOP=""
 BOOT_MOUNT=""
 cleanup() {
@@ -30,5 +32,8 @@ for name in BMO-FIRSTBOOT.txt README-FIRST-BOOT.txt; do
     cmp -- "$SOURCES/$name" "$BOOT_MOUNT/$name"
     echo "OK: final BOOT/$name matches versioned source"
 done
+cp -- "$BOOT_LOGO" "$BOOT_MOUNT/logo.bmp"
+cmp -- "$BOOT_LOGO" "$BOOT_MOUNT/logo.bmp"
+echo "OK: final BOOT/logo.bmp matches versioned art"
 sync -f "$BOOT_MOUNT"
 echo BMO_FINAL_BOOT_OK

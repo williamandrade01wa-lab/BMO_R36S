@@ -15,6 +15,9 @@ cp --reflink=auto --sparse=always "$BASE" "$IMAGE"
 LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle
 ROOT="$WORK/root";mkdir "$ROOT";mount "$LOOP"p2 "$ROOT"
 mount "$LOOP"p1 "$ROOT/boot/u-boot"
+(cd "$REPO/assets/boot" && sha256sum -c logo.bmp.sha256)
+cp "$REPO/assets/boot/logo.bmp" "$ROOT/boot/u-boot/logo.bmp"
+cmp "$REPO/assets/boot/logo.bmp" "$ROOT/boot/u-boot/logo.bmp"
 touch "$ROOT/.bmo-ready-build-root"
 rm -f "$ROOT/root/.not_logged_in_yet"
 install -m 0755 "$REPO/image/armbian/userpatches/overlay/usr/local/sbin/bmo-firstboot" "$ROOT/usr/local/sbin/bmo-firstboot"
