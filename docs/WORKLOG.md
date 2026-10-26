@@ -922,3 +922,15 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Arquivos: assets/boot/logo.bmp + SHA/README, finalize-boot.sh, build-light-image.sh e build-beta-image.sh copiam e conferem a arte versionada para as próximas montagens. common.sh recebe correção de expansão já validada na CI do App. Worklog/continuidade atualizados. Sons e política Chromium já estavam nos instaladores desta branch.
 - Validação: BMP conferido no PC e aparelho; bash -n dos finalizadores base/Light/Ready aprovado. Sem reconstrução de imagem nesta etapa, nenhum arquivo grande novo na Potato. Imagens existentes permanecem com seus hashes anteriores.
 - R36S_REQUIRED=YES para boot visual da logo e futura montagem Light/Ready; App visual atual e fluxo básico de update confirmados. Próximo: iniciar visual em branch a partir da main; retomar build Light nesta branch apenas quando for montar imagem atualizada.
+
+
+## 2026-10-25 — Montagem PureLight v0.1.0-beta solicitada para teste privado
+
+- Branch/HEAD inicial: feat/bmo-linux-base-v1 / ad0bca4b8de36edbd5d5b98df7ac3fa3248a35b1.
+- Objetivo autorizado: remontar a Light com correções antes de publicar qualquer Release. Nome de entrega BMO-R36S-PureLight-v0.1.0-beta.img.xz.
+- Conteúdo: Assistente v0.2.1, logs, sons originais (12 WAV), política TranslateEnabled=false, logo R36S versionada, fonte App funcional e instalação automática online com expansão do SD/progresso. Mantido kernel/base9 validados; sem pré-instalar pacotes grandes e sem usar Potato.
+- Ações: nome/marker de versão atualizados, README claro e contrato de fontes antecipado na CI (hashes sons/sistema/boot, versão/correção do assistente e inclusão das pastas necessárias).
+- Arquivos: install/light/build-light-image.sh, verify-source.py, README-LIGHT.txt, workflow e documentação.
+- Resultado esperado: CI ARM64 passa contratos/fixtures/resize/sanitização e gera core comprimido; baixar ao PC, conferir hashes, incluir runtime PPSSPP pinado e validar entrega completa antes de entregar.
+- Validação: gates vão rodar no GitHub. Nenhuma imagem desta nova candidata declarada pronta ainda; nenhuma Release/tag será publicada nesta etapa. R36S_REQUIRED=YES.
+- Próximo passo exato: acompanhar CI, baixar artifact core, finalizar/verificar/comprimir no PC, registrar tamanhos/SHA e entregar arquivo de teste ao usuário.

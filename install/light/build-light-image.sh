@@ -10,7 +10,7 @@ fi
 echo "33e250518619c9cfecc2a846fa9a68e4bc213a5f1731d93cd07cffcaa61e9996  $BASE" | sha256sum -c -
 cleanup(){ if [ -n "$ROOT" ] && mountpoint -q "$ROOT";then umount -R "$ROOT";fi;[ -z "$LOOP" ] || losetup -d "$LOOP"; }
 trap cleanup EXIT
-IMAGE="$WORK/BMO-R36S-Light-v0.1.0-core.img"
+IMAGE="$WORK/BMO-R36S-PureLight-v0.1.0-beta-core.img"
 cp --reflink=auto --sparse=always "$BASE" "$IMAGE"
 LOOP="$(losetup --find --show --partscan "$IMAGE")";udevadm settle
 ROOT="$WORK/root";mkdir "$ROOT";mount "$LOOP"p2 "$ROOT"
@@ -65,7 +65,7 @@ done
 cp "$REPO/scripts/windows/ABRIR-BMO.cmd" "$REPO/scripts/windows/BMO-Preparar-Cartao.ps1" "$REPO/scripts/windows/LEIA-ME.txt" "$ROOT/boot/u-boot/"
 cp "$REPO/install/light/README-LIGHT.txt" "$ROOT/boot/u-boot/"
 install -d "$ROOT/etc/bmo"
-printf 'BMO_LIGHT_VERSION=0.1.0\nBMO_LIGHT_SOURCE=%s\n' "$(git -c safe.directory="$REPO" -C "$REPO" rev-parse HEAD)" > "$ROOT/etc/bmo/light-image.env"
+printf 'BMO_LIGHT_VERSION=0.1.0-beta\nBMO_APP_VERSION=0.1.0-beta.1\nBMO_LIGHT_SOURCE=%s\n' "$(git -c safe.directory="$REPO" -C "$REPO" rev-parse HEAD)" > "$ROOT/etc/bmo/light-image.env"
 rm -f "$ROOT/etc/systemd/system/getty@.service.d/override.conf" "$ROOT/etc/systemd/system/serial-getty@.service.d/override.conf"
 systemctl --root="$ROOT" enable bmo-ready-firstboot.service bmo-light-install.service
 systemctl --root="$ROOT" enable armbian-resize-filesystem.service

@@ -1,5 +1,7 @@
 # BMO R36S — Continuidade do Projeto
 
+> Prioridade atual: montar PureLight v0.1.0-beta para teste privado do usuário, antes do Releases. CI/core no GitHub e finalização no PC, sem Potato. Incluir sons, assistente v0.2.1, Chromium sem tradução e nova logo. Ainda não declarar nova imagem pronta: acompanhar workflow, finalizar runtime PPSSPP, validar conteúdo/hash e entregar candidata; R36S_REQUIRED=YES.
+
 > Atualização 2026-10-25: App v0.1.0-beta.1 integrado à main via PR #5 (merge c8e218953ce3d710d47042db16448fc664ad3997), com CI aprovada e update visual PC testado no aparelho. Alterações visuais devem partir de main; esta branch continua responsável pela imagem Light. Nova arte de assets/boot está aplicada no aparelho e incluída nos finalizadores das próximas imagens. Imagens já geradas mantêm seus hashes anteriores.
 
 > **LEITURA OBRIGATÓRIA EM TODO NOVO CHAT / AGENTE / SESSÃO DE DESENVOLVIMENTO**
