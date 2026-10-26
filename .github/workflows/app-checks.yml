@@ -1,0 +1,31 @@
+name: App beta checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m unittest discover -s tests -v
+      - run: python scripts/validate-app.py
+      - name: Shell syntax
+        run: |
+          find launchers scripts -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+          bash -n deploy/r36s/bmo-deploy-helper
+      - name: Authenticated Git source check
+        env:
+          BMO_TEST_REF: ${{ github.head_ref || github.ref_name }}
+        run: python scripts/update-visual.py check --ref "$BMO_TEST_REF"

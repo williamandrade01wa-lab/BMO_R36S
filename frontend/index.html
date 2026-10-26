@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BMO Display OS</title>
 
+  <script src="/bmo-runtime-config.js"></script>
+
   <style>
     /* ==========================================================================
        BMO DISPLAY OS - TELA CHEIA NATIVA
@@ -227,7 +229,7 @@
       opacity: 1;
       transform: translateY(0);
     }
-  
+
     /* ==========================================================================
        R36S SYSTEM PANEL
        ========================================================================== */
@@ -307,7 +309,7 @@
     .sys-ok { color: #9CFFB7; }
     .sys-bad { color: #FF8C8C; }
 
-  
+
     /* ==========================================================================
        BMO MAIN MENU
        ========================================================================== */
@@ -560,6 +562,609 @@
       margin-top: 5px;
     }
 
+
+
+    /* =========================================================
+       BMO CONTROL
+       ========================================================= */
+
+    #bmoControlApp {
+      background: #081814;
+      color: #AEE8CA;
+      padding: 0;
+      font-family: var(--font-mono);
+    }
+
+    .ctl-wrap {
+      width: 100%;
+      height: 100%;
+      padding: 18px 20px 14px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ctl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 54px;
+      margin-bottom: 14px;
+      border-bottom: 2px solid rgba(174,232,202,.45);
+      padding-bottom: 10px;
+    }
+
+    .ctl-title {
+      font-size: 23px;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
+
+    .ctl-subtitle {
+      margin-top: 3px;
+      font-size: 11px;
+      opacity: .6;
+      letter-spacing: .18em;
+    }
+
+    .ctl-status {
+      padding: 7px 12px;
+      border: 2px solid rgba(174,232,202,.7);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .ctl-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      flex: 1;
+    }
+
+    .ctl-card {
+      min-height: 118px;
+      border: 2px solid rgba(174,232,202,.26);
+      border-radius: 14px;
+      padding: 13px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: rgba(174,232,202,.035);
+      transition: .12s ease;
+    }
+
+    .ctl-card.selected {
+      border-color: #AEE8CA;
+      background: rgba(174,232,202,.15);
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 2px rgba(174,232,202,.12);
+    }
+
+    .ctl-icon {
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .ctl-label {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .ctl-value {
+      font-size: 10px;
+      margin-top: 5px;
+      opacity: .7;
+    }
+
+    .ctl-footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 10px;
+      margin-top: auto;
+      font-size: 10px;
+      opacity: .6;
+      letter-spacing: .05em;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #ctlWifi {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .ctl-wifi-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .ctl-networks {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .ctl-network {
+      display: grid;
+      grid-template-columns: 1fr 80px 55px;
+      align-items: center;
+      min-height: 42px;
+      padding: 7px 9px;
+      border-radius: 9px;
+      border: 1px solid rgba(174,232,202,.20);
+      font-size: 12px;
+    }
+
+    .ctl-network.selected {
+      border: 2px solid #AEE8CA;
+      background: rgba(174,232,202,.12);
+    }
+
+    .ctl-network.connected .ctl-network-name::before {
+      content: "★ ";
+    }
+
+    .ctl-network-name {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-weight: 900;
+    }
+
+    .ctl-network-band,
+    .ctl-network-signal {
+      text-align: right;
+      opacity: .7;
+      font-size: 10px;
+    }
+
+    .ctl-actions {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .ctl-action {
+      border: 1px solid rgba(174,232,202,.28);
+      border-radius: 9px;
+      padding: 9px 5px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .ctl-action.selected {
+      border: 2px solid #AEE8CA;
+      background: rgba(174,232,202,.14);
+    }
+
+    .ctl-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 42px;
+      transform: translateX(-50%) translateY(8px);
+      background: #AEE8CA;
+      color: #081814;
+      border: 2px solid #081814;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 11px;
+      font-weight: 900;
+      opacity: 0;
+      pointer-events: none;
+      transition: .16s ease;
+      z-index: 999999;
+    }
+
+    .ctl-toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+
+
+    /* ============================================================
+       BMO WIFI KEYBOARD - RECUPERACAO
+       ============================================================ */
+
+    #bmoWifiKeyboard {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      box-sizing: border-box;
+
+      padding: 12px;
+
+      background: rgba(2, 15, 13, .96);
+    }
+
+    #bmoWifiKeyboard.visible {
+      display: flex;
+    }
+
+    .wifi-kb-panel {
+      width: 100%;
+      height: 100%;
+
+      max-width: 616px;
+      max-height: 456px;
+
+      box-sizing: border-box;
+
+      display: flex;
+      flex-direction: column;
+
+      padding: 12px;
+
+      background: #071b17;
+
+      border: 2px solid #9ce4c5;
+      border-radius: 16px;
+
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    .wifi-kb-title {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .08em;
+
+      color: #d7ffec;
+    }
+
+    .wifi-kb-network {
+      margin-top: 2px;
+
+      font-size: 10px;
+      font-weight: 700;
+
+      color: rgba(215,255,236,.65);
+    }
+
+    .wifi-kb-password {
+      min-height: 34px;
+
+      display: flex;
+      align-items: center;
+
+      margin: 8px 0;
+
+      padding: 0 9px;
+
+      box-sizing: border-box;
+
+      overflow: hidden;
+      white-space: nowrap;
+
+      border: 1px solid rgba(156,228,197,.4);
+      border-radius: 7px;
+
+      font-size: 12px;
+      font-weight: 900;
+
+      color: #d7ffec;
+    }
+
+    .wifi-kb-grid {
+      flex: 1;
+
+      display: grid;
+
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+
+      gap: 4px;
+
+      min-height: 0;
+    }
+
+    .wifi-kb-key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 0;
+
+      border: 1px solid rgba(156,228,197,.22);
+      border-radius: 5px;
+
+      font-size: 11px;
+      font-weight: 900;
+
+      color: #d7ffec;
+    }
+
+    .wifi-kb-key.selected {
+      border: 2px solid #aef2d3;
+
+      background:
+        rgba(156,228,197,.19);
+
+      box-shadow:
+        0 0 10px rgba(156,228,197,.12);
+    }
+
+    .wifi-kb-actions {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
+      gap: 5px;
+
+      margin-top: 7px;
+    }
+
+    .wifi-kb-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      min-height: 29px;
+
+      box-sizing: border-box;
+
+      border: 1px solid rgba(156,228,197,.25);
+      border-radius: 6px;
+
+      font-size: 9px;
+      font-weight: 900;
+
+      color: #d7ffec;
+    }
+
+    .wifi-kb-action.selected {
+      border: 2px solid #aef2d3;
+
+      background:
+        rgba(156,228,197,.19);
+    }
+
+    .wifi-kb-hint {
+      margin-top: 6px;
+
+      text-align: center;
+
+      font-size: 8px;
+      font-weight: 700;
+
+      color: rgba(215,255,236,.52);
+    }
+
+
+    /* Wi-Fi: rede selecionada */
+
+    #bmoControlApp .ctl-network.selected {
+      border-color: #aef2d3 !important;
+
+      background:
+        rgba(174,242,211,.13) !important;
+
+      box-shadow:
+        inset 3px 0 0 #aef2d3;
+    }
+
+    #bmoControlApp.wifi-focus-actions
+      .ctl-network.selected {
+
+      border-color:
+        rgba(255,255,255,.12) !important;
+
+      background:
+        rgba(255,255,255,.03) !important;
+
+      box-shadow: none;
+    }
+
+
+
+    /* =========================================================
+       BMO_GAMES_FRONTEND_V1
+       ========================================================= */
+
+    #bmoGamesApp {
+      background: #081814;
+      color: #AEE8CA;
+      padding: 0;
+      font-family: var(--font-mono);
+    }
+
+    .games-wrap {
+      width: 100%;
+      height: 100%;
+      padding: 18px 20px 14px 20px;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    .games-header {
+      min-height: 58px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      border-bottom: 2px solid rgba(174,232,202,.55);
+      margin-bottom: 14px;
+    }
+
+    .games-title {
+      font-size: 23px;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
+
+    .games-subtitle {
+      margin-top: 3px;
+
+      font-size: 11px;
+      opacity: .65;
+      letter-spacing: .08em;
+    }
+
+    .games-count {
+      min-width: 48px;
+
+      padding: 5px 8px;
+
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+
+      border: 2px solid rgba(174,232,202,.5);
+      border-radius: 8px;
+    }
+
+    .games-body {
+      flex: 1;
+      min-height: 0;
+
+      overflow: hidden;
+    }
+
+    .games-list {
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .games-row {
+      min-height: 62px;
+
+      padding: 8px 11px;
+
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      border: 2px solid rgba(174,232,202,.20);
+      border-radius: 10px;
+
+      background: rgba(174,232,202,.035);
+    }
+
+    .games-row.selected {
+      border-color: #AEE8CA;
+
+      background: rgba(174,232,202,.13);
+
+      box-shadow:
+        inset 0 0 0 1px rgba(174,232,202,.22);
+    }
+
+    .games-icon {
+      width: 45px;
+      height: 38px;
+
+      flex: 0 0 45px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 2px solid currentColor;
+      border-radius: 7px;
+
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .games-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .games-name {
+      overflow: hidden;
+
+      font-size: 14px;
+      font-weight: 900;
+
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .games-meta {
+      margin-top: 4px;
+
+      font-size: 10px;
+      opacity: .62;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .games-arrow {
+      flex: 0 0 auto;
+
+      font-size: 25px;
+      font-weight: 900;
+
+      opacity: .7;
+    }
+
+    .games-footer {
+      min-height: 30px;
+      padding-top: 9px;
+
+      display: flex;
+      justify-content: space-between;
+
+      border-top: 1px solid rgba(174,232,202,.25);
+
+      font-size: 10px;
+      font-weight: 900;
+      opacity: .65;
+    }
+
+    .games-empty {
+      padding: 30px 12px;
+
+      text-align: center;
+      font-size: 13px;
+      opacity: .65;
+    }
+
+
+/* BMO_FAVORITE_STAR_VISUAL_V1 */
+
+.games-icon.favorite-star {
+  font-size: 28px !important;
+  line-height: 1 !important;
+  font-weight: 900;
+  transform: scale(1.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 </style>
 
 <style id="bmo-sleep-style">
@@ -672,6 +1277,1187 @@
 
 </style>
 
+
+<style id="bmoPhysicalVolumeBrightnessStyle">
+
+  #bmoPhysicalOverlay {
+    position: fixed;
+
+    left: 50%;
+    bottom: 38px;
+
+    transform:
+      translateX(-50%)
+      translateY(12px);
+
+    width: 270px;
+
+    padding: 14px 18px;
+
+    box-sizing: border-box;
+
+    border: 2px solid #AEE8CA;
+    border-radius: 10px;
+
+    background: rgba(7, 24, 19, .96);
+    color: #AEE8CA;
+
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+
+    z-index: 250000;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+      opacity .12s ease,
+      transform .12s ease;
+  }
+
+  #bmoPhysicalOverlay.visible {
+    opacity: 1;
+
+    transform:
+      translateX(-50%)
+      translateY(0);
+  }
+
+  #bmoPhysicalOverlayLabel {
+    margin-bottom: 8px;
+  }
+
+  .bmo-physical-track {
+    width: 100%;
+    height: 10px;
+
+    border: 1px solid #AEE8CA;
+    border-radius: 5px;
+
+    overflow: hidden;
+  }
+
+  #bmoPhysicalOverlayFill {
+    width: 0%;
+    height: 100%;
+
+    background: #AEE8CA;
+
+    transition:
+      width .08s linear;
+  }
+
+</style>
+
+
+<style id="bmoControlBrightnessCardStyle">
+
+  .ctl-brightness-value {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 900;
+    opacity: 1;
+  }
+
+  .ctl-brightness-track {
+    width: 82%;
+    height: 8px;
+
+    margin-top: 9px;
+
+    border: 1px solid rgba(174,232,202,.55);
+    border-radius: 999px;
+
+    overflow: hidden;
+
+    background:
+      rgba(174,232,202,.07);
+  }
+
+  .ctl-brightness-fill {
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: #AEE8CA;
+
+    transition:
+      width .16s ease;
+  }
+
+</style>
+
+
+<style id="bmoBrightnessSubviewCss">
+
+  #ctlBrightness {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ctl-brightness-screen {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    padding:
+      12px
+      28px
+      20px;
+
+    text-align: center;
+  }
+
+  .ctl-brightness-screen-title {
+    font-size: 15px;
+    font-weight: 900;
+
+    letter-spacing: .14em;
+
+    opacity: .72;
+  }
+
+  .ctl-brightness-screen-value {
+    margin-top: 16px;
+
+    font-size: 54px;
+    line-height: 1;
+
+    font-weight: 900;
+  }
+
+  .ctl-brightness-screen-track {
+    width: 82%;
+    height: 18px;
+
+    margin-top: 25px;
+
+    border:
+      2px solid
+      #AEE8CA;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+
+    background:
+      rgba(
+        174,
+        232,
+        202,
+        .07
+      );
+  }
+
+  .ctl-brightness-screen-fill {
+    width: 0%;
+    height: 100%;
+
+    background:
+      #AEE8CA;
+
+    border-radius:
+      inherit;
+
+    transition:
+      width .10s ease;
+  }
+
+  .ctl-brightness-screen-help {
+    margin-top: 25px;
+
+    font-size: 12px;
+    font-weight: 900;
+
+    letter-spacing: .05em;
+  }
+
+  .ctl-brightness-screen-back {
+    margin-top: 18px;
+
+    font-size: 10px;
+
+    opacity: .55;
+  }
+
+</style>
+
+
+<style id="bmoPowerCss">
+
+  #ctlPowerConfirm {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ctl-power-confirm {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    box-sizing: border-box;
+
+    padding: 24px;
+  }
+
+  .ctl-power-icon {
+    font-size: 52px;
+    line-height: 1;
+  }
+
+  .ctl-power-title {
+    margin-top: 18px;
+
+    font-size: 25px;
+    font-weight: 900;
+
+    letter-spacing: .08em;
+  }
+
+  .ctl-power-text {
+    margin-top: 10px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    opacity: .72;
+  }
+
+  .ctl-power-actions {
+    margin-top: 30px;
+
+    padding: 10px 16px;
+
+    border: 2px solid #AEE8CA;
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+</style>
+
+
+<style>
+
+/* =========================================================
+   BMO_GAMES_VISUAL_V2
+   ========================================================= */
+
+#bmoGamesApp {
+  background:
+    linear-gradient(
+      145deg,
+      #071711 0%,
+      #0b241b 55%,
+      #07140f 100%
+    );
+
+  color: #AEE8CA;
+}
+
+
+/* HEADER */
+
+#bmoGamesApp .games-wrap {
+  padding: 14px 17px 11px 17px;
+}
+
+
+#bmoGamesApp .games-header {
+  min-height: 54px;
+
+  margin-bottom: 9px;
+
+  border-bottom:
+    2px solid rgba(174,232,202,.38);
+}
+
+
+#bmoGamesApp .games-title {
+  color: #e0fff3;
+
+  font-size: 23px;
+  font-weight: 1000;
+  letter-spacing: .08em;
+}
+
+
+#bmoGamesApp .games-subtitle {
+  color: #83bda4;
+}
+
+
+#bmoGamesApp .games-count {
+  color: #dcfff1;
+
+  background:
+    rgba(174,232,202,.08);
+
+  border-color:
+    rgba(174,232,202,.48);
+}
+
+
+/* DUAS COLUNAS */
+
+#bmoGamesApp .games-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.08fr)
+    minmax(0, .92fr);
+
+  gap: 11px;
+}
+
+
+#bmoGamesApp .games-library,
+#bmoGamesApp .games-preview {
+  min-width: 0;
+  min-height: 0;
+}
+
+
+#bmoGamesApp .games-library {
+  display: flex;
+  flex-direction: column;
+}
+
+
+#bmoGamesApp .games-preview {
+  display: flex;
+  flex-direction: column;
+
+  padding: 8px;
+
+  border:
+    2px solid rgba(174,232,202,.24);
+
+  border-radius: 13px;
+
+  background:
+    rgba(174,232,202,.035);
+
+  box-shadow:
+    inset 0 0 28px rgba(174,232,202,.025);
+}
+
+
+#bmoGamesApp .games-section-label,
+#bmoGamesApp .games-preview-label {
+  margin-bottom: 6px;
+
+  color: #72aa91;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+
+/* LISTA */
+
+#bmoGamesApp .games-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 3px;
+
+  scrollbar-width: none;
+}
+
+
+#bmoGamesApp .games-list::-webkit-scrollbar {
+  display: none;
+}
+
+
+#bmoGamesApp .games-row {
+  min-height: 58px;
+
+  padding: 7px 9px;
+
+  border-radius: 11px;
+
+  transition:
+    transform .12s ease,
+    background .12s ease,
+    border-color .12s ease;
+}
+
+
+#bmoGamesApp .games-row.selected {
+  transform:
+    translateX(3px);
+
+  color: #e7fff6;
+
+  border-color: #AEE8CA;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(174,232,202,.19),
+      rgba(174,232,202,.055)
+    );
+
+  box-shadow:
+    0 0 14px rgba(174,232,202,.07),
+    inset 3px 0 0 #AEE8CA;
+}
+
+
+#bmoGamesApp .games-icon {
+  width: 43px;
+  height: 37px;
+
+  flex-basis: 43px;
+
+  color: #c5f6df;
+
+  background:
+    rgba(174,232,202,.035);
+}
+
+
+#bmoGamesApp
+.games-row.selected
+.games-icon {
+  background:
+    rgba(174,232,202,.12);
+}
+
+
+#bmoGamesApp .games-name {
+  font-size: 12px;
+}
+
+
+#bmoGamesApp .games-meta {
+  color: #87baa3;
+}
+
+
+/* PREVIEW */
+
+#bmoGamesApp .games-cover-shell {
+  flex: 1;
+
+  min-height: 165px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 7px;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(174,232,202,.10),
+      rgba(174,232,202,.015)
+    );
+}
+
+
+/* CARTUCHO PLACEHOLDER */
+
+#bmoGamesApp
+.games-cover-placeholder {
+  position: relative;
+
+  width: 108px;
+  height: 137px;
+
+  padding: 12px;
+
+  border:
+    3px solid #AEE8CA;
+
+  border-radius:
+    8px 8px
+    17px 8px;
+
+  background: #153329;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.28),
+    inset 0 0 0 2px rgba(255,255,255,.03);
+
+  transform: rotate(-2deg);
+}
+
+
+#bmoGamesApp .games-cart-slot {
+  width: 72%;
+  height: 7px;
+
+  margin:
+    0 auto 14px auto;
+
+  border-radius: 4px;
+
+  background: #071711;
+}
+
+
+#bmoGamesApp .games-cart-screen {
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #071711;
+
+  border-radius: 5px;
+
+  background: #AEE8CA;
+
+  font-size: 20px;
+  font-weight: 1000;
+  letter-spacing: .08em;
+
+  box-shadow:
+    inset 0 0 0 3px
+    rgba(7,23,17,.15);
+}
+
+
+#bmoGamesApp .games-cart-label {
+  margin-top: 11px;
+
+  color: #AEE8CA;
+
+  text-align: center;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+
+
+/* INFO DO JOGO */
+
+#bmoGamesApp .games-preview-info {
+  min-height: 70px;
+
+  padding:
+    7px 5px 3px 5px;
+}
+
+
+#bmoGamesApp .games-preview-system {
+  margin-bottom: 4px;
+
+  color: #74b599;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .11em;
+}
+
+
+#bmoGamesApp .games-preview-name {
+  overflow: hidden;
+
+  display: -webkit-box;
+
+  color: #e7fff6;
+
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1.15;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+
+#bmoGamesApp .games-preview-meta {
+  margin-top: 5px;
+
+  color: #7daf98;
+
+  font-size: 9px;
+}
+
+
+/* FOOTER */
+
+#bmoGamesApp .games-footer {
+  margin-top: 7px;
+
+  color: #8fc5ad;
+
+  border-top-color:
+    rgba(174,232,202,.20);
+}
+
+</style>
+
+
+<style>
+
+/* =========================================================
+   BMO_GAME_COVERS_FRONTEND_V1
+   ========================================================= */
+
+#bmoGamesApp .games-cover-shell {
+  position: relative;
+}
+
+
+#bmoGamesApp .games-cover-image {
+  display: none;
+
+  width: 100%;
+  height: 100%;
+
+  max-width: 155px;
+  max-height: 205px;
+
+  object-fit: contain;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 8px 22px
+    rgba(0,0,0,.38);
+
+  filter:
+    saturate(.96)
+    contrast(1.03);
+
+  animation:
+    bmo-cover-in
+    .16s ease-out;
+}
+
+
+@keyframes bmo-cover-in {
+
+  from {
+    opacity: 0;
+    transform:
+      translateY(4px)
+      scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+}
+
+</style>
+
+
+<style>
+
+/* =========================================================
+   BMO_GAMES_LAYOUT_TUNE_V1
+   GAMES PRIMEIRO + CAPA MAIOR
+   ========================================================= */
+
+#bmoGamesApp .games-layout {
+  grid-template-columns:
+    minmax(0, .88fr)
+    minmax(0, 1.12fr);
+}
+
+
+#bmoGamesApp .games-preview {
+  padding: 7px;
+}
+
+
+#bmoGamesApp .games-cover-shell {
+  min-height: 205px;
+}
+
+
+#bmoGamesApp .games-cover-image {
+  width: 100%;
+  height: 100%;
+
+  max-width: 188px;
+  max-height: 238px;
+
+  object-fit: contain;
+}
+
+
+#bmoGamesApp .games-cover-placeholder {
+  width: 125px;
+  height: 158px;
+}
+
+
+#bmoGamesApp .games-preview-info {
+  min-height: 64px;
+  padding-top: 5px;
+}
+
+</style>
+
+
+<style>
+/* =========================================================
+   BMO_GAMES_COVER_FULLBLEED_V1
+   CAPA OCUPANDO TODO O QUADRADO SUPERIOR
+   ========================================================= */
+
+#bmoGamesApp .games-preview {
+  padding: 6px;
+}
+
+#bmoGamesApp .games-cover-shell {
+  width: 100%;
+  min-height: 230px;
+  height: 230px;
+  padding: 0 !important;
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  background: rgba(0, 0, 0, 0.08);
+  border: 2px solid rgba(14, 54, 47, 0.18);
+  box-shadow: none;
+}
+
+#bmoGamesApp .games-cover-image {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover !important;
+  object-position: center center;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#bmoGamesApp .games-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#bmoGamesApp .games-preview-info {
+  margin-top: 8px;
+}
+</style>
+
+
+<!-- ========================================================
+     BMO_PC_STREAM_V1
+     ======================================================== -->
+
+<style id="bmoPcStreamCss">
+
+#bmoPcStreamApp {
+  color: #d9fff4;
+}
+
+#bmoPcStreamApp .pcstream-wrap {
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+
+  padding:
+    32px
+    38px
+    24px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+#bmoPcStreamApp .pcstream-header {
+  flex: 0 0 auto;
+
+  margin-bottom: 20px;
+}
+
+
+#bmoPcStreamApp .pcstream-title {
+  font-size: 28px;
+
+  font-weight: 900;
+
+  letter-spacing: .08em;
+}
+
+
+#bmoPcStreamApp .pcstream-subtitle {
+  margin-top: 5px;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  opacity: .65;
+
+  letter-spacing: .08em;
+}
+
+
+#bmoPcStreamApp .pcstream-list {
+  flex: 1 1 auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+#bmoPcStreamApp .pcstream-row {
+  min-height: 68px;
+
+  box-sizing: border-box;
+
+  border:
+    2px solid
+    rgba(217,255,244,.20);
+
+  border-radius: 12px;
+
+  padding:
+    12px
+    16px;
+
+  display: flex;
+
+  align-items: center;
+
+  opacity: .72;
+}
+
+
+#bmoPcStreamApp
+.pcstream-row.selected {
+
+  opacity: 1;
+
+  border-color:
+    #d9fff4;
+
+  background:
+    rgba(217,255,244,.10);
+}
+
+
+#bmoPcStreamApp .pcstream-icon {
+
+  width: 54px;
+
+  font-size: 18px;
+
+  font-weight: 900;
+
+  letter-spacing: .04em;
+}
+
+
+#bmoPcStreamApp .pcstream-info {
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+#bmoPcStreamApp .pcstream-name {
+
+  font-size: 18px;
+
+  font-weight: 900;
+
+  letter-spacing: .04em;
+}
+
+
+#bmoPcStreamApp .pcstream-meta {
+
+  margin-top: 3px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  opacity: .60;
+
+  letter-spacing: .06em;
+}
+
+
+#bmoPcStreamApp .pcstream-arrow {
+
+  font-size: 26px;
+
+  font-weight: 900;
+}
+
+
+#bmoPcStreamApp .pcstream-status {
+
+  min-height: 16px;
+
+  margin-top: 4px;
+
+  text-align: center;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing: .05em;
+}
+
+
+#bmoPcStreamApp .pcstream-footer {
+
+  flex: 0 0 auto;
+
+  padding-top: 12px;
+
+  text-align: center;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: .06em;
+
+  opacity: .65;
+}
+
+</style>
+
+
+
+
+
+<!-- ========================================================
+     BMO_MAIN_MENU_SCROLL_V2
+
+     Scroll mínimo:
+     - preserva geometria original
+     - lista central rolável
+     - sem scrollbar
+     - sem smooth scroll
+     ======================================================== -->
+
+<style id="bmoMainMenuScrollV2Css">
+
+  #bmoMenu.visible {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+
+  #bmoMenu .menu-header {
+    flex: 0 0 auto;
+  }
+
+
+  #bmoMenu .menu-list {
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scroll-behavior: auto;
+    overflow-anchor: none;
+
+    scrollbar-width: none;
+  }
+
+
+  #bmoMenu .menu-list::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+
+  #bmoMenu .menu-item {
+    flex: 0 0 auto;
+  }
+
+
+  #bmoMenu .menu-footer {
+    flex: 0 0 auto;
+  }
+
+</style>
+
+
+<style id="bmoSystemControlV2Css">
+  /* BMO_SYSTEM_CONTROL_V2 */
+
+  .r36-system-v2 .app-topbar {
+    height: 42px;
+    margin-bottom: 8px;
+  }
+
+  .r36-system-v2 .stats-grid {
+    gap: 8px 10px;
+  }
+
+  .r36-system-v2 .stat-card {
+    min-height: 55px;
+    padding: 7px 9px;
+  }
+
+  .r36-system-v2 .stat-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .r36-system-v2 .stat-value {
+    font-size: 14px;
+    line-height: 1.12;
+  }
+
+  .r36-system-v2 .stat-value small {
+    font-size: 10px;
+    opacity: .72;
+  }
+
+  #r36Services.system-health-ok,
+  #ctlDiagnosticsValue.system-health-ok {
+    color: #9CFFB7;
+  }
+
+  #r36Services.system-health-bad,
+  #ctlDiagnosticsValue.system-health-bad {
+    color: #FF8C8C;
+  }
+
+
+  /* BMO_DIAGNOSTICS_VIEW_V2 */
+
+  #ctlDiagnostics {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .ctl-diagnostics-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ctl-diagnostics-title {
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: .06em;
+  }
+
+  .ctl-diagnostics-services {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  .ctl-diag-service {
+    min-height: 43px;
+    border: 2px solid rgba(174,232,202,.28);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+  }
+
+  .ctl-diag-service.ok {
+    color: #9CFFB7;
+    border-color: rgba(156,255,183,.55);
+  }
+
+  .ctl-diag-service.bad {
+    color: #FF8C8C;
+    border-color: rgba(255,140,140,.55);
+  }
+
+  .ctl-diagnostics-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  .ctl-diagnostics-meta > div {
+    border: 1px solid rgba(174,232,202,.22);
+    border-radius: 8px;
+    padding: 7px 9px;
+  }
+
+  .ctl-diagnostics-meta small {
+    display: block;
+    opacity: .6;
+    font-size: 8px;
+    margin-bottom: 3px;
+  }
+
+  .ctl-diagnostics-meta strong {
+    display: block;
+    font-size: 12px;
+  }
+
+  .ctl-diagnostics-help {
+    margin-top: auto;
+    text-align: center;
+    font-size: 10px;
+    opacity: .68;
+  }
+</style>
+
 </head>
 <body class="state-happy" id="bmoBody">
 
@@ -752,11 +2538,23 @@
       <div class="menu-hint">↑↓ NAV · A OK · B VOLTAR</div>
     </div>
     <div class="menu-list" id="menuList">
-      <div class="menu-item active" data-action="r36status"><span>R36S</span><small>STATUS LOCAL</small></div>
-      <div class="menu-item" data-action="lepotato"><span>LE POTATO</span><small>STATUS SERVER</small></div>
+      <!-- BMO_MENU_CLEAN_V1 -->
+      <div class="menu-item active" data-action="games">
+        <span>GAMES</span>
+        <small>JOGOS</small>
+      </div>
+      <div
+        class="menu-item"
+        data-action="pcstream"
+      >
+        <span>PC STREAM</span>
+        <small>HIPO-PC · MOONLIGHT</small>
+      </div>
+
+      <div class="menu-item" data-action="r36status"><span>R36S</span><small>STATUS LOCAL</small></div>
       <div class="menu-item" data-action="clock"><span>RELÓGIO</span><small>HORA + DATA</small></div>
       <div class="menu-item" data-action="weather"><span>CLIMA</span><small>BRASÍLIA</small></div>
-      <div class="menu-item" data-action="companion"><span>COMPANION</span><small>BMO PET</small></div>
+      <div class="menu-item" data-action="control"><span>CONTROL</span><small>SISTEMA + WI-FI</small></div>
       <div class="menu-item" data-action="face"><span>ROSTO</span><small>VOLTAR AO BMO</small></div>
     </div>
 
@@ -767,7 +2565,7 @@
   </section>
 
 
-  <section class="app-screen app-dark" id="r36StatusApp">
+  <section class="app-screen app-dark r36-system-v2" id="r36StatusApp">
     <div class="app-topbar">
       <div class="app-title">R36S // LOCAL</div>
       <div class="app-back">B = VOLTAR</div>
@@ -781,6 +2579,23 @@
       <div class="stat-card"><div class="stat-label">DISCO</div><div class="stat-value" id="r36Disk">---</div></div>
       <div class="stat-card"><div class="stat-label">UPTIME</div><div class="stat-value" id="r36Uptime">---</div></div>
       <div class="stat-card"><div class="stat-label">LOAD / BRILHO</div><div class="stat-value"><span id="r36Load">---</span><br><span id="r36Brightness">---</span></div></div>
+
+      <!-- BMO_SYSTEM_CONTROL_V2 -->
+      <div class="stat-card">
+        <div class="stat-label">WI-FI / SINAL</div>
+        <div class="stat-value">
+          <span id="r36Wifi">---</span><br>
+          <small id="r36Signal">---</small>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">RUNTIME / SAÚDE</div>
+        <div class="stat-value">
+          <span id="r36Runtime">---</span><br>
+          <small id="r36Services">---</small>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -839,6 +2654,467 @@
     </div>
   </section>
 
+
+
+  <!-- ======================================================
+       BMO_GAMES_FRONTEND_V1
+       ====================================================== -->
+
+  <section class="app-screen app-dark" id="bmoGamesApp">
+
+    <div class="games-wrap">
+
+      <div class="games-header">
+
+        <div>
+          <div class="games-title">BMO GAMES</div>
+          <div class="games-subtitle" id="gamesSubtitle">
+            ESCOLHA O SISTEMA
+          </div>
+        </div>
+
+        <div class="games-count" id="gamesCount">
+          ---
+        </div>
+
+      </div>
+
+      <div class="games-body games-layout">
+
+        <div class="games-library">
+
+          <div class="games-section-label">
+            BIBLIOTECA
+          </div>
+
+          <div class="games-list" id="gamesList">
+
+            <div class="games-row selected">
+              <div class="games-icon">GBA</div>
+
+              <div class="games-info">
+                <div class="games-name">
+                  GAME BOY ADVANCE
+                </div>
+
+                <div class="games-meta">
+                  CARREGANDO...
+                </div>
+              </div>
+
+              <div class="games-arrow">›</div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="games-preview">
+
+          <div class="games-preview-label">
+            PREVIEW
+          </div>
+
+          <div class="games-cover-shell">
+
+            <!-- BMO_GAME_COVERS_FRONTEND_V1 -->
+
+            <img
+              class="games-cover-image"
+              id="gamesCoverImage"
+              alt=""
+            >
+
+            <div
+              class="games-cover-placeholder"
+              id="gamesCoverPlaceholder"
+            >
+
+              <div class="games-cart-slot"></div>
+
+              <div class="games-cart-screen">
+                BMO
+              </div>
+
+              <div class="games-cart-label">
+                GAME
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="games-preview-info">
+
+            <div
+              class="games-preview-system"
+              id="gamesPreviewSystem"
+            >
+              BMO GAMES
+            </div>
+
+            <div
+              class="games-preview-name"
+              id="gamesPreviewName"
+            >
+              GAME BOY ADVANCE
+            </div>
+
+            <div
+              class="games-preview-meta"
+              id="gamesPreviewMeta"
+            >
+              ESCOLHA UM JOGO
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="games-footer">
+        <span>↑↓ NAV</span>
+        <span>A JOGAR</span>
+        <span>B VOLTAR</span>
+        <span>Y ★ ADD</span>
+        <span>X ☆ REM</span>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ======================================================
+       BMO CONTROL
+       ====================================================== -->
+
+  <!-- ======================================================
+       BMO_PC_STREAM_V1
+       ====================================================== -->
+
+  <section
+    class="app-screen app-dark"
+    id="bmoPcStreamApp"
+  >
+
+    <div class="pcstream-wrap">
+
+      <div class="pcstream-header">
+
+        <div class="pcstream-title">
+          PC STREAM
+        </div>
+
+        <div class="pcstream-subtitle">
+          HIPO-PC · SUNSHINE + MOONLIGHT
+        </div>
+
+      </div>
+
+
+      <div
+        class="pcstream-list"
+        id="pcStreamList"
+      >
+      </div>
+
+
+      <div
+        class="pcstream-status"
+        id="pcStreamStatus"
+      >
+      </div>
+
+
+      <div class="pcstream-footer">
+        ↑↓ NAV · A ABRIR · B VOLTAR
+      </div>
+
+    </div>
+
+  </section>
+
+
+<section class="app-screen app-dark" id="bmoControlApp">
+
+    <div class="ctl-wrap">
+
+      <div class="ctl-header">
+        <div>
+          <div class="ctl-title">BMO CONTROL</div>
+          <div class="ctl-subtitle">SYSTEM + WI-FI</div>
+        </div>
+
+        <div class="ctl-status" id="ctlStatus">
+          READY
+        </div>
+      </div>
+
+
+      <div id="ctlMain">
+
+        <div class="ctl-grid">
+
+          <div class="ctl-card selected" data-ctl="wifi">
+            <div class="ctl-icon">◉</div>
+            <div class="ctl-label">WI-FI</div>
+            <div class="ctl-value" id="ctlWifiValue">---</div>
+          </div>
+
+          <!-- BMO_CONTROL_BRIGHTNESS_CARD_V1 -->
+          <div class="ctl-card" data-ctl="brightness">
+            <div class="ctl-icon">☀</div>
+
+            <div class="ctl-label">
+              BRILHO
+            </div>
+
+            <div
+              class="ctl-value ctl-brightness-value"
+              id="ctlBrightnessValue"
+            >
+              --%
+            </div>
+
+            <div class="ctl-brightness-track">
+              <div
+                class="ctl-brightness-fill"
+                id="ctlBrightnessFill"
+              ></div>
+            </div>
+          </div>
+
+          <div class="ctl-card" data-ctl="sound_test">
+            <div class="ctl-icon">♪</div>
+            <div class="ctl-label">ÁUDIO</div>
+            <div class="ctl-value">TESTE</div>
+          </div>
+
+          <div class="ctl-card" data-ctl="diagnostics">
+            <div class="ctl-icon">◆</div>
+            <div class="ctl-label">DIAGNÓSTICO</div>
+            <div class="ctl-value" id="ctlDiagnosticsValue">VERIFICAR</div>
+          </div>
+
+          <div class="ctl-card" data-ctl="kiosk_restart">
+            <div class="ctl-icon">↻</div>
+            <div class="ctl-label">KIOSK</div>
+            <div class="ctl-value">REINICIAR</div>
+          </div>
+
+          <!-- BMO_CONTROL_POWER_V1 -->
+
+          <div class="ctl-card" data-ctl="system_reboot">
+            <div class="ctl-icon">↻</div>
+            <div class="ctl-label">REINICIAR</div>
+            <div class="ctl-value">R36S</div>
+          </div>
+
+          <div class="ctl-card" data-ctl="system_poweroff">
+            <div class="ctl-icon">●</div>
+            <div class="ctl-label">DESLIGAR</div>
+            <div class="ctl-value">R36S</div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- BMO_BRIGHTNESS_SUBVIEW_V1 -->
+      <div id="ctlBrightness" class="hidden">
+
+        <div class="ctl-brightness-screen">
+
+          <div class="ctl-brightness-screen-title">
+            BRILHO
+          </div>
+
+          <div
+            class="ctl-brightness-screen-value"
+            id="ctlBrightnessBigValue"
+          >
+            --%
+          </div>
+
+          <div class="ctl-brightness-screen-track">
+            <div
+              class="ctl-brightness-screen-fill"
+              id="ctlBrightnessBigFill"
+            ></div>
+          </div>
+
+          <div class="ctl-brightness-screen-help">
+            ← DIMINUIR
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            AUMENTAR →
+          </div>
+
+          <div class="ctl-brightness-screen-back">
+            B VOLTAR
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- BMO_DIAGNOSTICS_VIEW_V2 -->
+      <div id="ctlDiagnostics" class="hidden">
+
+        <div class="ctl-diagnostics-screen">
+
+          <div class="ctl-diagnostics-title">
+            BMO // DIAGNÓSTICO
+          </div>
+
+          <div class="ctl-diagnostics-services">
+
+            <div class="ctl-diag-service" id="diagUi">
+              UI ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagKiosk">
+              KIOSK ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagControl">
+              CONTROL ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagStatus">
+              STATUS ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagSound">
+              SOUND ---
+            </div>
+
+            <div class="ctl-diag-service" id="diagBattery">
+              BATTERY ---
+            </div>
+
+          </div>
+
+          <div class="ctl-diagnostics-meta">
+
+            <div>
+              <small>RUNTIME</small>
+              <strong id="diagRuntime">---</strong>
+            </div>
+
+            <div>
+              <small>WI-FI</small>
+              <strong id="diagWifi">---</strong>
+            </div>
+
+            <div>
+              <small>REDES</small>
+              <strong id="diagNetworks">---</strong>
+            </div>
+
+            <div>
+              <small>BRILHO</small>
+              <strong id="diagBrightness">---</strong>
+            </div>
+
+          </div>
+
+          <div class="ctl-diagnostics-help">
+            A ATUALIZAR
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+            B VOLTAR
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="ctlPowerConfirm" class="hidden">
+
+        <div class="ctl-power-confirm">
+
+          <div class="ctl-power-icon">
+            ⏻
+          </div>
+
+          <div
+            class="ctl-power-title"
+            id="ctlPowerTitle"
+          >
+            CONFIRMAR?
+          </div>
+
+          <div
+            class="ctl-power-text"
+            id="ctlPowerText"
+          >
+            ---
+          </div>
+
+          <div class="ctl-power-actions">
+            A CONFIRMAR
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+            B CANCELAR
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="ctlWifi" class="hidden">
+
+        <div class="ctl-wifi-head">
+          <span>REDES WI-FI</span>
+          <span id="ctlNetCount">0 REDES</span>
+        </div>
+
+        <div class="ctl-networks" id="ctlNetworks">
+          <div class="ctl-network selected">
+            <div class="ctl-network-name">
+              PROCURANDO...
+            </div>
+            <div class="ctl-network-band">--</div>
+            <div class="ctl-network-signal">--</div>
+          </div>
+        </div>
+
+        <div class="ctl-actions">
+          <div class="ctl-action selected" data-action="wifi_reconnect">
+            RECONECTAR
+          </div>
+
+          <div class="ctl-action" data-action="wifi_scan">
+            BUSCAR
+          </div>
+
+          <div class="ctl-action" data-action="back">
+            VOLTAR
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="ctl-footer">
+        <span>↑↓ NAV</span>
+        <span>←→ AÇÕES</span>
+        <span>A OK</span>
+        <span>B VOLTAR</span>
+      </div>
+
+      <div class="ctl-toast" id="ctlToast"></div>
+
+    </div>
+
+  </section>
+
+
   <script>
     /**
      * =========================================================================
@@ -855,7 +3131,7 @@
         className: 'state-happy',
         render: (isTalking) => `
           <circle class="face-part blink-eye" cx="120" cy="130" r="19" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
             : `<path class="face-part" d="M 195 138 Q 220 166 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -880,7 +3156,7 @@
         className: 'state-shocked',
         render: (isTalking) => `
           <circle class="face-part" cx="115" cy="120" r="24" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="150" rx="24" ry="34" />`
             : `<ellipse class="face-part" cx="220" cy="150" rx="22" ry="34" />`
           }
@@ -906,7 +3182,7 @@
         render: (isTalking) => `
           <line class="face-part" x1="95" y1="105" x2="145" y2="155" stroke-width="14" stroke-linecap="round" />
           <line class="face-part" x1="145" y1="105" x2="95" y2="155" stroke-width="14" stroke-linecap="round" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="22" ry="16" />`
             : `<line class="face-part" x1="185" y1="145" x2="255" y2="145" stroke-width="12" stroke-linecap="round" />`
           }
@@ -923,7 +3199,7 @@
           <!-- Coração Esquerdo -->
           <path class="face-part" d="M 120 138 A 12 12 0 0 0 102 120 A 12 12 0 0 0 120 144 A 12 12 0 0 0 138 120 A 12 12 0 0 0 120 138 Z" transform="rotate(45 120 130) scale(1.6) translate(-40, -40)" />
           <!-- Sorriso -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
             : `<path class="face-part" d="M 195 138 Q 220 168 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -941,7 +3217,7 @@
           <line class="face-part" x1="90" y1="105" x2="145" y2="128" stroke-width="12" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="120" cy="142" r="16" />
           <!-- Boca Reta / Irritada -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="22" ry="18" />`
             : `<line class="face-part" x1="190" y1="155" x2="250" y2="155" stroke-width="12" stroke-linecap="round" />`
           }
@@ -960,7 +3236,7 @@
           <line class="face-part" x1="95" y1="118" x2="145" y2="105" stroke-width="10" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="120" cy="135" r="18" />
           <!-- Boca para baixo -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="20" ry="16" />`
             : `<path class="face-part" d="M 195 158 Q 220 135 245 158" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -990,7 +3266,7 @@
           <!-- Olho Fechado piscando -->
           <line class="face-part" x1="95" y1="130" x2="145" y2="130" stroke-width="13" stroke-linecap="round" />
           <!-- Boca sorrindo de lado -->
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="225" cy="145" rx="20" ry="18" />`
             : `<path class="face-part" d="M 195 138 Q 225 170 248 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -1005,7 +3281,7 @@
         className: 'state-thinking',
         render: (isTalking) => `
           <ellipse class="face-part blink-eye" cx="120" cy="130" rx="19" ry="14" />
-          ${isTalking 
+          ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="148" rx="18" ry="16" />`
             : `<path class="face-part" d="M 195 150 Q 220 144 245 148" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
@@ -1028,10 +3304,10 @@
      */
     function renderFace() {
       const expr = BMO_EXPRESSIONS[currentExpression] || BMO_EXPRESSIONS.happy;
-      
+
       // Classes do body (para transição de animações)
       bodyEl.className = `${expr.className} ${isTalking ? 'is-talking' : ''}`;
-      
+
       // Renderização do SVG
       svgEl.innerHTML = expr.render(isTalking);
     }
@@ -1092,7 +3368,7 @@
       /**
        * MODO FALA COMPLETO:
        * Mostra a legenda, move a boca do BMO durante a duração e encerra ao final.
-       * 
+       *
        * @param {string} text - Mensagem a ser falada
        * @param {object} [options]
        * @param {number} [options.duration] - Duração em ms (se omitido, calcula automaticamente pelo tamanho do texto)
@@ -1240,7 +3516,7 @@
         BMO.clearSubtitle();
       }
     });
-  
+
 
     /* =========================================================================
        SYSTEM PANEL CONTROLLER
@@ -1345,6 +3621,11 @@
         else if (action === 'clock') APPS.open('clock');
         else if (action === 'weather') APPS.open('weather');
         else if (action === 'companion') APPS.open('companion');
+        else if (action === 'control') APPS.open('control');
+        else if (action === 'games') {
+          APPS.open('games');
+          BMO_GAMES.open();
+        }
         else if (action === 'face') APPS.close();
       }
     };
@@ -1363,7 +3644,9 @@
         r36status: document.getElementById('r36StatusApp'),
         clock: document.getElementById('clockApp'),
         weather: document.getElementById('weatherApp'),
-        companion: document.getElementById('companionApp')
+        companion: document.getElementById('companionApp'),
+        control: document.getElementById('bmoControlApp'),
+        games: document.getElementById('bmoGamesApp')
       },
 
       hideAll() {
@@ -1393,6 +3676,8 @@
           this.timer = setInterval(() => this.updateWeather(), 10 * 60 * 1000);
         } else if (name === 'companion') {
           COMPANION.render();
+        } else if (name === 'control') {
+          BMO_CONTROL.open();
         }
       },
 
@@ -1412,10 +3697,57 @@
           const battExtra = d.battery_voltage_v != null ? ` · ${d.battery_voltage_v}V` : '';
           const battStatus = d.battery_status ? ` ${d.battery_status.toUpperCase()}` : '';
           document.getElementById('r36Battery').textContent = `${d.battery_percent ?? '--'}%${battStatus}${battExtra}`;
-          document.getElementById('r36Ram').textContent = `${d.ram_used_mb ?? '--'} / ${d.ram_total_mb ?? '--'} MB`;
-          document.getElementById('r36Disk').textContent = `${d.disk_percent ?? '--'}%`;
-          document.getElementById('r36Uptime').textContent = d.uptime ?? '---';
-          document.getElementById('r36Load').textContent = d.load ?? '---';
+          const memoryPercent =
+            d.system &&
+            d.system.memory &&
+            d.system.memory.percent != null
+              ? ` · ${d.system.memory.percent}%`
+              : '';
+
+          document.getElementById('r36Ram').textContent =
+            `${d.ram_used_mb ?? '--'} / ${d.ram_total_mb ?? '--'} MB${memoryPercent}`;
+
+          document.getElementById('r36Disk').textContent =
+            `${d.disk_percent ?? '--'}%`;
+
+          document.getElementById('r36Uptime').textContent =
+            d.uptime ?? '---';
+
+          const systemLoad =
+            d.system &&
+            d.system.load
+              ? d.system.load
+              : null;
+
+          document.getElementById('r36Load').textContent =
+            systemLoad
+              ? `${systemLoad.load_1m ?? '--'} / ${systemLoad.load_5m ?? '--'} / ${systemLoad.load_15m ?? '--'}`
+              : (d.load ?? '---');
+
+          const net =
+            d.network || {};
+
+          document.getElementById('r36Wifi').textContent =
+            net.connected
+              ? (net.ssid || 'CONECTADO')
+              : 'OFFLINE';
+
+          document.getElementById('r36Signal').textContent =
+            net.connected
+              ? `${net.signal ?? '--'}% · ${net.interface || '--'}`
+              : 'SEM REDE';
+
+          document.getElementById('r36Ip').textContent =
+            net.ip
+              ? `${net.ip}${net.interface ? ' · ' + net.interface : ''}`
+              : (d.ip ?? '---');
+
+          document.getElementById('r36Runtime').textContent =
+            window.location.pathname.includes(
+              'index.bmo-next.html'
+            )
+              ? 'CANDIDATE'
+              : 'PRODUCTION';
         } catch (e) {
           document.getElementById('r36Host').textContent = 'API OFFLINE';
         }
@@ -1635,6 +3967,5417 @@
       }
     }
 
+
+    /* ================================================================
+       BMO CONTROL V7 - BASE
+       ================================================================ */
+
+    const BMO_CONTROL = {
+
+      API: 'http://127.0.0.1:8088',
+
+      view: 'main',
+      index: 0,
+
+      wifiIndex: 0,
+      wifiOffset: 0,
+      wifiAction: 0,
+      wifiFocus: 'networks',
+
+      visibleWifiRows: 5,
+
+      networks: [],
+
+      toastTimer: null,
+
+      mainActions: [
+        'wifi',
+        'brightness',
+        'sound_test',
+        'diagnostics',
+        'kiosk_restart',
+        'system_reboot',
+        'system_poweroff'
+      ],
+
+
+      toast(text) {
+
+        const el =
+          document.getElementById('ctlToast');
+
+        if (!el) return;
+
+        el.textContent = text;
+
+        el.classList.add('visible');
+
+        clearTimeout(this.toastTimer);
+
+        this.toastTimer =
+          setTimeout(() => {
+            el.classList.remove('visible');
+          }, 1500);
+      },
+
+
+      escape(value) {
+
+        return String(value ?? '')
+          .replace(
+            /[&<>"']/g,
+            ch => ({
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#39;'
+            })[ch]
+          );
+      },
+
+
+      open() {
+
+        this.view = 'main';
+        this.index = 0;
+        this.wifiIndex = 0;
+        this.wifiOffset = 0;
+        this.wifiAction = 0;
+        this.wifiFocus = 'networks';
+
+        this.render();
+        this.refresh();
+      },
+
+
+      async refresh() {
+
+        try {
+
+          const r =
+            await fetch(
+              this.API + '/api/control/status?t='
+              + Date.now(),
+              {
+                cache: 'no-store'
+              }
+            );
+
+          if (!r.ok) {
+            throw new Error(
+              'HTTP ' + r.status
+            );
+          }
+
+          const d =
+            await r.json();
+
+          /*
+           * BMO CONTROL - BRILHO
+           * Apenas visual.
+           */
+
+          const brightness =
+            d &&
+            d.brightness
+              ? d.brightness
+              : null;
+
+          const brightnessPercent =
+            brightness &&
+            brightness.percent !== null &&
+            brightness.percent !== undefined
+              ? Math.max(
+                  0,
+                  Math.min(
+                    100,
+                    Number(
+                      brightness.percent
+                    )
+                  )
+                )
+              : null;
+
+          const brightnessValueEl =
+            document.getElementById(
+              'ctlBrightnessValue'
+            );
+
+          const brightnessFillEl =
+            document.getElementById(
+              'ctlBrightnessFill'
+            );
+
+          if (brightnessValueEl) {
+
+            brightnessValueEl.textContent =
+              brightnessPercent === null
+                ? '--%'
+                : (
+                    Math.round(
+                      brightnessPercent
+                    ) +
+                    '%'
+                  );
+          }
+
+          if (brightnessFillEl) {
+
+            brightnessFillEl.style.width =
+              brightnessPercent === null
+                ? '0%'
+                : (
+                    brightnessPercent +
+                    '%'
+                  );
+          }
+
+          const brightnessBigValueEl =
+            document.getElementById(
+              'ctlBrightnessBigValue'
+            );
+
+          const brightnessBigFillEl =
+            document.getElementById(
+              'ctlBrightnessBigFill'
+            );
+
+          if (brightnessBigValueEl) {
+
+            brightnessBigValueEl.textContent =
+              brightnessPercent === null
+                ? '--%'
+                : (
+                    Math.round(
+                      brightnessPercent
+                    ) +
+                    '%'
+                  );
+          }
+
+          if (brightnessBigFillEl) {
+
+            brightnessBigFillEl.style.width =
+              brightnessPercent === null
+                ? '0%'
+                : (
+                    brightnessPercent +
+                    '%'
+                  );
+          }
+
+
+          const wifi =
+            Array.isArray(d.wifi)
+              ? d.wifi
+              : [];
+
+          const connected =
+            wifi.find(
+              x =>
+                x &&
+                x.state === 'connected'
+            );
+
+          const el =
+            document.getElementById(
+              'ctlWifiValue'
+            );
+
+          if (el) {
+            el.textContent =
+              connected
+                ? connected.connection
+                : 'OFFLINE';
+          }
+
+          const status =
+            document.getElementById(
+              'ctlStatus'
+            );
+
+          if (status) {
+            status.textContent = 'ONLINE';
+          }
+
+        } catch (err) {
+
+          const status =
+            document.getElementById(
+              'ctlStatus'
+            );
+
+          if (status) {
+            status.textContent = 'API OFFLINE';
+          }
+        }
+      },
+
+
+      render() {
+
+        const main =
+          document.getElementById(
+            'ctlMain'
+          );
+
+        const wifi =
+          document.getElementById(
+            'ctlWifi'
+          );
+
+        if (!main || !wifi) {
+          return;
+        }
+
+        main.classList.toggle(
+          'hidden',
+          this.view !== 'main'
+        );
+
+        wifi.classList.toggle(
+          'hidden',
+          this.view !== 'wifi'
+        );
+
+
+        if (this.view === 'main') {
+
+          document
+            .querySelectorAll(
+              '#bmoControlApp .ctl-card'
+            )
+            .forEach(
+              (el, i) => {
+                el.classList.toggle(
+                  'selected',
+                  i === this.index
+                );
+              }
+            );
+
+        } else {
+
+          this.renderNetworks();
+
+          document
+            .querySelectorAll(
+              '#bmoControlApp .ctl-action'
+            )
+            .forEach(
+              (el, i) => {
+                el.classList.toggle(
+                  'selected',
+                  this.wifiFocus ===
+                    'actions'
+                  &&
+                  i === this.wifiAction
+                );
+              }
+            );
+        }
+      },
+
+
+      getUsableNetworks() {
+
+        return (
+          this.networks || []
+        ).filter(
+          n =>
+            n &&
+            n.ssid
+        );
+      },
+
+
+      renderNetworks() {
+
+        const root =
+          document.getElementById(
+            'ctlNetworks'
+          );
+
+        const count =
+          document.getElementById(
+            'ctlNetCount'
+          );
+
+        if (!root) return;
+
+        const usable =
+          this.getUsableNetworks();
+
+
+        if (count) {
+
+          count.textContent =
+            usable.length +
+            (
+              usable.length === 1
+                ? ' REDE'
+                : ' REDES'
+            );
+        }
+
+
+        if (!usable.length) {
+
+          root.innerHTML = `
+            <div class="ctl-network selected">
+              <div class="ctl-network-name">
+                NENHUMA REDE
+              </div>
+              <div class="ctl-network-band">
+                --
+              </div>
+              <div class="ctl-network-signal">
+                --
+              </div>
+            </div>
+          `;
+
+          return;
+        }
+
+
+        this.wifiIndex =
+          Math.max(
+            0,
+            Math.min(
+              usable.length - 1,
+              this.wifiIndex
+            )
+          );
+
+
+        if (
+          this.wifiIndex <
+          this.wifiOffset
+        ) {
+
+          this.wifiOffset =
+            this.wifiIndex;
+        }
+
+
+        if (
+          this.wifiIndex >=
+          this.wifiOffset +
+          this.visibleWifiRows
+        ) {
+
+          this.wifiOffset =
+            this.wifiIndex -
+            this.visibleWifiRows +
+            1;
+        }
+
+
+        const end =
+          Math.min(
+            usable.length,
+            this.wifiOffset +
+            this.visibleWifiRows
+          );
+
+
+        let html = '';
+
+
+        for (
+          let i = this.wifiOffset;
+          i < end;
+          i++
+        ) {
+
+          const n =
+            usable[i];
+
+          const selected =
+            this.wifiFocus ===
+              'networks'
+            &&
+            i === this.wifiIndex;
+
+          html += `
+            <div
+              class="
+                ctl-network
+                ${
+                  n.connected
+                    ? 'connected'
+                    : ''
+                }
+                ${
+                  selected
+                    ? 'selected'
+                    : ''
+                }
+              "
+            >
+
+              <div class="ctl-network-name">
+                ${this.escape(n.ssid)}
+              </div>
+
+              <div class="ctl-network-band">
+                ${
+                  this.escape(
+                    n.band || '--'
+                  )
+                }
+              </div>
+
+              <div class="ctl-network-signal">
+                ${
+                  n.signal != null
+                    ? this.escape(
+                        n.signal + '%'
+                      )
+                    : '--'
+                }
+              </div>
+
+            </div>
+          `;
+        }
+
+        root.innerHTML = html;
+      },
+
+
+      async scan(showToast = true) {
+
+        if (showToast) {
+          this.toast('BUSCANDO REDES...');
+        }
+
+        try {
+
+          const r =
+            await fetch(
+              this.API +
+              '/api/control/action',
+              {
+                method: 'POST',
+                cache: 'no-store',
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+                body: JSON.stringify({
+                  action: 'wifi_scan'
+                })
+              }
+            );
+
+          const d =
+            await r.json();
+
+          if (
+            !r.ok ||
+            !d.ok
+          ) {
+
+            throw new Error(
+              d.error ||
+              'scan falhou'
+            );
+          }
+
+          this.networks =
+            Array.isArray(
+              d.networks
+            )
+              ? d.networks
+              : [];
+
+          const connectedIndex =
+            this.networks.findIndex(
+              n =>
+                n &&
+                n.connected
+            );
+
+          if (
+            connectedIndex >= 0
+          ) {
+
+            this.wifiIndex =
+              connectedIndex;
+          }
+
+          this.render();
+
+          if (showToast) {
+
+            this.toast(
+              this.networks.length +
+              ' REDES'
+            );
+          }
+
+        } catch (err) {
+
+          this.networks = [];
+
+          this.render();
+
+          this.toast(
+            'SCAN FALHOU'
+          );
+        }
+      },
+
+
+      setView(view) {
+
+        this.view = view;
+
+        if (view === 'wifi') {
+
+          this.wifiIndex = 0;
+          this.wifiOffset = 0;
+          this.wifiAction = 0;
+          this.wifiFocus =
+            'networks';
+
+          this.scan(false);
+        }
+
+        this.render();
+      },
+
+
+      up() {
+
+        if (this.view === 'main') {
+
+          const cols = 3;
+
+          this.index =
+            (
+              this.index -
+              cols +
+              this.mainActions.length
+            )
+            %
+            this.mainActions.length;
+
+          this.render();
+
+          return;
+        }
+
+
+        const usable =
+          this.getUsableNetworks();
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          if (usable.length) {
+
+            this.wifiFocus =
+              'networks';
+
+            this.render();
+          }
+
+          return;
+        }
+
+
+        if (!usable.length) {
+          return;
+        }
+
+
+        this.wifiIndex =
+          (
+            this.wifiIndex -
+            1 +
+            usable.length
+          )
+          %
+          usable.length;
+
+        this.render();
+      },
+
+
+      down() {
+
+        if (this.view === 'main') {
+
+          const cols = 3;
+
+          this.index =
+            (
+              this.index +
+              cols
+            )
+            %
+            this.mainActions.length;
+
+          this.render();
+
+          return;
+        }
+
+
+        const usable =
+          this.getUsableNetworks();
+
+        if (
+          this.wifiFocus ===
+          'networks'
+        ) {
+
+          if (
+            this.wifiIndex <
+            usable.length - 1
+          ) {
+
+            this.wifiIndex++;
+
+          } else {
+
+            this.wifiFocus =
+              'actions';
+          }
+
+          this.render();
+
+          return;
+        }
+
+
+        this.wifiAction =
+          (
+            this.wifiAction +
+            1
+          )
+          % 3;
+
+        this.render();
+      },
+
+
+      left() {
+
+        if (this.view === 'main') {
+
+          this.index =
+            (
+              this.index -
+              1 +
+              this.mainActions.length
+            )
+            %
+            this.mainActions.length;
+
+          this.render();
+
+          return;
+        }
+
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          this.wifiAction =
+            (
+              this.wifiAction -
+              1 +
+              3
+            )
+            % 3;
+
+          this.render();
+        }
+      },
+
+
+      right() {
+
+        if (this.view === 'main') {
+
+          this.index =
+            (
+              this.index +
+              1
+            )
+            %
+            this.mainActions.length;
+
+          this.render();
+
+          return;
+        }
+
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          this.wifiAction =
+            (
+              this.wifiAction +
+              1
+            )
+            % 3;
+
+          this.render();
+        }
+      },
+
+
+      activate() {
+
+        if (this.view === 'main') {
+
+          const action =
+            this.mainActions[
+              this.index
+            ];
+
+          if (action === 'wifi') {
+
+            this.setView(
+              'wifi'
+            );
+
+            return;
+          }
+
+          this.action(
+            action
+          );
+
+          return;
+        }
+
+
+        if (
+          this.wifiFocus ===
+          'networks'
+        ) {
+
+          const usable =
+            this.getUsableNetworks();
+
+          const n =
+            usable[
+              this.wifiIndex
+            ];
+
+          if (n) {
+
+            this.toast(
+              n.connected
+                ? 'CONECTADO · ' +
+                  n.ssid
+                : n.ssid
+            );
+          }
+
+          return;
+        }
+
+
+        const actions = [
+          'wifi_reconnect',
+          'wifi_scan',
+          'back'
+        ];
+
+        const action =
+          actions[
+            this.wifiAction
+          ];
+
+
+        if (action === 'back') {
+
+          this.setView(
+            'main'
+          );
+
+          return;
+        }
+
+
+        if (action === 'wifi_scan') {
+
+          this.scan();
+
+          return;
+        }
+
+
+        this.action(
+          action
+        );
+      },
+
+
+      async action(action) {
+
+        this.toast(
+          'EXECUTANDO...'
+        );
+
+
+        try {
+
+          const r =
+            await fetch(
+              this.API +
+              '/api/control/action',
+              {
+                method: 'POST',
+                cache: 'no-store',
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+                body: JSON.stringify({
+                  action
+                })
+              }
+            );
+
+
+          const d =
+            await r.json();
+
+
+          if (
+            !r.ok ||
+            !d.ok
+          ) {
+
+            throw new Error(
+              d.error ||
+              d.result ||
+              (
+                'HTTP ' +
+                r.status
+              )
+            );
+          }
+
+
+          if (
+            action ===
+              'brightness_up'
+            ||
+            action ===
+              'brightness_down'
+          ) {
+
+            const pct =
+              d.result &&
+              d.result.percent;
+
+            this.toast(
+              pct != null
+                ? 'BRILHO ' +
+                  pct +
+                  '%'
+                : 'BRILHO ALTERADO'
+            );
+
+          }
+
+          else if (
+            action ===
+            'sound_test'
+          ) {
+
+            this.toast(
+              'ÁUDIO OK'
+            );
+
+          }
+
+          else if (
+            action ===
+            'wifi_reconnect'
+          ) {
+
+            this.toast(
+              'WI-FI RECONECTADO'
+            );
+
+            setTimeout(
+              () =>
+                this.scan(
+                  false
+                ),
+              1200
+            );
+
+          }
+
+          else if (
+            action ===
+            'kiosk_restart'
+          ) {
+
+            this.toast(
+              'REINICIANDO KIOSK...'
+            );
+
+          }
+
+          else if (
+            action ===
+            'diagnostics'
+          ) {
+
+            this.toast(
+              'DIAGNÓSTICO OK'
+            );
+
+          }
+
+          else {
+
+            this.toast(
+              'OK'
+            );
+          }
+
+
+          setTimeout(
+            () =>
+              this.refresh(),
+            300
+          );
+
+        } catch (err) {
+
+          this.toast(
+            'AÇÃO FALHOU'
+          );
+        }
+      }
+
+    };
+
+
+
+    /* ================================================================
+       BMO STICK NAV
+       Ambos os analógicos controlam a mesma navegação
+       ================================================================ */
+
+
+
+    /* ================================================================
+       BMO_WIFI_NAV_V2
+       Recuperado da navegacao historica
+       ================================================================ */
+
+    BMO_CONTROL.wifiIndex = 0;
+    BMO_CONTROL.wifiFocus = 'networks';
+    BMO_CONTROL.visibleWifiRows = 5;
+
+
+    BMO_CONTROL.getUsableNetworks = function() {
+
+      return (
+        this.networks || []
+      ).filter(
+        n => n && n.ssid
+      );
+    };
+
+
+    BMO_CONTROL.renderNetworks = function() {
+
+      const root =
+        document.getElementById(
+          'ctlNetworks'
+        );
+
+      const count =
+        document.getElementById(
+          'ctlNetCount'
+        );
+
+      if (!root) return;
+
+
+      const usable =
+        this.getUsableNetworks();
+
+
+      if (!usable.length) {
+
+        this.wifiIndex = 0;
+        this.wifiOffset = 0;
+
+        if (count) {
+          count.textContent =
+            '0 REDES';
+        }
+
+        root.innerHTML = `
+          <div class="
+            ctl-network selected
+          ">
+            <div class="
+              ctl-network-name
+            ">
+              NENHUMA REDE
+            </div>
+
+            <div class="
+              ctl-network-band
+            ">
+              --
+            </div>
+
+            <div class="
+              ctl-network-signal
+            ">
+              --
+            </div>
+          </div>
+        `;
+
+        return;
+      }
+
+
+      this.wifiIndex =
+        Math.max(
+          0,
+          Math.min(
+            usable.length - 1,
+            Number(this.wifiIndex) || 0
+          )
+        );
+
+
+      /*
+        Janela acompanha a selecao.
+        Ex.: 0..4 / depois 1..5 / 2..6.
+      */
+
+      if (
+        this.wifiIndex <
+        this.wifiOffset
+      ) {
+
+        this.wifiOffset =
+          this.wifiIndex;
+      }
+
+
+      if (
+        this.wifiIndex >=
+        this.wifiOffset +
+        this.visibleWifiRows
+      ) {
+
+        this.wifiOffset =
+          this.wifiIndex -
+          this.visibleWifiRows +
+          1;
+      }
+
+
+      const maxOffset =
+        Math.max(
+          0,
+          usable.length -
+          this.visibleWifiRows
+        );
+
+
+      this.wifiOffset =
+        Math.max(
+          0,
+          Math.min(
+            maxOffset,
+            this.wifiOffset
+          )
+        );
+
+
+      if (count) {
+
+        count.textContent =
+          `${this.wifiIndex + 1}/${usable.length}`;
+      }
+
+
+      const visible =
+        usable.slice(
+          this.wifiOffset,
+          this.wifiOffset +
+          this.visibleWifiRows
+        );
+
+
+      root.innerHTML =
+        visible.map(
+          (n, localIndex) => {
+
+            const globalIndex =
+              this.wifiOffset +
+              localIndex;
+
+            const selected =
+              globalIndex ===
+              this.wifiIndex;
+
+            const star =
+              n.connected
+                ? '★ '
+                : '';
+
+            const meta =
+              n.band ||
+              n.security ||
+              '--';
+
+            const signal =
+              n.signal === null ||
+              n.signal === undefined
+                ? '--%'
+                : `${n.signal}%`;
+
+
+            return `
+              <div
+                class="
+                  ctl-network
+                  ${n.connected ? 'connected' : ''}
+                  ${selected ? 'selected' : ''}
+                "
+                data-network-index="
+                  ${globalIndex}
+                "
+              >
+
+                <div class="
+                  ctl-network-name
+                ">
+                  ${star}${this.escape(n.ssid)}
+                </div>
+
+                <div class="
+                  ctl-network-band
+                ">
+                  ${this.escape(meta)}
+                </div>
+
+                <div class="
+                  ctl-network-signal
+                ">
+                  ${this.escape(signal)}
+                </div>
+
+              </div>
+            `;
+          }
+        ).join('');
+    };
+
+
+    /*
+      Preserva o render original da tela principal.
+    */
+
+    BMO_CONTROL._renderBeforeWifiV2 =
+      BMO_CONTROL.render.bind(
+        BMO_CONTROL
+      );
+
+
+    BMO_CONTROL.render = function() {
+
+      this._renderBeforeWifiV2();
+
+      const app =
+        document.getElementById(
+          'bmoControlApp'
+        );
+
+
+      if (
+        !app ||
+        this.view !== 'wifi'
+      ) {
+        return;
+      }
+
+
+      app.classList.toggle(
+        'wifi-focus-networks',
+        this.wifiFocus ===
+          'networks'
+      );
+
+
+      app.classList.toggle(
+        'wifi-focus-actions',
+        this.wifiFocus ===
+          'actions'
+      );
+
+
+      document
+        .querySelectorAll(
+          '#bmoControlApp .ctl-action'
+        )
+        .forEach(
+          (el, i) => {
+
+            el.classList.toggle(
+              'selected',
+
+              this.wifiFocus ===
+                'actions'
+              &&
+              i ===
+                this.wifiAction
+            );
+          }
+        );
+
+
+      this.renderNetworks();
+    };
+
+
+    /*
+      Preserva setView original.
+    */
+
+    BMO_CONTROL._setViewBeforeWifiV2 =
+      BMO_CONTROL.setView.bind(
+        BMO_CONTROL
+      );
+
+
+    BMO_CONTROL.setView =
+      function(view) {
+
+        if (
+          view === 'wifi'
+        ) {
+
+          this.wifiIndex = 0;
+          this.wifiOffset = 0;
+          this.wifiAction = 0;
+          this.wifiFocus =
+            'networks';
+        }
+
+
+        this._setViewBeforeWifiV2(
+          view
+        );
+
+        this.render();
+      };
+
+
+    /*
+      Guardamos navegacao principal original.
+    */
+
+    BMO_CONTROL._upBeforeWifiV2 =
+      BMO_CONTROL.up.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL._downBeforeWifiV2 =
+      BMO_CONTROL.down.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL._leftBeforeWifiV2 =
+      BMO_CONTROL.left.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL._rightBeforeWifiV2 =
+      BMO_CONTROL.right.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL._activateBeforeWifiV2 =
+      BMO_CONTROL.activate.bind(
+        BMO_CONTROL
+      );
+
+
+    BMO_CONTROL.up =
+      function() {
+
+        if (
+          this.view !== 'wifi'
+        ) {
+
+          this._upBeforeWifiV2();
+          return;
+        }
+
+
+        const usable =
+          this.getUsableNetworks();
+
+
+        if (!usable.length) {
+
+          this.wifiFocus =
+            'actions';
+
+          this.render();
+          return;
+        }
+
+
+        /*
+          Se estava nos botoes,
+          UP volta para a lista.
+        */
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          this.wifiFocus =
+            'networks';
+
+          this.render();
+          return;
+        }
+
+
+        this.wifiIndex =
+          (
+            this.wifiIndex -
+            1 +
+            usable.length
+          )
+          %
+          usable.length;
+
+
+        this.render();
+      };
+
+
+    BMO_CONTROL.down =
+      function() {
+
+        if (
+          this.view !== 'wifi'
+        ) {
+
+          this._downBeforeWifiV2();
+          return;
+        }
+
+
+        const usable =
+          this.getUsableNetworks();
+
+
+        if (!usable.length) {
+
+          this.wifiFocus =
+            'actions';
+
+          this.render();
+          return;
+        }
+
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          return;
+        }
+
+
+        /*
+          Ao chegar na ultima rede,
+          DOWN vai para os botoes.
+        */
+
+        if (
+          this.wifiIndex ===
+          usable.length - 1
+        ) {
+
+          this.wifiFocus =
+            'actions';
+
+          this.render();
+          return;
+        }
+
+
+        this.wifiIndex =
+          (
+            this.wifiIndex + 1
+          )
+          %
+          usable.length;
+
+
+        this.render();
+      };
+
+
+    BMO_CONTROL.left =
+      function() {
+
+        if (
+          this.view !== 'wifi'
+        ) {
+
+          this._leftBeforeWifiV2();
+          return;
+        }
+
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          const actions =
+            document.querySelectorAll(
+              '#bmoControlApp .ctl-action'
+            );
+
+          const total =
+            Math.max(
+              1,
+              actions.length
+            );
+
+
+          this.wifiAction =
+            (
+              this.wifiAction -
+              1 +
+              total
+            )
+            %
+            total;
+
+
+          this.render();
+        }
+      };
+
+
+    BMO_CONTROL.right =
+      function() {
+
+        if (
+          this.view !== 'wifi'
+        ) {
+
+          this._rightBeforeWifiV2();
+          return;
+        }
+
+
+        if (
+          this.wifiFocus ===
+          'actions'
+        ) {
+
+          const actions =
+            document.querySelectorAll(
+              '#bmoControlApp .ctl-action'
+            );
+
+          const total =
+            Math.max(
+              1,
+              actions.length
+            );
+
+
+          this.wifiAction =
+            (
+              this.wifiAction +
+              1
+            )
+            %
+            total;
+
+
+          this.render();
+        }
+      };
+
+
+    BMO_CONTROL.activate =
+      function() {
+
+        if (
+          this.view !== 'wifi'
+        ) {
+
+          this._activateBeforeWifiV2();
+          return;
+        }
+
+
+        const usable =
+          this.getUsableNetworks();
+
+
+        /*
+          Foco na rede.
+        */
+
+        if (
+          this.wifiFocus ===
+          'networks'
+        ) {
+
+          const n =
+            usable[
+              this.wifiIndex
+            ];
+
+
+          if (!n) {
+            return;
+          }
+
+
+          if (n.connected) {
+
+            this.toast(
+              `CONECTADO · ${n.ssid}`
+            );
+
+            return;
+          }
+
+
+          BMO_WIFI_KEYBOARD.open(
+            n
+          );
+
+          return;
+        }
+
+
+        /*
+          Foco nos botoes inferiores.
+          Mantemos a logica original.
+        */
+
+        this._activateBeforeWifiV2();
+      };
+
+
+
+    /* ================================================================
+       BMO_WIFI_KEYBOARD
+       Base recuperada do teclado historico
+       ================================================================ */
+
+    const BMO_WIFI_KEYBOARD = {
+
+      visible: false,
+
+      network: null,
+
+      value: '',
+
+      showPassword: false,
+
+      index: 0,
+
+
+      chars: [
+        'A','B','C','D','E','F','G','H','I','J',
+        'K','L','M','N','O','P','Q','R','S','T',
+        'U','V','W','X','Y','Z','0','1','2','3',
+        '4','5','6','7','8','9','@','#','$','%',
+        '-','_','.','!','?','+','=','/','(',')'
+      ],
+
+
+      get totalKeys() {
+
+        return (
+          this.chars.length +
+          4
+        );
+      },
+
+
+      open(network) {
+
+        if (
+          !network ||
+          !network.ssid
+        ) {
+
+          BMO_CONTROL.toast(
+            'REDE INVALIDA'
+          );
+
+          return;
+        }
+
+
+        this.network =
+          network;
+
+        this.visible = true;
+
+        this.value = '';
+
+        this.showPassword =
+          false;
+
+        this.index = 0;
+
+
+        document
+          .getElementById(
+            'bmoWifiKeyboard'
+          )
+          ?.classList.add(
+            'visible'
+          );
+
+
+        const net =
+          document.getElementById(
+            'wifiKbNetwork'
+          );
+
+
+        if (net) {
+
+          const meta =
+            network.band ||
+            network.security ||
+            '--';
+
+          net.textContent =
+            `${network.ssid} · ${meta}`;
+        }
+
+
+        this.render();
+      },
+
+
+      close() {
+
+        this.visible = false;
+
+        document
+          .getElementById(
+            'bmoWifiKeyboard'
+          )
+          ?.classList.remove(
+            'visible'
+          );
+
+        this.network = null;
+
+        this.value = '';
+
+        this.index = 0;
+
+        this.showPassword =
+          false;
+
+        BMO_CONTROL.render();
+      },
+
+
+      render() {
+
+        const root =
+          document.getElementById(
+            'wifiKbGrid'
+          );
+
+        if (!root) {
+          return;
+        }
+
+
+        root.innerHTML =
+          this.chars.map(
+            (c, i) => `
+              <div
+                class="
+                  wifi-kb-key
+                  ${
+                    this.index === i
+                      ? 'selected'
+                      : ''
+                  }
+                "
+              >
+                ${BMO_CONTROL.escape(c)}
+              </div>
+            `
+          ).join('');
+
+
+        const actions =
+          document.querySelectorAll(
+            '#wifiKbActions .wifi-kb-action'
+          );
+
+
+        actions.forEach(
+          (el, i) => {
+
+            el.classList.toggle(
+              'selected',
+
+              this.index ===
+              this.chars.length +
+              i
+            );
+          }
+        );
+
+
+        const pass =
+          document.getElementById(
+            'wifiKbPassword'
+          );
+
+
+        if (pass) {
+
+          let display =
+            this.value;
+
+
+          if (
+            !this.showPassword
+          ) {
+
+            display =
+              '•'.repeat(
+                this.value.length
+              );
+          }
+
+
+          pass.textContent =
+            'SENHA: ' +
+            (
+              display ||
+              '_'
+            );
+        }
+      },
+
+
+      up() {
+
+        if (!this.visible) {
+          return;
+        }
+
+
+        const cols = 10;
+
+
+        if (
+          this.index <
+          this.chars.length
+        ) {
+
+          if (
+            this.index >=
+            cols
+          ) {
+
+            this.index -=
+              cols;
+          }
+
+        }
+
+        else {
+
+          /*
+            Acoes -> ultima linha.
+          */
+
+          const actionCol =
+            this.index -
+            this.chars.length;
+
+
+          this.index =
+            40 +
+            Math.min(
+              9,
+              actionCol * 3
+            );
+        }
+
+
+        this.render();
+      },
+
+
+      down() {
+
+        if (!this.visible) {
+          return;
+        }
+
+
+        const cols = 10;
+
+
+        if (
+          this.index < 40
+        ) {
+
+          this.index +=
+            cols;
+
+        }
+
+        else if (
+          this.index <
+          this.chars.length
+        ) {
+
+          const col =
+            this.index %
+            cols;
+
+
+          let action = 0;
+
+          if (col >= 8) {
+            action = 3;
+          }
+
+          else if (
+            col >= 5
+          ) {
+            action = 2;
+          }
+
+          else if (
+            col >= 3
+          ) {
+            action = 1;
+          }
+
+
+          this.index =
+            this.chars.length +
+            action;
+        }
+
+
+        this.render();
+      },
+
+
+      left() {
+
+        if (!this.visible) {
+          return;
+        }
+
+
+        if (
+          this.index <
+          this.chars.length
+        ) {
+
+          const row =
+            Math.floor(
+              this.index / 10
+            );
+
+          const col =
+            this.index % 10;
+
+
+          this.index =
+            row * 10 +
+            (
+              (
+                col -
+                1 +
+                10
+              )
+              %
+              10
+            );
+
+        }
+
+        else {
+
+          let a =
+            this.index -
+            this.chars.length;
+
+
+          a =
+            (
+              a -
+              1 +
+              4
+            )
+            %
+            4;
+
+
+          this.index =
+            this.chars.length +
+            a;
+        }
+
+
+        this.render();
+      },
+
+
+      right() {
+
+        if (!this.visible) {
+          return;
+        }
+
+
+        if (
+          this.index <
+          this.chars.length
+        ) {
+
+          const row =
+            Math.floor(
+              this.index / 10
+            );
+
+          const col =
+            this.index % 10;
+
+
+          this.index =
+            row * 10 +
+            (
+              (
+                col +
+                1
+              )
+              %
+              10
+            );
+
+        }
+
+        else {
+
+          let a =
+            this.index -
+            this.chars.length;
+
+
+          a =
+            (
+              a +
+              1
+            )
+            %
+            4;
+
+
+          this.index =
+            this.chars.length +
+            a;
+        }
+
+
+        this.render();
+      },
+
+
+      async connect() {
+
+        const ssid =
+          this.network?.ssid;
+
+
+        if (!ssid) {
+
+          BMO_CONTROL.toast(
+            'REDE INVALIDA'
+          );
+
+          return;
+        }
+
+
+        /*
+          Senha vazia e permitida
+          para redes abertas.
+
+          Se houver senha, WPA exige
+          normalmente ao menos 8 chars.
+        */
+
+        if (
+          this.value.length > 0 &&
+          this.value.length < 8
+        ) {
+
+          BMO_CONTROL.toast(
+            'SENHA MUITO CURTA'
+          );
+
+          return;
+        }
+
+
+        BMO_CONTROL.toast(
+          'CONECTANDO...'
+        );
+
+
+        try {
+
+          const res =
+            await fetch(
+              BMO_CONTROL.API +
+              '/api/control/action',
+              {
+                method:
+                  'POST',
+
+                cache:
+                  'no-store',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    action:
+                      'wifi_connect',
+
+                    ssid:
+                      ssid,
+
+                    password:
+                      this.value
+                  })
+              }
+            );
+
+
+          const data =
+            await res.json();
+
+
+          if (
+            !res.ok ||
+            !data.ok
+          ) {
+
+            throw new Error(
+              data.error ||
+              data.result ||
+              (
+                'HTTP ' +
+                res.status
+              )
+            );
+          }
+
+
+          this.close();
+
+
+          BMO_CONTROL.toast(
+            'WI-FI CONECTADO'
+          );
+
+
+          setTimeout(
+            () => {
+
+              BMO_CONTROL.scan(
+                false
+              );
+
+              BMO_CONTROL.refresh();
+
+            },
+            1200
+          );
+
+        }
+
+        catch (err) {
+
+          console.error(
+            '[BMO WIFI CONNECT]',
+            err
+          );
+
+
+          BMO_CONTROL.toast(
+            'FALHA AO CONECTAR'
+          );
+        }
+      },
+
+
+      activate() {
+
+        if (!this.visible) {
+          return;
+        }
+
+
+        /*
+          Tecla comum.
+        */
+
+        if (
+          this.index <
+          this.chars.length
+        ) {
+
+          if (
+            this.value.length <
+            63
+          ) {
+
+            this.value +=
+              this.chars[
+                this.index
+              ];
+          }
+
+
+          this.render();
+
+          return;
+        }
+
+
+        const action =
+          this.index -
+          this.chars.length;
+
+
+        /*
+          MOSTRAR
+        */
+
+        if (
+          action === 0
+        ) {
+
+          this.showPassword =
+            !this.showPassword;
+
+          this.render();
+        }
+
+
+        /*
+          APAGAR
+        */
+
+        else if (
+          action === 1
+        ) {
+
+          this.value =
+            this.value.slice(
+              0,
+              -1
+            );
+
+          this.render();
+        }
+
+
+        /*
+          CONECTAR
+        */
+
+        else if (
+          action === 2
+        ) {
+
+          this.connect();
+        }
+
+
+        /*
+          CANCELAR
+        */
+
+        else if (
+          action === 3
+        ) {
+
+          this.close();
+        }
+      }
+
+    };
+
+
+    /*
+      O D-pad e os dois analogicos
+      ja chamam BMO_CONTROL.*.
+
+      Interceptamos essas funcoes
+      quando o teclado estiver aberto.
+    */
+
+    const BMO_CTL_UP_BEFORE_KB =
+      BMO_CONTROL.up.bind(
+        BMO_CONTROL
+      );
+
+    const BMO_CTL_DOWN_BEFORE_KB =
+      BMO_CONTROL.down.bind(
+        BMO_CONTROL
+      );
+
+    const BMO_CTL_LEFT_BEFORE_KB =
+      BMO_CONTROL.left.bind(
+        BMO_CONTROL
+      );
+
+    const BMO_CTL_RIGHT_BEFORE_KB =
+      BMO_CONTROL.right.bind(
+        BMO_CONTROL
+      );
+
+    const BMO_CTL_ACTIVATE_BEFORE_KB =
+      BMO_CONTROL.activate.bind(
+        BMO_CONTROL
+      );
+
+
+    BMO_CONTROL.up =
+      function() {
+
+        if (
+          BMO_WIFI_KEYBOARD.visible
+        ) {
+
+          BMO_WIFI_KEYBOARD.up();
+          return;
+        }
+
+
+        BMO_CTL_UP_BEFORE_KB();
+      };
+
+
+    BMO_CONTROL.down =
+      function() {
+
+        if (
+          BMO_WIFI_KEYBOARD.visible
+        ) {
+
+          BMO_WIFI_KEYBOARD.down();
+          return;
+        }
+
+
+        BMO_CTL_DOWN_BEFORE_KB();
+      };
+
+
+    BMO_CONTROL.left =
+      function() {
+
+        if (
+          BMO_WIFI_KEYBOARD.visible
+        ) {
+
+          BMO_WIFI_KEYBOARD.left();
+          return;
+        }
+
+
+        BMO_CTL_LEFT_BEFORE_KB();
+      };
+
+
+    BMO_CONTROL.right =
+      function() {
+
+        if (
+          BMO_WIFI_KEYBOARD.visible
+        ) {
+
+          BMO_WIFI_KEYBOARD.right();
+          return;
+        }
+
+
+        BMO_CTL_RIGHT_BEFORE_KB();
+      };
+
+
+    BMO_CONTROL.activate =
+      function() {
+
+        if (
+          BMO_WIFI_KEYBOARD.visible
+        ) {
+
+          BMO_WIFI_KEYBOARD.activate();
+          return;
+        }
+
+
+        BMO_CTL_ACTIVATE_BEFORE_KB();
+      };
+
+
+
+    /*
+     * BMO CONTROL BRIGHTNESS CARD
+     * Card informativo.
+     * O brilho físico continua:
+     * FN + VOL-/VOL+
+     */
+
+    const BMO_CTL_ACTIVATE_BEFORE_BRIGHTNESS_CARD =
+      BMO_CONTROL.activate.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.activate =
+      function() {
+
+        if (
+          this.view === 'main' &&
+          this.mainActions[
+            this.index
+          ] === 'brightness'
+        ) {
+
+          this.refresh();
+
+          this.toast(
+            'FN + VOLUME · AJUSTAR BRILHO'
+          );
+
+          return;
+        }
+
+        BMO_CTL_ACTIVATE_BEFORE_BRIGHTNESS_CARD();
+      };
+
+
+
+    /* =========================================================
+       BMO_BRIGHTNESS_SUBVIEW_V1
+       ========================================================= */
+
+    BMO_CONTROL._brightnessRenderBefore =
+      BMO_CONTROL.render.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.render =
+      function() {
+
+        this._brightnessRenderBefore();
+
+        const screen =
+          document.getElementById(
+            'ctlBrightness'
+          );
+
+        if (screen) {
+
+          screen.classList.toggle(
+            'hidden',
+            this.view !==
+              'brightness'
+          );
+        }
+      };
+
+
+    BMO_CONTROL.updateBrightnessUi =
+      function(percent) {
+
+        const pct =
+          Math.max(
+            0,
+            Math.min(
+              100,
+              Number(percent) || 0
+            )
+          );
+
+        [
+          [
+            'ctlBrightnessValue',
+            'ctlBrightnessFill'
+          ],
+          [
+            'ctlBrightnessBigValue',
+            'ctlBrightnessBigFill'
+          ]
+        ].forEach(
+          ([valueId, fillId]) => {
+
+            const value =
+              document.getElementById(
+                valueId
+              );
+
+            const fill =
+              document.getElementById(
+                fillId
+              );
+
+            if (value) {
+
+              value.textContent =
+                Math.round(pct) +
+                '%';
+            }
+
+            if (fill) {
+
+              fill.style.width =
+                pct +
+                '%';
+            }
+          }
+        );
+      };
+
+
+    BMO_CONTROL.adjustBrightness =
+      async function(direction) {
+
+        const action =
+          direction < 0
+            ? 'brightness_down'
+            : 'brightness_up';
+
+        try {
+
+          const response =
+            await fetch(
+              this.API +
+              '/api/control/action',
+              {
+                method:
+                  'POST',
+
+                cache:
+                  'no-store',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    action
+                  })
+              }
+            );
+
+          const data =
+            await response.json();
+
+          if (
+            !response.ok ||
+            !data.ok
+          ) {
+
+            throw new Error(
+              data.error ||
+              data.result ||
+              'falha'
+            );
+          }
+
+          const percent =
+            data &&
+            data.result
+              ? data.result.percent
+              : null;
+
+          if (
+            percent !== null &&
+            percent !== undefined
+          ) {
+
+            this.updateBrightnessUi(
+              percent
+            );
+          }
+
+        }
+        catch (err) {
+
+          console.error(
+            '[BMO BRIGHTNESS]',
+            err
+          );
+
+          this.toast(
+            'ERRO NO BRILHO'
+          );
+        }
+      };
+
+
+    /*
+     * A
+     */
+
+    BMO_CONTROL._brightnessActivateBefore =
+      BMO_CONTROL.activate.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.activate =
+      function() {
+
+        if (
+          this.view === 'main' &&
+          this.mainActions[
+            this.index
+          ] === 'brightness'
+        ) {
+
+          this.setView(
+            'brightness'
+          );
+
+          this.refresh();
+
+          return;
+        }
+
+        if (
+          this.view ===
+          'brightness'
+        ) {
+
+          return;
+        }
+
+        this._brightnessActivateBefore();
+      };
+
+
+    /*
+     * LEFT
+     */
+
+    BMO_CONTROL._brightnessLeftBefore =
+      BMO_CONTROL.left.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.left =
+      function() {
+
+        if (
+          this.view ===
+          'brightness'
+        ) {
+
+          this.adjustBrightness(
+            -1
+          );
+
+          return;
+        }
+
+        this._brightnessLeftBefore();
+      };
+
+
+    /*
+     * RIGHT
+     */
+
+    BMO_CONTROL._brightnessRightBefore =
+      BMO_CONTROL.right.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.right =
+      function() {
+
+        if (
+          this.view ===
+          'brightness'
+        ) {
+
+          this.adjustBrightness(
+            1
+          );
+
+          return;
+        }
+
+        this._brightnessRightBefore();
+      };
+
+
+    /*
+     * UP/DOWN:
+     * sem funcao dentro da tela.
+     */
+
+    BMO_CONTROL._brightnessUpBefore =
+      BMO_CONTROL.up.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.up =
+      function() {
+
+        if (
+          this.view ===
+          'brightness'
+        ) {
+          return;
+        }
+
+        this._brightnessUpBefore();
+      };
+
+
+    BMO_CONTROL._brightnessDownBefore =
+      BMO_CONTROL.down.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.down =
+      function() {
+
+        if (
+          this.view ===
+          'brightness'
+        ) {
+          return;
+        }
+
+        this._brightnessDownBefore();
+      };
+
+
+
+    /* =========================================================
+       BMO_CONTROL_POWER_V1
+       ========================================================= */
+
+    BMO_CONTROL.powerAction =
+      null;
+
+
+    BMO_CONTROL._powerRenderBefore =
+      BMO_CONTROL.render.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.render =
+      function() {
+
+        this._powerRenderBefore();
+
+        const screen =
+          document.getElementById(
+            'ctlPowerConfirm'
+          );
+
+        if (screen) {
+
+          screen.classList.toggle(
+            'hidden',
+            this.view !==
+              'power_confirm'
+          );
+        }
+
+
+        if (
+          this.view ===
+          'power_confirm'
+        ) {
+
+          const title =
+            document.getElementById(
+              'ctlPowerTitle'
+            );
+
+          const text =
+            document.getElementById(
+              'ctlPowerText'
+            );
+
+          const reboot =
+            this.powerAction ===
+            'system_reboot';
+
+
+          if (title) {
+
+            title.textContent =
+              reboot
+                ? 'REINICIAR R36S?'
+                : 'DESLIGAR R36S?';
+          }
+
+          if (text) {
+
+            text.textContent =
+              reboot
+                ? 'O SISTEMA SERA REINICIADO'
+                : 'O SISTEMA SERA DESLIGADO';
+          }
+        }
+      };
+
+
+    BMO_CONTROL._powerActivateBefore =
+      BMO_CONTROL.activate.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.activate =
+      function() {
+
+        if (
+          this.view === 'main'
+        ) {
+
+          const action =
+            this.mainActions[
+              this.index
+            ];
+
+          if (
+            action ===
+              'system_reboot' ||
+            action ===
+              'system_poweroff'
+          ) {
+
+            this.powerAction =
+              action;
+
+            this.view =
+              'power_confirm';
+
+            this.render();
+
+            return;
+          }
+        }
+
+
+        if (
+          this.view ===
+          'power_confirm'
+        ) {
+
+          const action =
+            this.powerAction;
+
+          if (!action) {
+
+            this.setView(
+              'main'
+            );
+
+            return;
+          }
+
+          if (
+            action ===
+            'system_reboot'
+          ) {
+
+            this.toast(
+              'REINICIANDO R36S...'
+            );
+
+          } else {
+
+            this.toast(
+              'DESLIGANDO R36S...'
+            );
+          }
+
+          this.action(
+            action
+          );
+
+          return;
+        }
+
+
+        this._powerActivateBefore();
+      };
+
+
+    /*
+     * Nenhuma navegacao dentro
+     * da confirmacao.
+     */
+
+    BMO_CONTROL._powerUpBefore =
+      BMO_CONTROL.up.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.up =
+      function() {
+
+        if (
+          this.view ===
+          'power_confirm'
+        ) return;
+
+        this._powerUpBefore();
+      };
+
+
+    BMO_CONTROL._powerDownBefore =
+      BMO_CONTROL.down.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.down =
+      function() {
+
+        if (
+          this.view ===
+          'power_confirm'
+        ) return;
+
+        this._powerDownBefore();
+      };
+
+
+    BMO_CONTROL._powerLeftBefore =
+      BMO_CONTROL.left.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.left =
+      function() {
+
+        if (
+          this.view ===
+          'power_confirm'
+        ) return;
+
+        this._powerLeftBefore();
+      };
+
+
+    BMO_CONTROL._powerRightBefore =
+      BMO_CONTROL.right.bind(
+        BMO_CONTROL
+      );
+
+    BMO_CONTROL.right =
+      function() {
+
+        if (
+          this.view ===
+          'power_confirm'
+        ) return;
+
+        this._powerRightBefore();
+      };
+
+
+
+    /* =========================================================
+       BMO_GAMES_FRONTEND_V1
+       ========================================================= */
+
+    /* BMO_GAMES_MULTI_SYSTEM_V1 */
+    /* BMO_GAMES_PSP_FRONTEND_V1 */
+    const BMO_GAMES = {
+
+      API: 'http://127.0.0.1:8088',
+
+      view: 'systems',
+
+      index: 0,
+
+      systems: [
+        {
+          id: 'gba',
+          name: 'GAME BOY ADVANCE',
+          short: 'GBA'
+        },
+        {
+          id: 'snes',
+          name: 'SUPER NINTENDO',
+          short: 'SNES'
+        },
+        {
+          id: 'psp',
+          name: 'PLAYSTATION PORTABLE',
+          short: 'PSP'
+        }
+      ],
+
+      currentSystem: 'gba',
+
+      games: [],
+
+      /* BMO_GAMES_LAZY_LOAD_V1 */
+      loadedSystems: new Set(),
+
+      gamesBySystem: {
+        gba: [],
+        snes: [],
+        psp: []
+      },
+
+      coverBaseBySystem: {
+        gba: '/game-covers/gba/',
+        snes: '/game-covers/snes/',
+        psp: '/game-covers/psp/'
+      },
+
+
+      listEl() {
+        return document.getElementById('gamesList');
+      },
+
+
+      /* BMO_GAMES_AUTOSCROLL_V1 */
+      ensureSelectedVisible() {
+
+        const list = this.listEl();
+
+        if (!list) return;
+
+        const selected =
+          list.querySelector(
+            '.games-row.selected'
+          );
+
+        if (!selected) return;
+
+        const listRect =
+          list.getBoundingClientRect();
+
+        const rowRect =
+          selected.getBoundingClientRect();
+
+        const topHidden =
+          rowRect.top < listRect.top;
+
+        const bottomHidden =
+          rowRect.bottom > listRect.bottom;
+
+        if (
+          topHidden ||
+          bottomHidden
+        ) {
+
+          selected.scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest',
+            behavior: 'auto'
+          });
+        }
+      },
+
+
+      subtitle(text) {
+        const el =
+          document.getElementById('gamesSubtitle');
+
+        if (el) el.textContent = text;
+      },
+
+
+      count(text) {
+        const el =
+          document.getElementById('gamesCount');
+
+        if (el) el.textContent = text;
+      },
+
+
+      systemById(id) {
+
+        return this.systems.find(
+          system => system.id === id
+        ) || null;
+      },
+
+
+      async open() {
+
+        this.view = 'systems';
+        this.index = 0;
+
+        /*
+         * Lazy Load:
+         * nenhum sistema real e carregado aqui.
+         *
+         * GBA / SNES / PSP sao carregados somente
+         * quando o usuario entra no sistema.
+         */
+
+        this.games = [];
+
+        this.render();
+      },
+
+
+      async loadGames(systemId) {
+
+        try {
+
+          const res = await fetch(
+            this.API +
+            '/api/games/' +
+            encodeURIComponent(systemId) +
+            '?t=' +
+            Date.now(),
+            {
+              cache: 'no-store'
+            }
+          );
+
+          if (!res.ok) {
+            throw new Error(
+              'HTTP ' + res.status
+            );
+          }
+
+          const d = await res.json();
+
+          this.gamesBySystem[systemId] =
+            Array.isArray(d.games)
+              ? d.games
+              : [];
+
+          this.loadedSystems.add(
+            systemId
+          );
+
+          if (
+            typeof d.cover_base === 'string' &&
+            d.cover_base
+          ) {
+            this.coverBaseBySystem[systemId] =
+              d.cover_base;
+          }
+
+        }
+        catch (e) {
+
+          console.warn(
+            '[BMO GAMES] lista offline:',
+            systemId,
+            e
+          );
+
+          this.gamesBySystem[systemId] = [];
+        }
+
+        if (this.currentSystem === systemId) {
+
+          this.games =
+            this.gamesBySystem[systemId] || [];
+        }
+      },
+
+
+      render() {
+
+        if (this.view === 'systems') {
+          this.renderSystems();
+        }
+        else {
+          this.renderGames();
+        }
+      },
+
+
+      renderSystems() {
+
+        const el = this.listEl();
+
+        if (!el) return;
+
+        this.subtitle(
+          'ESCOLHA O SISTEMA'
+        );
+
+        this.count(
+          this.systems.length + ' SYS'
+        );
+
+        el.innerHTML =
+          this.systems.map(
+            (system, i) => {
+
+              const selected =
+                i === this.index
+                  ? ' selected'
+                  : '';
+
+              const qtd =
+                (
+                  this.gamesBySystem[
+                    system.id
+                  ] || []
+                ).length;
+
+              return `
+                <div class="games-row${selected}">
+
+                  <div class="games-icon">
+                    ${system.short}
+                  </div>
+
+                  <div class="games-info">
+
+                    <div class="games-name">
+                      ${system.name}
+                    </div>
+
+                    <div class="games-meta">
+                      ${qtd} JOGO${qtd === 1 ? '' : 'S'}
+                    </div>
+
+                  </div>
+
+                  <div class="games-arrow">
+                    ›
+                  </div>
+
+                </div>
+              `;
+            }
+          ).join('');
+
+        this.updatePreview();
+
+        requestAnimationFrame(() => {
+          this.ensureSelectedVisible();
+        });
+      },
+
+
+      renderGames() {
+
+        const el = this.listEl();
+
+        if (!el) return;
+
+        const system =
+          this.systemById(
+            this.currentSystem
+          );
+
+        this.subtitle(
+          system
+            ? system.name
+            : 'BMO GAMES'
+        );
+
+        this.count(
+          this.games.length + ' JG'
+        );
+
+        if (!this.games.length) {
+
+          el.innerHTML =
+            '<div class="games-empty">NENHUM JOGO</div>';
+
+          this.updatePreview();
+
+          return;
+        }
+
+        el.innerHTML =
+          this.games.map(
+            (game, i) => {
+
+              const selected =
+                i === this.index
+                  ? ' selected'
+                  : '';
+
+              const mb =
+                game.size
+                  ? (
+                      Number(game.size) /
+                      1024 /
+                      1024
+                    ).toFixed(1)
+                  : '?';
+
+              return `
+                <div class="games-row${selected}">
+
+                  <div class="games-icon">
+                    ▶
+                  </div>
+
+                  <div class="games-info">
+
+                    <div class="games-name">
+                      ${this.escape(game.name)}
+                    </div>
+
+                    <div class="games-meta">
+                      ${system ? system.short : this.currentSystem.toUpperCase()} · ${mb} MB
+                    </div>
+
+                  </div>
+
+                  <div class="games-arrow">
+                    ›
+                  </div>
+
+                </div>
+              `;
+            }
+          ).join('');
+
+        this.updatePreview();
+
+        requestAnimationFrame(() => {
+          this.ensureSelectedVisible();
+        });
+      },
+
+
+      setCover(game) {
+
+        const image =
+          document.getElementById(
+            'gamesCoverImage'
+          );
+
+        const placeholder =
+          document.getElementById(
+            'gamesCoverPlaceholder'
+          );
+
+
+        if (!image || !placeholder) {
+          return;
+        }
+
+
+        const showPlaceholder = () => {
+
+          image.style.display =
+            'none';
+
+          image.removeAttribute(
+            'src'
+          );
+
+          placeholder.style.display =
+            'block';
+        };
+
+
+        if (
+          !game ||
+          !game.cover
+        ) {
+
+          showPlaceholder();
+
+          return;
+        }
+
+
+        placeholder.style.display =
+          'none';
+
+        image.style.display =
+          'block';
+
+
+        image.onerror = () => {
+
+          showPlaceholder();
+
+        };
+
+
+        const base =
+          this.coverBaseBySystem[
+            this.currentSystem
+          ] ||
+          (
+            '/game-covers/' +
+            this.currentSystem +
+            '/'
+          );
+
+        image.src =
+          base +
+          encodeURIComponent(
+            game.cover
+          );
+      },
+
+
+      updatePreview() {
+
+        const nameEl =
+          document.getElementById(
+            'gamesPreviewName'
+          );
+
+        const systemEl =
+          document.getElementById(
+            'gamesPreviewSystem'
+          );
+
+        const metaEl =
+          document.getElementById(
+            'gamesPreviewMeta'
+          );
+
+
+        if (
+          !nameEl ||
+          !systemEl ||
+          !metaEl
+        ) {
+          return;
+        }
+
+
+        if (this.view === 'systems') {
+
+          const system =
+            this.systems[this.index];
+
+          if (!system) return;
+
+          systemEl.textContent =
+            'BMO GAMES';
+
+          nameEl.textContent =
+            system.name;
+
+          const qtd =
+            (
+              this.gamesBySystem[
+                system.id
+              ] || []
+            ).length;
+
+          metaEl.textContent =
+            qtd +
+            ' JOGO' +
+            (qtd === 1 ? '' : 'S');
+
+          this.setCover(null);
+
+          return;
+        }
+
+
+        const game =
+          this.games[this.index];
+
+        const activeSystem =
+          this.systemById(
+            this.currentSystem
+          );
+
+        systemEl.textContent =
+          activeSystem
+            ? activeSystem.name
+            : this.currentSystem.toUpperCase();
+
+
+        if (!game) {
+
+          nameEl.textContent =
+            'SEM JOGOS';
+
+          metaEl.textContent =
+            'ADICIONE UMA ROM';
+
+          this.setCover(null);
+
+          return;
+        }
+
+
+        nameEl.textContent =
+          game.name;
+
+
+        const mb =
+          game.size
+            ? (
+                Number(game.size) /
+                1024 /
+                1024
+              ).toFixed(1)
+            : '?';
+
+
+        metaEl.textContent =
+          mb +
+          ' MB · PRONTO PARA JOGAR';
+
+        this.setCover(game);
+      },
+
+
+      escape(text) {
+
+        return String(text ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      },
+
+
+      up() {
+
+        const total =
+          this.view === 'systems'
+            ? this.systems.length
+            : this.games.length;
+
+        if (!total) return;
+
+        this.index =
+          (
+            this.index -
+            1 +
+            total
+          ) % total;
+
+        this.render();
+      },
+
+
+      down() {
+
+        const total =
+          this.view === 'systems'
+            ? this.systems.length
+            : this.games.length;
+
+        if (!total) return;
+
+        this.index =
+          (
+            this.index +
+            1
+          ) % total;
+
+        this.render();
+      },
+
+
+      async activate() {
+
+        if (this.view === 'systems') {
+
+          const system =
+            this.systems[this.index];
+
+          if (!system) return;
+
+          this.currentSystem =
+            system.id;
+
+          if (
+            system.id !== 'favorites' &&
+            !this.loadedSystems.has(
+              system.id
+            )
+          ) {
+
+            this.subtitle(
+              'CARREGANDO ' +
+              system.name +
+              '...'
+            );
+
+            await this.loadGames(
+              system.id
+            );
+          }
+
+          this.games =
+            this.gamesBySystem[
+              system.id
+            ] || [];
+
+          this.view = 'games';
+          this.index = 0;
+
+          this.render();
+
+          return;
+        }
+
+
+        const game =
+          this.games[this.index];
+
+        if (!game) return;
+
+
+        this.subtitle(
+          'INICIANDO...'
+        );
+
+
+        try {
+
+          const res = await fetch(
+            this.API +
+            '/api/control/action',
+            {
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+
+              body: JSON.stringify({
+                action: 'game_launch',
+                system: this.currentSystem,
+                game: game.file || game.id
+              })
+            }
+          );
+
+
+          const d = await res.json();
+
+
+          if (!res.ok || !d.ok) {
+
+            throw new Error(
+              d.result ||
+              d.error ||
+              'falha'
+            );
+          }
+
+
+          this.subtitle(
+            'ABRINDO ' +
+            game.name
+          );
+
+        }
+        catch (e) {
+
+          console.error(
+            '[BMO GAMES] launch',
+            e
+          );
+
+          this.subtitle(
+            'ERRO AO INICIAR'
+          );
+        }
+      },
+
+
+      back() {
+
+        if (this.view === 'games') {
+
+          this.view = 'systems';
+
+          const systemIndex =
+            this.systems.findIndex(
+              system =>
+                system.id ===
+                this.currentSystem
+            );
+
+          this.index =
+            systemIndex >= 0
+              ? systemIndex
+              : 0;
+
+          this.render();
+
+          return true;
+        }
+
+        APPS.close();
+
+        return true;
+      }
+
+    };
+
+
+    const BMO_STICK_NAV = {
+
+      threshold: 0.62,
+      release: 0.35,
+
+      held: {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+      },
+
+
+      fire(direction) {
+
+        if (APPS.current === 'control') {
+
+          if (direction === 'up') {
+            BMO_CONTROL.up();
+          }
+
+          else if (direction === 'down') {
+            BMO_CONTROL.down();
+          }
+
+          else if (direction === 'left') {
+            BMO_CONTROL.left();
+          }
+
+          else if (direction === 'right') {
+            BMO_CONTROL.right();
+          }
+
+          return;
+        }
+
+
+        if (MAIN_MENU.visible) {
+
+          if (direction === 'up') {
+            MAIN_MENU.up();
+          }
+
+          else if (direction === 'down') {
+            MAIN_MENU.down();
+          }
+
+          return;
+        }
+      },
+
+
+      update(pad) {
+
+        if (
+          !pad ||
+          !pad.axes ||
+          pad.axes.length < 2
+        ) {
+          return;
+        }
+
+
+        const lx =
+          Number(
+            pad.axes[0] || 0
+          );
+
+        const ly =
+          Number(
+            pad.axes[1] || 0
+          );
+
+
+        const rx =
+          Number(
+            pad.axes.length > 2
+              ? pad.axes[2]
+              : 0
+          );
+
+        const ry =
+          Number(
+            pad.axes.length > 3
+              ? pad.axes[3]
+              : 0
+          );
+
+
+        /*
+          Os dois sticks fazem a mesma coisa.
+          Usa o eixo com maior deslocamento.
+        */
+
+        const x =
+          Math.abs(rx) > Math.abs(lx)
+            ? rx
+            : lx;
+
+        const y =
+          Math.abs(ry) > Math.abs(ly)
+            ? ry
+            : ly;
+
+
+        // UP
+        if (y <= -this.threshold) {
+
+          if (!this.held.up) {
+
+            this.held.up = true;
+
+            this.fire('up');
+          }
+
+        }
+
+        else if (y > -this.release) {
+
+          this.held.up = false;
+        }
+
+
+        // DOWN
+        if (y >= this.threshold) {
+
+          if (!this.held.down) {
+
+            this.held.down = true;
+
+            this.fire('down');
+          }
+
+        }
+
+        else if (y < this.release) {
+
+          this.held.down = false;
+        }
+
+
+        // LEFT
+        if (x <= -this.threshold) {
+
+          if (!this.held.left) {
+
+            this.held.left = true;
+
+            this.fire('left');
+          }
+
+        }
+
+        else if (x > -this.release) {
+
+          this.held.left = false;
+        }
+
+
+        // RIGHT
+        if (x >= this.threshold) {
+
+          if (!this.held.right) {
+
+            this.held.right = true;
+
+            this.fire('right');
+          }
+
+        }
+
+        else if (x < this.release) {
+
+          this.held.right = false;
+        }
+      }
+
+    };
+
+
+    /* BMO_FN_SELECT_FIX_V1 */
+    /* BMO_R36S_PHYSICAL_MAP_V1 */
+    /* BMO_REAL_GAMEPAD_MAP_CONFIRMED_V1 */
+
+
+    /* =========================================================
+       BMO_GAME_FAVORITES_FRONTEND_V1
+       ========================================================= */
+
+    BMO_GAMES.favoriteRecords = [];
+
+
+    if (
+      !BMO_GAMES.systems.some(
+        system => system.id === 'favorites'
+      )
+    ) {
+
+      BMO_GAMES.systems.unshift({
+        id: 'favorites',
+        name: 'FAVORITOS',
+        short: '★'
+      });
+    }
+
+
+    BMO_GAMES.gamesBySystem.favorites = [];
+
+
+    BMO_GAMES.isFavorite =
+      function(systemId, gameFile) {
+
+        return this.favoriteRecords.some(
+          item =>
+            item.system === systemId &&
+            item.game === gameFile
+        );
+      };
+
+
+    BMO_GAMES.loadFavorites =
+      async function() {
+
+        try {
+
+          const res = await fetch(
+            this.API +
+            '/api/favorites?t=' +
+            Date.now(),
+            {
+              cache: 'no-store'
+            }
+          );
+
+          if (!res.ok) {
+            throw new Error(
+              'HTTP ' + res.status
+            );
+          }
+
+          const d = await res.json();
+
+          this.favoriteRecords =
+            Array.isArray(d.favorites)
+              ? d.favorites
+              : [];
+
+        }
+        catch (e) {
+
+          console.warn(
+            '[BMO GAMES] favoritos offline:',
+            e
+          );
+
+          this.favoriteRecords = [];
+        }
+
+
+        const merged = [];
+
+
+        for (
+          const fav
+          of this.favoriteRecords
+        ) {
+
+          const source =
+            this.gamesBySystem[
+              fav.system
+            ] || [];
+
+          const game =
+            source.find(
+              item =>
+                (
+                  item.file ||
+                  item.id
+                ) === fav.game
+            );
+
+          if (!game) continue;
+
+          merged.push({
+            ...game,
+            _system: fav.system,
+            _favorite: true
+          });
+        }
+
+
+        this.gamesBySystem.favorites =
+          merged;
+
+
+        if (
+          this.currentSystem ===
+          'favorites'
+        ) {
+
+          this.games = merged;
+        }
+      };
+
+
+    /* -----------------------------------------
+       LOAD GAMES
+       Nao existe /api/games/favorites.
+       ----------------------------------------- */
+
+    BMO_GAMES._favoritesLoadGamesBefore =
+      BMO_GAMES.loadGames.bind(
+        BMO_GAMES
+      );
+
+
+    BMO_GAMES.loadGames =
+      async function(systemId) {
+
+        if (
+          systemId === 'favorites'
+        ) {
+          return;
+        }
+
+        return this
+          ._favoritesLoadGamesBefore(
+            systemId
+          );
+      };
+
+
+    /* -----------------------------------------
+       OPEN
+       ----------------------------------------- */
+
+    BMO_GAMES._favoritesOpenBefore =
+      BMO_GAMES.open.bind(
+        BMO_GAMES
+      );
+
+
+    BMO_GAMES.open =
+      async function() {
+
+        await this
+          ._favoritesOpenBefore();
+
+        await this.loadFavorites();
+
+        this.render();
+      };
+
+
+    /* -----------------------------------------
+       COVER
+       Favorito precisa usar a pasta
+       do sistema de origem.
+       ----------------------------------------- */
+
+    BMO_GAMES._favoritesSetCoverBefore =
+      BMO_GAMES.setCover.bind(
+        BMO_GAMES
+      );
+
+
+    BMO_GAMES.setCover =
+      function(game) {
+
+        if (
+          !game ||
+          !game._system
+        ) {
+
+          return this
+            ._favoritesSetCoverBefore(
+              game
+            );
+        }
+
+
+        const previousSystem =
+          this.currentSystem;
+
+        this.currentSystem =
+          game._system;
+
+        try {
+
+          return this
+            ._favoritesSetCoverBefore(
+              game
+            );
+
+        }
+        finally {
+
+          this.currentSystem =
+            previousSystem;
+        }
+      };
+
+
+    /* -----------------------------------------
+       RENDER
+       ★ indica favorito.
+       ----------------------------------------- */
+
+    BMO_GAMES._favoritesRenderGamesBefore =
+      BMO_GAMES.renderGames.bind(
+        BMO_GAMES
+      );
+
+
+    BMO_GAMES.renderGames =
+      function() {
+
+        this._favoritesRenderGamesBefore();
+
+        const list = this.listEl();
+
+        if (!list) return;
+
+        const rows =
+          list.querySelectorAll(
+            '.games-row'
+          );
+
+
+        rows.forEach(
+          (row, i) => {
+
+            const game =
+              this.games[i];
+
+            if (!game) return;
+
+            const sourceSystem =
+              game._system ||
+              this.currentSystem;
+
+            const gameFile =
+              game.file ||
+              game.id;
+
+            const icon =
+              row.querySelector(
+                '.games-icon'
+              );
+
+            if (
+              icon &&
+              this.isFavorite(
+                sourceSystem,
+                gameFile
+              )
+            ) {
+
+              icon.textContent = '★';
+              icon.classList.add(
+                'favorite-star'
+              );
+            }
+          }
+        );
+      };
+
+
+    /* -----------------------------------------
+       PREVIEW FAVORITOS
+       Mostra o sistema real do jogo.
+       ----------------------------------------- */
+
+    BMO_GAMES._favoritesPreviewBefore =
+      BMO_GAMES.updatePreview.bind(
+        BMO_GAMES
+      );
+
+
+    BMO_GAMES.updatePreview =
+      function() {
+
+        this._favoritesPreviewBefore();
+
+        if (
+          this.view !== 'games' ||
+          this.currentSystem !==
+            'favorites'
+        ) {
+          return;
+        }
+
+        const game =
+          this.games[this.index];
+
+        if (
+          !game ||
+          !game._system
+        ) {
+          return;
+        }
+
+        const source =
+          this.systemById(
+            game._system
+          );
+
+        const el =
+          document.getElementById(
+            'gamesPreviewSystem'
+          );
+
+        if (
+          el &&
+          source
+        ) {
+
+          el.textContent =
+            source.name;
+        }
+      };
+
+
+    /* -----------------------------------------
+       LAUNCH
+       Favorito abre pelo sistema original.
+       ----------------------------------------- */
+
+    BMO_GAMES._favoritesActivateBefore =
+      BMO_GAMES.activate.bind(
+        BMO_GAMES
+      );
+
+
+    BMO_GAMES.activate =
+      async function() {
+
+        if (
+          this.view === 'games' &&
+          this.currentSystem ===
+            'favorites'
+        ) {
+
+          const game =
+            this.games[this.index];
+
+          if (
+            !game ||
+            !game._system
+          ) {
+            return;
+          }
+
+          const previousSystem =
+            this.currentSystem;
+
+          this.currentSystem =
+            game._system;
+
+          try {
+
+            await this
+              ._favoritesActivateBefore();
+
+          }
+          finally {
+
+            this.currentSystem =
+              previousSystem;
+          }
+
+          return;
+        }
+
+
+        return this
+          ._favoritesActivateBefore();
+      };
+
+
+    /* -----------------------------------------
+       Y = ADD / REMOVE
+       ----------------------------------------- */
+
+    BMO_GAMES.toggleFavorite =
+      async function() {
+
+        if (
+          this.view !== 'games'
+        ) {
+          return;
+        }
+
+        const game =
+          this.games[this.index];
+
+        if (!game) return;
+
+
+        const systemId =
+          game._system ||
+          this.currentSystem;
+
+        const gameFile =
+          game.file ||
+          game.id;
+
+
+        if (
+          !systemId ||
+          systemId === 'favorites' ||
+          !gameFile
+        ) {
+          return;
+        }
+
+
+        try {
+
+          const res = await fetch(
+            this.API +
+            '/api/control/action',
+            {
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+
+              body: JSON.stringify({
+                action:
+                  'favorite_toggle',
+
+                system:
+                  systemId,
+
+                game:
+                  gameFile
+              })
+            }
+          );
+
+
+          const d = await res.json();
+
+
+          if (
+            !res.ok ||
+            !d.ok
+          ) {
+
+            throw new Error(
+              d.result ||
+              d.error ||
+              'falha'
+            );
+          }
+
+
+          const favorite =
+            !!(
+              d.result &&
+              d.result.favorite
+            );
+
+
+          await this.loadFavorites();
+
+
+          if (
+            this.currentSystem ===
+            'favorites'
+          ) {
+
+            this.games =
+              this.gamesBySystem
+                .favorites || [];
+
+            if (
+              this.index >=
+              this.games.length
+            ) {
+
+              this.index =
+                Math.max(
+                  0,
+                  this.games.length - 1
+                );
+            }
+          }
+
+
+          this.render();
+
+
+          this.subtitle(
+            favorite
+              ? '★ ADICIONADO AOS FAVORITOS'
+              : '☆ REMOVIDO DOS FAVORITOS'
+          );
+
+        }
+        catch (e) {
+
+          console.error(
+            '[BMO GAMES] favorito',
+            e
+          );
+
+          this.subtitle(
+            'ERRO AO SALVAR FAVORITO'
+          );
+        }
+      };
+
+
+
+    /* BMO_FAVORITES_XY_V1 */
+
+    BMO_GAMES.selectedFavoriteInfo =
+      function() {
+
+        if (
+          this.view !== 'games'
+        ) {
+          return null;
+        }
+
+        const game =
+          this.games[this.index];
+
+        if (!game) {
+          return null;
+        }
+
+        const systemId =
+          game._system ||
+          this.currentSystem;
+
+        const gameFile =
+          game.file ||
+          game.id;
+
+        if (
+          !systemId ||
+          systemId === 'favorites' ||
+          !gameFile
+        ) {
+          return null;
+        }
+
+        return {
+          game,
+          systemId,
+          gameFile
+        };
+      };
+
+
+    BMO_GAMES.addFavorite =
+      async function() {
+
+        const info =
+          this.selectedFavoriteInfo();
+
+        if (!info) {
+          return;
+        }
+
+        if (
+          this.isFavorite(
+            info.systemId,
+            info.gameFile
+          )
+        ) {
+
+          this.subtitle(
+            '★ JÁ ESTÁ NOS FAVORITOS'
+          );
+
+          return;
+        }
+
+        await this.toggleFavorite();
+      };
+
+
+    BMO_GAMES.removeFavorite =
+      async function() {
+
+        const info =
+          this.selectedFavoriteInfo();
+
+        if (!info) {
+          return;
+        }
+
+        if (
+          !this.isFavorite(
+            info.systemId,
+            info.gameFile
+          )
+        ) {
+
+          this.subtitle(
+            '☆ NÃO ESTÁ NOS FAVORITOS'
+          );
+
+          return;
+        }
+
+        await this.toggleFavorite();
+      };
+
+
+    const BMO_GAMES_STICK_FIRE_BASE =
+      BMO_STICK_NAV.fire.bind(
+        BMO_STICK_NAV
+      );
+
+
+    BMO_STICK_NAV.fire =
+      function(direction) {
+
+        if (
+          APPS.current === 'games'
+        ) {
+
+          if (direction === 'up') {
+            BMO_GAMES.up();
+          }
+          else if (direction === 'down') {
+            BMO_GAMES.down();
+          }
+
+          return;
+        }
+
+
+        BMO_GAMES_STICK_FIRE_BASE(
+          direction
+        );
+      };
+
+
+
+    /* =========================================================
+       BMO_GAMES_FAST_NAV_V1
+
+       D-PAD:
+         1 item
+
+       LEFT STICK:
+         5 itens por passo
+
+       RIGHT STICK:
+         grupo alfabetico anterior/proximo
+       ========================================================= */
+
+
+    BMO_GAMES.fastStep =
+      function(delta) {
+
+        if (
+          this.view !== 'games' ||
+          !this.games.length
+        ) {
+          return;
+        }
+
+        const total =
+          this.games.length;
+
+        this.index =
+          Math.max(
+            0,
+            Math.min(
+              total - 1,
+              this.index + delta
+            )
+          );
+
+        this.render();
+      };
+
+
+    BMO_GAMES.gameLetter =
+      function(game) {
+
+        if (!game) {
+          return '#';
+        }
+
+        let text =
+          String(
+            game.name ||
+            game.file ||
+            game.id ||
+            ''
+          )
+          .trim()
+          .toUpperCase();
+
+        try {
+          text =
+            text
+              .normalize('NFD')
+              .replace(
+                /[\u0300-\u036f]/g,
+                ''
+              );
+        }
+        catch (_) {}
+
+        const first =
+          text.charAt(0);
+
+        if (
+          first >= 'A' &&
+          first <= 'Z'
+        ) {
+          return first;
+        }
+
+        return '#';
+      };
+
+
+    BMO_GAMES.letterAnchors =
+      function() {
+
+        const anchors = {};
+
+        this.games.forEach(
+          (game, index) => {
+
+            const letter =
+              this.gameLetter(game);
+
+            if (
+              anchors[letter] === undefined
+            ) {
+              anchors[letter] = index;
+            }
+          }
+        );
+
+        return anchors;
+      };
+
+
+    BMO_GAMES.showLetterBadge =
+      function(letter) {
+
+        let el =
+          document.getElementById(
+            'bmoGamesLetterBadge'
+          );
+
+        if (!el) {
+
+          el =
+            document.createElement(
+              'div'
+            );
+
+          el.id =
+            'bmoGamesLetterBadge';
+
+          el.style.position =
+            'absolute';
+
+          el.style.right =
+            '18px';
+
+          el.style.top =
+            '50%';
+
+          el.style.transform =
+            'translateY(-50%)';
+
+          el.style.minWidth =
+            '58px';
+
+          el.style.height =
+            '58px';
+
+          el.style.padding =
+            '0 8px';
+
+          el.style.display =
+            'flex';
+
+          el.style.alignItems =
+            'center';
+
+          el.style.justifyContent =
+            'center';
+
+          el.style.border =
+            '3px solid currentColor';
+
+          el.style.borderRadius =
+            '12px';
+
+          el.style.background =
+            'rgba(0,0,0,.82)';
+
+          el.style.fontSize =
+            '34px';
+
+          el.style.fontWeight =
+            '900';
+
+          el.style.lineHeight =
+            '1';
+
+          el.style.zIndex =
+            '9999';
+
+          el.style.pointerEvents =
+            'none';
+
+          el.style.opacity =
+            '0';
+
+          el.style.transition =
+            'opacity .08s linear';
+
+          const app =
+            document.getElementById(
+              'bmoGamesApp'
+            );
+
+          if (app) {
+            app.appendChild(el);
+          }
+        }
+
+        el.textContent =
+          letter;
+
+        el.style.opacity =
+          '1';
+
+        clearTimeout(
+          this._letterBadgeTimer
+        );
+
+        this._letterBadgeTimer =
+          setTimeout(
+            () => {
+              el.style.opacity =
+                '0';
+            },
+            700
+          );
+      };
+
+
+    BMO_GAMES.jumpLetter =
+      function(direction) {
+
+        if (
+          this.view !== 'games' ||
+          !this.games.length
+        ) {
+          return;
+        }
+
+        const anchors =
+          this.letterAnchors();
+
+        const order =
+          [
+            '#',
+            'A','B','C','D','E',
+            'F','G','H','I','J',
+            'K','L','M','N','O',
+            'P','Q','R','S','T',
+            'U','V','W','X','Y',
+            'Z'
+          ].filter(
+            letter =>
+              anchors[letter] !== undefined
+          );
+
+        if (!order.length) {
+          return;
+        }
+
+
+        const currentGame =
+          this.games[this.index];
+
+        const currentLetter =
+          this.gameLetter(
+            currentGame
+          );
+
+        let pos =
+          order.indexOf(
+            currentLetter
+          );
+
+
+        /*
+         * Caso especial:
+         * se por algum motivo a letra atual
+         * nao estiver no indice, encontra
+         * o grupo cuja ancora esta antes.
+         */
+        if (pos < 0) {
+
+          pos = 0;
+
+          for (
+            let i = 0;
+            i < order.length;
+            i++
+          ) {
+
+            if (
+              anchors[order[i]]
+              <= this.index
+            ) {
+              pos = i;
+            }
+          }
+        }
+
+
+        let next =
+          pos + direction;
+
+
+        /*
+         * Sem wrap.
+         * A primeira e ultima letra sao limites.
+         */
+        next =
+          Math.max(
+            0,
+            Math.min(
+              order.length - 1,
+              next
+            )
+          );
+
+
+        const letter =
+          order[next];
+
+        this.index =
+          anchors[letter];
+
+        this.render();
+
+        this.showLetterBadge(
+          letter
+        );
+      };
+
+
+    const BMO_GAMES_STICK_UPDATE_BASE =
+      BMO_STICK_NAV.update.bind(
+        BMO_STICK_NAV
+      );
+
+
+    BMO_STICK_NAV.gamesFastState = {
+      leftDir: 0,
+      leftAt: 0,
+      rightDir: 0,
+      rightAt: 0
+    };
+
+
+    BMO_STICK_NAV.update =
+      function(pad) {
+
+        /*
+         * Fora do GAMES:
+         * comportamento anterior intacto.
+         */
+        if (
+          APPS.current !== 'games' ||
+          !pad ||
+          !pad.axes
+        ) {
+
+          BMO_GAMES_STICK_UPDATE_BASE(
+            pad
+          );
+
+          return;
+        }
+
+
+        /*
+         * Na tela de sistemas nao usamos
+         * Fast Nav. Mantemos o comportamento
+         * anterior do stick.
+         */
+        if (
+          BMO_GAMES.view !== 'games'
+        ) {
+
+          BMO_GAMES_STICK_UPDATE_BASE(
+            pad
+          );
+
+          return;
+        }
+
+
+        const ly =
+          Number(
+            pad.axes.length > 1
+              ? pad.axes[1]
+              : 0
+          );
+
+        const ry =
+          Number(
+            pad.axes.length > 3
+              ? pad.axes[3]
+              : 0
+          );
+
+
+        const threshold =
+          0.62;
+
+        const release =
+          0.35;
+
+        const now =
+          performance.now();
+
+        const state =
+          this.gamesFastState;
+
+
+        /*
+         * =====================================================
+         * STICK ESQUERDO
+         *
+         * ±5 jogos.
+         * Primeira resposta imediata.
+         * Segurando: repete a cada 145ms.
+         * =====================================================
+         */
+
+        let leftDir = 0;
+
+        if (ly <= -threshold) {
+          leftDir = -1;
+        }
+        else if (ly >= threshold) {
+          leftDir = 1;
+        }
+
+
+        if (leftDir !== 0) {
+
+          if (
+            state.leftDir !== leftDir
+          ) {
+
+            state.leftDir =
+              leftDir;
+
+            state.leftAt =
+              now;
+
+            BMO_GAMES.fastStep(
+              leftDir * 5
+            );
+          }
+
+          else if (
+            now - state.leftAt
+            >= 145
+          ) {
+
+            state.leftAt =
+              now;
+
+            BMO_GAMES.fastStep(
+              leftDir * 5
+            );
+          }
+        }
+
+        else if (
+          Math.abs(ly) <= release
+        ) {
+
+          state.leftDir = 0;
+          state.leftAt = 0;
+        }
+
+
+        /*
+         * =====================================================
+         * STICK DIREITO
+         *
+         * UP   = letra anterior
+         * DOWN = proxima letra
+         *
+         * Repeticao propositalmente mais lenta
+         * para nao atravessar o alfabeto sem controle.
+         * =====================================================
+         */
+
+        let rightDir = 0;
+
+        if (ry <= -threshold) {
+          rightDir = -1;
+        }
+        else if (ry >= threshold) {
+          rightDir = 1;
+        }
+
+
+        if (rightDir !== 0) {
+
+          if (
+            state.rightDir !== rightDir
+          ) {
+
+            state.rightDir =
+              rightDir;
+
+            state.rightAt =
+              now;
+
+            BMO_GAMES.jumpLetter(
+              rightDir
+            );
+          }
+
+          else if (
+            now - state.rightAt
+            >= 360
+          ) {
+
+            state.rightAt =
+              now;
+
+            BMO_GAMES.jumpLetter(
+              rightDir
+            );
+          }
+        }
+
+        else if (
+          Math.abs(ry) <= release
+        ) {
+
+          state.rightDir = 0;
+          state.rightAt = 0;
+        }
+      };
+
+
+
+    /* =========================================================
+       BMO_GAMES_VIRTUAL_WINDOW_V1
+
+       Mantem catalogo completo em memoria.
+       Renderiza somente uma janela pequena no DOM.
+       Cacheia indice alfabetico A-Z.
+       ========================================================= */
+
+
+    BMO_GAMES.virtualWindowSize = 17;
+
+
+    /*
+     * ---------------------------------------------------------
+     * CACHE A-Z
+     * ---------------------------------------------------------
+     *
+     * O indice so e reconstruido quando o array de jogos muda.
+     */
+
+    BMO_GAMES._letterIndexGamesRef = null;
+    BMO_GAMES._letterIndexLength = -1;
+    BMO_GAMES._letterIndexCache = null;
+
+
+    BMO_GAMES.letterAnchors =
+      function() {
+
+        if (
+          this._letterIndexGamesRef === this.games &&
+          this._letterIndexLength === this.games.length &&
+          this._letterIndexCache
+        ) {
+          return this._letterIndexCache;
+        }
+
+        const anchors = {};
+
+        for (
+          let i = 0;
+          i < this.games.length;
+          i++
+        ) {
+
+          const letter =
+            this.gameLetter(
+              this.games[i]
+            );
+
+          if (
+            anchors[letter] === undefined
+          ) {
+            anchors[letter] = i;
+          }
+        }
+
+        this._letterIndexGamesRef =
+          this.games;
+
+        this._letterIndexLength =
+          this.games.length;
+
+        this._letterIndexCache =
+          anchors;
+
+        return anchors;
+      };
+
+
+    /*
+     * ---------------------------------------------------------
+     * RENDER VIRTUAL
+     * ---------------------------------------------------------
+     */
+
+    BMO_GAMES.renderGames =
+      function() {
+
+        const el =
+          this.listEl();
+
+        if (!el) return;
+
+
+        const currentSystem =
+          this.systemById(
+            this.currentSystem
+          );
+
+
+        this.subtitle(
+          currentSystem
+            ? currentSystem.name
+            : 'BMO GAMES'
+        );
+
+
+        this.count(
+          this.games.length +
+          ' JG'
+        );
+
+
+        if (!this.games.length) {
+
+          el.innerHTML =
+            '<div class="games-empty">' +
+            'NENHUM JOGO' +
+            '</div>';
+
+          this.updatePreview();
+
+          return;
+        }
+
+
+        /*
+         * Garante indice valido.
+         */
+
+        this.index =
+          Math.max(
+            0,
+            Math.min(
+              this.games.length - 1,
+              this.index
+            )
+          );
+
+
+        const size =
+          Math.max(
+            5,
+            Number(
+              this.virtualWindowSize
+            ) || 17
+          );
+
+
+        const half =
+          Math.floor(
+            size / 2
+          );
+
+
+        let start =
+          this.index - half;
+
+
+        if (start < 0) {
+          start = 0;
+        }
+
+
+        let end =
+          Math.min(
+            this.games.length,
+            start + size
+          );
+
+
+        /*
+         * No final da lista ainda tentamos
+         * manter a janela completa.
+         */
+
+        start =
+          Math.max(
+            0,
+            end - size
+          );
+
+
+        const rows = [];
+
+
+        for (
+          let realIndex = start;
+          realIndex < end;
+          realIndex++
+        ) {
+
+          const game =
+            this.games[
+              realIndex
+            ];
+
+
+          const selected =
+            realIndex === this.index
+              ? ' selected'
+              : '';
+
+
+          const mb =
+            game.size
+              ? (
+                  Number(game.size) /
+                  1024 /
+                  1024
+                ).toFixed(1)
+              : '?';
+
+
+          /*
+           * Favoritos podem carregar jogos
+           * originarios de outro sistema.
+           */
+
+          const sourceSystemId =
+            game._system ||
+            this.currentSystem;
+
+
+          const sourceSystem =
+            this.systemById(
+              sourceSystemId
+            );
+
+
+          const gameFile =
+            game.file ||
+            game.id ||
+            '';
+
+
+          const favorite =
+            (
+              typeof this.isFavorite
+              === 'function'
+            )
+            &&
+            this.isFavorite(
+              sourceSystemId,
+              gameFile
+            );
+
+
+          const icon =
+            favorite
+              ? '★'
+              : '▶';
+
+
+          const iconClass =
+            favorite
+              ? ' favorite-star'
+              : '';
+
+
+          rows.push(`
+            <div
+              class="games-row${selected}"
+              data-game-index="${realIndex}"
+            >
+
+              <div class="games-icon${iconClass}">
+                ${icon}
+              </div>
+
+              <div class="games-info">
+
+                <div class="games-name">
+                  ${this.escape(game.name)}
+                </div>
+
+                <div class="games-meta">
+                  ${
+                    sourceSystem
+                      ? sourceSystem.short
+                      : String(
+                          sourceSystemId
+                        ).toUpperCase()
+                  }
+                  ·
+                  ${mb} MB
+                </div>
+
+              </div>
+
+              <div class="games-arrow">
+                ›
+              </div>
+
+            </div>
+          `);
+        }
+
+
+        el.innerHTML =
+          rows.join('');
+
+
+        /*
+         * Preview continua trabalhando
+         * com o jogo real selecionado.
+         */
+
+        this.updatePreview();
+
+
+        /*
+         * A linha selecionada ja esta sempre
+         * dentro da janela virtual.
+         */
+
+        requestAnimationFrame(
+          () => {
+
+            const selected =
+              el.querySelector(
+                '.games-row.selected'
+              );
+
+            if (selected) {
+
+              selected.scrollIntoView({
+                block: 'nearest',
+                inline: 'nearest',
+                behavior: 'auto'
+              });
+            }
+          }
+        );
+      };
+
+
     const R36S_GAMEPAD = {
       previous: [],
       connected: false,
@@ -1642,24 +9385,75 @@
 
       actions: {
         0: () => { // B
-          if (APPS.current) APPS.close();
-          else if (MAIN_MENU.visible) MAIN_MENU.hide();
-          else setExpressionAndSound('shocked');
-        },
+          if (APPS.current === 'games') {
+            BMO_GAMES.back();
+          }
+          else if (
+            APPS.current === 'control' &&
+            BMO_WIFI_KEYBOARD.visible
+          ) {
+            BMO_WIFI_KEYBOARD.close();
+          }
+          else if (APPS.current === 'control') {
+            if (
+              BMO_CONTROL.view === 'wifi' ||
+              BMO_CONTROL.view === 'brightness' ||
+              BMO_CONTROL.view === 'diagnostics' ||
+              BMO_CONTROL.view === 'power_confirm'
+            ) {
+              BMO_CONTROL.setView('main');
+            }
+            else {
+              APPS.close();
+            }
+          }
+          else if (APPS.current) {
+            APPS.close();
+          }
+          else if (MAIN_MENU.visible) {
+            MAIN_MENU.hide();
+          }
+          else {
+            setExpressionAndSound('shocked');
+          }        },
 
         1: () => { // A
-          if (APPS.current === 'companion') COMPANION.play();
-          else if (MAIN_MENU.visible) MAIN_MENU.select();
-          else setExpressionAndSound('happy');
+          if (APPS.current === 'control') {
+            BMO_CONTROL.activate();
+          }
+          else if (APPS.current === 'games') {
+            BMO_GAMES.activate();
+          }
+          else if (APPS.current === 'companion') {
+            COMPANION.play();
+          }
+          else if (MAIN_MENU.visible) {
+            MAIN_MENU.select();
+          }
+          else {
+            setExpressionAndSound('happy');
+          }
         },
 
         2: () => { // X
-          if (APPS.current === 'companion') COMPANION.feed();
-          else if (!APPS.current) setExpressionAndSound('love');
+          if (APPS.current === 'games') {
+            BMO_GAMES.removeFavorite();
+          }
+          else if (APPS.current === 'companion') {
+            COMPANION.feed();
+          }
+          else if (!APPS.current) {
+            setExpressionAndSound('love');
+          }
         },
 
         3: () => { // Y
-          if (!APPS.current) setExpressionAndSound('glitch');
+          if (APPS.current === 'games') {
+            BMO_GAMES.addFavorite();
+          }
+          else if (!APPS.current) {
+            setExpressionAndSound('glitch');
+          }
         },
 
         4: () => { // L1
@@ -1684,9 +9478,19 @@
         },
 
         9: () => { // START
-          APPS.close();
+          /*
+           * BMO_SYSTEM_CONTROL_V2
+           * START agora abre o mesmo painel de sistema
+           * usado pelo menu R36S.
+           */
+          if (APPS.current === 'r36status') {
+            APPS.close();
+            return;
+          }
+
           MAIN_MENU.hide();
-          SYSTEM_PANEL.toggle();
+          SYSTEM_PANEL.hide();
+          APPS.open('r36status');
         },
 
         10: () => { // FN
@@ -1702,26 +9506,58 @@
         },
 
         13: () => { // DPAD UP
-          if (MAIN_MENU.visible) MAIN_MENU.up();
-          else if (!APPS.current) setExpressionAndSound('happy');
+          if (APPS.current === 'control') {
+            BMO_CONTROL.up();
+          }
+          else if (APPS.current === 'games') {
+            BMO_GAMES.up();
+          }
+          else if (MAIN_MENU.visible) {
+            MAIN_MENU.up();
+          }
+          else if (!APPS.current) {
+            setExpressionAndSound('happy');
+          }
         },
 
         14: () => { // DPAD DOWN
-          if (MAIN_MENU.visible) MAIN_MENU.down();
-          else if (!APPS.current) setExpressionAndSound('sad');
+          if (APPS.current === 'control') {
+            BMO_CONTROL.down();
+          }
+          else if (APPS.current === 'games') {
+            BMO_GAMES.down();
+          }
+          else if (MAIN_MENU.visible) {
+            MAIN_MENU.down();
+          }
+          else if (!APPS.current) {
+            setExpressionAndSound('sad');
+          }
         },
 
         15: () => { // DPAD LEFT
-          // reservado
+          if (APPS.current === 'control') {
+            BMO_CONTROL.left();
+          }
         },
 
         16: () => { // DPAD RIGHT
-          // reservado
+          if (APPS.current === 'control') {
+            BMO_CONTROL.right();
+          }
         }
       },
 
       poll() {
         const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+
+        const navPad =
+          Array.from(pads).find(Boolean);
+
+        if (navPad) {
+          BMO_STICK_NAV.update(navPad);
+        }
+
         let gp = null;
 
         for (const pad of pads) {
@@ -1748,8 +9584,32 @@
 
               if (SYSTEM_PANEL.visible) {
                 if ([0, 8, 9].includes(index) && action) action();
+              } else if (APPS.current === 'control') {
+                if (
+                  [0, 1, 8, 9, 13, 14, 15, 16].includes(index)
+                  &&
+                  action
+                ) {
+                  action();
+                }
+              } else if (APPS.current === 'games') {
+                /* BMO_FAVORITES_INPUT_FIX_V1 */
+                if (
+                  [0, 1, 2, 3, 8, 9, 13, 14].includes(index)
+                  &&
+                  action
+                ) {
+                  action();
+                }
+              } else if (APPS.current === 'pcstream') {
+                /* BMO_PC_STREAM_DPAD_V1 */
+                if ([0, 1, 13, 14].includes(index) && action) {
+                  action();
+                }
               } else if (APPS.current) {
-                if ([0, 1, 2, 8, 9].includes(index) && action) action();
+                if ([0, 1, 2, 3, 8, 9].includes(index) && action) {
+                  action();
+                }
               } else if (MAIN_MENU.visible) {
                 if ([0, 1, 8, 9, 13, 14].includes(index) && action) action();
               } else if (action) {
@@ -1779,6 +9639,612 @@
     window.addEventListener('gamepaddisconnected', (event) => {
       console.log('[R36S] Gamepad desconectado:', event.gamepad.id);
     });
+
+
+    /* =========================================================
+       BMO_PC_STREAM_V1
+       ========================================================= */
+
+    const BMO_PC_STREAM = {
+
+      API:
+        'http://127.0.0.1:8088',
+
+      index:
+        0,
+
+      launching:
+        false,
+
+
+      apps: [
+
+        {
+          name:
+            'DESKTOP',
+
+          app:
+            'Desktop',
+
+          icon:
+            'PC',
+
+          meta:
+            'WINDOWS DESKTOP'
+        },
+
+
+        {
+          name:
+            'STEAM BIG PICTURE',
+
+          app:
+            'Steam Big Picture',
+
+          icon:
+            'ST',
+
+          meta:
+            'STEAM · BIG PICTURE'
+        }
+
+      ],
+
+
+      open() {
+
+        this.index = 0;
+
+        this.launching = false;
+
+        this.status('');
+
+        this.render();
+      },
+
+
+      status(text) {
+
+        const el =
+          document.getElementById(
+            'pcStreamStatus'
+          );
+
+
+        if (el) {
+
+          el.textContent =
+            text || '';
+        }
+      },
+
+
+      render() {
+
+        const root =
+          document.getElementById(
+            'pcStreamList'
+          );
+
+
+        if (!root) {
+          return;
+        }
+
+
+        root.innerHTML =
+          this.apps
+            .map(
+              (item, i) => `
+
+                <div
+                  class="
+                    pcstream-row
+                    ${
+                      i === this.index
+                        ? 'selected'
+                        : ''
+                    }
+                  "
+                >
+
+                  <div class="pcstream-icon">
+                    ${item.icon}
+                  </div>
+
+
+                  <div class="pcstream-info">
+
+                    <div class="pcstream-name">
+                      ${item.name}
+                    </div>
+
+                    <div class="pcstream-meta">
+                      ${item.meta}
+                    </div>
+
+                  </div>
+
+
+                  <div class="pcstream-arrow">
+                    ›
+                  </div>
+
+                </div>
+
+              `
+            )
+            .join('');
+      },
+
+
+      up() {
+
+        if (this.launching) {
+          return;
+        }
+
+
+        this.index =
+          (
+            this.index
+            -
+            1
+            +
+            this.apps.length
+          )
+          %
+          this.apps.length;
+
+
+        this.render();
+      },
+
+
+      down() {
+
+        if (this.launching) {
+          return;
+        }
+
+
+        this.index =
+          (
+            this.index
+            +
+            1
+          )
+          %
+          this.apps.length;
+
+
+        this.render();
+      },
+
+
+      async activate() {
+
+        if (this.launching) {
+          return;
+        }
+
+
+        const item =
+          this.apps[
+            this.index
+          ];
+
+
+        if (!item) {
+          return;
+        }
+
+
+        this.launching = true;
+
+
+        this.status(
+          'CONECTANDO · '
+          +
+          item.name
+        );
+
+
+        try {
+
+          const response =
+            await fetch(
+
+              this.API
+              +
+              '/api/control/action',
+
+              {
+                method:
+                  'POST',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    action:
+                      'moonlight_launch',
+
+                    app:
+                      item.app
+                  })
+              }
+
+            );
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              'HTTP '
+              +
+              response.status
+            );
+          }
+
+
+          let data = null;
+
+
+          try {
+
+            data =
+              await response.json();
+
+          }
+          catch (_) {
+          }
+
+
+          console.log(
+            '[BMO PC STREAM]',
+            item.app,
+            data
+          );
+
+        }
+
+        catch (err) {
+
+          console.error(
+            '[BMO PC STREAM]',
+            err
+          );
+
+
+          this.launching =
+            false;
+
+
+          this.status(
+            'ERRO AO INICIAR STREAM'
+          );
+        }
+      }
+
+    };
+
+
+    /*
+     * Registrar nova tela.
+     */
+
+    APPS.screens.pcstream =
+      document.getElementById(
+        'bmoPcStreamApp'
+      );
+
+
+    /*
+     * MENU
+     *
+     * Preserva MAIN_MENU.select original.
+     */
+
+    const BMO_PC_STREAM_MAIN_SELECT_BASE =
+      MAIN_MENU.select.bind(
+        MAIN_MENU
+      );
+
+
+    MAIN_MENU.select =
+      function() {
+
+        const action =
+          this.items[
+            this.index
+          ]?.dataset.action;
+
+
+        if (
+          action ===
+          'pcstream'
+        ) {
+
+          APPS.open(
+            'pcstream'
+          );
+
+
+          BMO_PC_STREAM.open();
+
+
+          return;
+        }
+
+
+        return (
+          BMO_PC_STREAM_MAIN_SELECT_BASE()
+        );
+      };
+
+
+    /*
+     * STICK
+     *
+     * Preserva todos os wrappers atuais,
+     * inclusive GAMES Fast Nav.
+     */
+
+    const BMO_PC_STREAM_STICK_FIRE_BASE =
+      BMO_STICK_NAV.fire.bind(
+        BMO_STICK_NAV
+      );
+
+
+    BMO_STICK_NAV.fire =
+      function(direction) {
+
+        if (
+          APPS.current ===
+          'pcstream'
+        ) {
+
+          if (
+            direction ===
+            'up'
+          ) {
+
+            BMO_PC_STREAM.up();
+
+          }
+
+          else if (
+            direction ===
+            'down'
+          ) {
+
+            BMO_PC_STREAM.down();
+
+          }
+
+
+          return;
+        }
+
+
+        return (
+          BMO_PC_STREAM_STICK_FIRE_BASE(
+            direction
+          )
+        );
+      };
+
+
+    /*
+     * BOTÃO A
+     */
+
+    const BMO_PC_STREAM_BUTTON_A_BASE =
+      R36S_GAMEPAD.actions[1];
+
+
+    R36S_GAMEPAD.actions[1] =
+      () => {
+
+        if (
+          APPS.current ===
+          'pcstream'
+        ) {
+
+          BMO_PC_STREAM.activate();
+
+          return;
+        }
+
+
+        if (
+          BMO_PC_STREAM_BUTTON_A_BASE
+        ) {
+
+          BMO_PC_STREAM_BUTTON_A_BASE();
+        }
+      };
+
+
+    /*
+     * DPAD UP
+     */
+
+    const BMO_PC_STREAM_BUTTON_UP_BASE =
+      R36S_GAMEPAD.actions[13];
+
+
+    R36S_GAMEPAD.actions[13] =
+      () => {
+
+        if (
+          APPS.current ===
+          'pcstream'
+        ) {
+
+          BMO_PC_STREAM.up();
+
+          return;
+        }
+
+
+        if (
+          BMO_PC_STREAM_BUTTON_UP_BASE
+        ) {
+
+          BMO_PC_STREAM_BUTTON_UP_BASE();
+        }
+      };
+
+
+    /*
+     * DPAD DOWN
+     */
+
+    const BMO_PC_STREAM_BUTTON_DOWN_BASE =
+      R36S_GAMEPAD.actions[14];
+
+
+    R36S_GAMEPAD.actions[14] =
+      () => {
+
+        if (
+          APPS.current ===
+          'pcstream'
+        ) {
+
+          BMO_PC_STREAM.down();
+
+          return;
+        }
+
+
+        if (
+          BMO_PC_STREAM_BUTTON_DOWN_BASE
+        ) {
+
+          BMO_PC_STREAM_BUTTON_DOWN_BASE();
+        }
+      };
+
+
+
+
+    /* =========================================================
+       BMO_MAIN_MENU_SCROLL_V2
+
+       Mantém apenas o item ativo dentro da janela visível.
+
+       IMPORTANTE:
+       usa getBoundingClientRect() para que lista e item
+       estejam exatamente no mesmo sistema de coordenadas.
+       ========================================================= */
+
+    const BMO_MAIN_MENU_SCROLL_V2_RENDER_BASE =
+      MAIN_MENU.render.bind(
+        MAIN_MENU
+      );
+
+
+    MAIN_MENU.render =
+      function() {
+
+        /*
+         * Render original permanece soberano.
+         */
+        BMO_MAIN_MENU_SCROLL_V2_RENDER_BASE();
+
+
+        requestAnimationFrame(
+          () => {
+
+            const list =
+              document.getElementById(
+                'menuList'
+              );
+
+
+            const active =
+              this.items[
+                this.index
+              ];
+
+
+            if (
+              !list ||
+              !active ||
+              !MAIN_MENU.visible
+            ) {
+              return;
+            }
+
+
+            const listRect =
+              list.getBoundingClientRect();
+
+
+            const itemRect =
+              active.getBoundingClientRect();
+
+
+            /*
+             * Pequena margem visual.
+             */
+            const margin = 4;
+
+
+            /*
+             * Saiu por cima:
+             * move somente a diferença necessária.
+             */
+            if (
+              itemRect.top <
+              listRect.top + margin
+            ) {
+
+              list.scrollTop -=
+                (
+                  listRect.top
+                  +
+                  margin
+                  -
+                  itemRect.top
+                );
+
+            }
+
+
+            /*
+             * Saiu por baixo:
+             * move somente a diferença necessária.
+             */
+            else if (
+              itemRect.bottom >
+              listRect.bottom - margin
+            ) {
+
+              list.scrollTop +=
+                (
+                  itemRect.bottom
+                  -
+                  (
+                    listRect.bottom
+                    -
+                    margin
+                  )
+                );
+
+            }
+
+          }
+        );
+
+      };
+
 
     R36S_GAMEPAD.poll();
 
@@ -1883,7 +10349,7 @@
 
 <script>
 (() => {
-  const API = "http://192.168.1.28:8083/api/battery";
+  const API = "http://127.0.0.1:8083/api/battery";
 
   const root = document.getElementById("r36sBattery");
   const fill = document.getElementById("r36sBatteryFill");
@@ -2221,7 +10687,10 @@ window.stopBmoSleepMode =
 (() => {
 
     const HUB_EVENTS =
-        "http://192.168.1.50:8084/api/events";
+        String(
+            window.BMO_RUNTIME_CONFIG?.hubEventsUrl
+            || ""
+        ).trim();
 
     let lastEventTimestamp = 0;
 
@@ -2350,7 +10819,19 @@ window.stopBmoSleepMode =
 
     function connect() {
 
-        console.log("[BMO SSE] conectando ao Hub...");
+        if (!HUB_EVENTS) {
+
+            console.info(
+                "[BMO SSE] Hub desabilitado; endpoint nao configurado"
+            );
+
+            return;
+        }
+
+        console.log(
+            "[BMO SSE] conectando ao Hub:",
+            HUB_EVENTS
+        );
 
         const source =
             new EventSource(HUB_EVENTS);
@@ -2393,6 +10874,924 @@ window.stopBmoSleepMode =
 
 
     connect();
+
+})();
+</script>
+
+
+
+  <!-- ======================================================
+       BMO WIFI KEYBOARD
+       ====================================================== -->
+
+  <div id="bmoWifiKeyboard">
+
+    <div class="wifi-kb-panel">
+
+      <div class="wifi-kb-title">
+        SENHA WI-FI
+      </div>
+
+      <div
+        class="wifi-kb-network"
+        id="wifiKbNetwork">
+        ---
+      </div>
+
+      <div
+        class="wifi-kb-password"
+        id="wifiKbPassword">
+        SENHA:
+      </div>
+
+      <div
+        class="wifi-kb-grid"
+        id="wifiKbGrid">
+      </div>
+
+      <div
+        class="wifi-kb-actions"
+        id="wifiKbActions">
+
+        <div class="wifi-kb-action">
+          MOSTRAR
+        </div>
+
+        <div class="wifi-kb-action">
+          APAGAR
+        </div>
+
+        <div class="wifi-kb-action">
+          CONECTAR
+        </div>
+
+        <div class="wifi-kb-action">
+          CANCELAR
+        </div>
+
+      </div>
+
+      <div class="wifi-kb-hint">
+        D-PAD / ANALOGICOS · A CONFIRMA · B VOLTA
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+<div id="bmoPhysicalOverlay">
+  <div id="bmoPhysicalOverlayLabel">
+    ---
+  </div>
+
+  <div class="bmo-physical-track">
+    <div id="bmoPhysicalOverlayFill"></div>
+  </div>
+</div>
+
+
+<script>
+/* BMO_PHYSICAL_VOLUME_BRIGHTNESS_V1 */
+
+(() => {
+
+  const API =
+    'http://127.0.0.1:8088';
+
+  let overlayTimer = null;
+  let requestBusy = false;
+
+
+  function fnHeld() {
+
+    if (
+      !navigator.getGamepads
+    ) {
+      return false;
+    }
+
+    const pads =
+      Array.from(
+        navigator.getGamepads()
+      );
+
+    const pad =
+      pads.find(Boolean);
+
+    return !!(
+      pad &&
+      pad.buttons &&
+      pad.buttons[10] &&
+      pad.buttons[10].pressed
+    );
+  }
+
+
+  function showOverlay(
+    type,
+    percent
+  ) {
+
+    const root =
+      document.getElementById(
+        'bmoPhysicalOverlay'
+      );
+
+    const label =
+      document.getElementById(
+        'bmoPhysicalOverlayLabel'
+      );
+
+    const fill =
+      document.getElementById(
+        'bmoPhysicalOverlayFill'
+      );
+
+    if (
+      !root ||
+      !label ||
+      !fill
+    ) {
+      return;
+    }
+
+    const pct =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(percent) || 0
+        )
+      );
+
+    label.textContent =
+      type +
+      ' ' +
+      Math.round(pct) +
+      '%';
+
+    fill.style.width =
+      pct + '%';
+
+    root.classList.add(
+      'visible'
+    );
+
+    clearTimeout(
+      overlayTimer
+    );
+
+    overlayTimer =
+      setTimeout(
+        () => {
+          root.classList.remove(
+            'visible'
+          );
+        },
+        1100
+      );
+  }
+
+
+  async function sendAction(
+    action,
+    type
+  ) {
+
+    if (requestBusy) {
+      return;
+    }
+
+    requestBusy = true;
+
+    try {
+
+      const response =
+        await fetch(
+          API +
+          '/api/control/action',
+          {
+            method: 'POST',
+            cache: 'no-store',
+
+            headers: {
+              'Content-Type':
+                'application/json'
+            },
+
+            body:
+              JSON.stringify({
+                action
+              })
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !data.ok
+      ) {
+        throw new Error(
+          data.error ||
+          data.result ||
+          'falha'
+        );
+      }
+
+      const percent =
+        data?.result?.percent;
+
+      if (
+        percent !== undefined &&
+        percent !== null
+      ) {
+        showOverlay(
+          type,
+          percent
+        );
+      }
+
+    }
+    catch (err) {
+
+      console.warn(
+        '[BMO SHORTCUT]',
+        action,
+        err
+      );
+
+    }
+    finally {
+
+      requestBusy = false;
+    }
+  }
+
+
+  window.addEventListener(
+    'keydown',
+    event => {
+
+      const down =
+        event.key ===
+          'AudioVolumeDown'
+        ||
+        event.code ===
+          'AudioVolumeDown';
+
+      const up =
+        event.key ===
+          'AudioVolumeUp'
+        ||
+        event.code ===
+          'AudioVolumeUp';
+
+      if (
+        !down &&
+        !up
+      ) {
+        return;
+      }
+
+
+      /*
+        Impede o ambiente gráfico de executar
+        outra função ao mesmo tempo.
+      */
+
+      event.preventDefault();
+      event.stopPropagation();
+
+
+      /*
+        FN = botão 10 confirmado.
+      */
+
+      if (fnHeld()) {
+
+        sendAction(
+          down
+            ? 'brightness_down'
+            : 'brightness_up',
+          'BRILHO'
+        );
+
+        return;
+      }
+
+
+      /*
+        Volume normal.
+      */
+
+      sendAction(
+        down
+          ? 'volume_down'
+          : 'volume_up',
+        'VOLUME'
+      );
+
+    },
+    true
+  );
+
+})();
+
+</script>
+
+
+<!-- BMO_WIFI_QUICK_STATUS_SIMPLE_V1 -->
+<style>
+  #bmoWifiQuick {
+    position: fixed;
+    top: 7px;
+    right: 82px;
+    z-index: 99999;
+
+    width: 24px;
+    height: 24px;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--bmo-face);
+    opacity: .88;
+
+    pointer-events: none;
+  }
+
+  #bmoWifiQuick.visible {
+    display: flex;
+  }
+
+  #bmoWifiQuick svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  #bmoWifiQuick .wifi-lines {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  #bmoWifiQuick .wifi-dot {
+    fill: currentColor;
+  }
+</style>
+
+<div id="bmoWifiQuick" aria-label="Wi-Fi conectado">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path class="wifi-lines"
+          d="M3.5 8.5
+             C8.3 4.4 15.7 4.4 20.5 8.5" />
+    <path class="wifi-lines"
+          d="M6.8 12
+             C9.8 9.5 14.2 9.5 17.2 12" />
+    <path class="wifi-lines"
+          d="M10 15.3
+             C11.2 14.3 12.8 14.3 14 15.3" />
+    <circle class="wifi-dot"
+            cx="12"
+            cy="19"
+            r="1.6" />
+  </svg>
+</div>
+
+<script>
+(() => {
+  const API = 'http://127.0.0.1:8086/api/status';
+  const box = document.getElementById('bmoWifiQuick');
+
+  if (!box) return;
+
+  async function refreshBmoWifiQuick() {
+    try {
+      const res = await fetch(
+        API + '?t=' + Date.now(),
+        { cache: 'no-store' }
+      );
+
+      if (!res.ok)
+        throw new Error('HTTP ' + res.status);
+
+      const d = await res.json();
+      const connected =
+        d.network &&
+        d.network.connected === true;
+
+      box.classList.toggle('visible', connected);
+
+    } catch (e) {
+      box.classList.remove('visible');
+    }
+  }
+
+  refreshBmoWifiQuick();
+  setInterval(refreshBmoWifiQuick, 3000);
+})();
+</script>
+
+
+<script id="bmoSystemControlV2Js">
+(() => {
+  'use strict';
+
+  /* BMO_SYSTEM_CONTROL_V2 */
+
+  const SYSTEM_V2 = {
+
+    async diagnostics(showToast = false) {
+
+      const r36Services =
+        document.getElementById(
+          'r36Services'
+        );
+
+      const ctlDiagnostics =
+        document.getElementById(
+          'ctlDiagnosticsValue'
+        );
+
+      try {
+
+        const response =
+          await fetch(
+            BMO_CONTROL.API +
+            '/api/control/diagnostics?t=' +
+            Date.now(),
+            {
+              cache: 'no-store'
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !data.ok
+        ) {
+          throw new Error(
+            data.error ||
+            'diagnostico falhou'
+          );
+        }
+
+        const services =
+          data.services || {};
+
+        const names =
+          Object.keys(
+            services
+          );
+
+        const healthy =
+          names.filter(
+            name =>
+              services[name] === true
+          ).length;
+
+        const total =
+          names.length;
+
+        const allOk =
+          total > 0 &&
+          healthy === total;
+
+        const summary =
+          total
+            ? `${healthy}/${total} ${allOk ? 'OK' : 'ATIVOS'}`
+            : 'SEM DADOS';
+
+
+        /* BMO_DIAGNOSTICS_VIEW_V2 */
+
+        const serviceElements = {
+          ui: 'diagUi',
+          kiosk: 'diagKiosk',
+          control: 'diagControl',
+          status: 'diagStatus',
+          sound: 'diagSound',
+          battery: 'diagBattery'
+        };
+
+        const serviceLabels = {
+          ui: 'UI',
+          kiosk: 'KIOSK',
+          control: 'CONTROL',
+          status: 'STATUS',
+          sound: 'SOUND',
+          battery: 'BATTERY'
+        };
+
+        Object.keys(
+          serviceElements
+        ).forEach(
+          key => {
+
+            const element =
+              document.getElementById(
+                serviceElements[key]
+              );
+
+            if (!element) return;
+
+            const ok =
+              services[key] === true;
+
+            element.textContent =
+              `${serviceLabels[key]} ${ok ? 'OK' : 'OFF'}`;
+
+            element.classList.toggle(
+              'ok',
+              ok
+            );
+
+            element.classList.toggle(
+              'bad',
+              !ok
+            );
+          }
+        );
+
+
+        const diagRuntime =
+          document.getElementById(
+            'diagRuntime'
+          );
+
+        if (diagRuntime) {
+
+          diagRuntime.textContent =
+            window.location.pathname.includes(
+              'index.bmo-next.html'
+            )
+              ? 'CANDIDATE'
+              : 'PRODUCTION';
+        }
+
+
+        const wifiDevices =
+          Array.isArray(data.wifi)
+            ? data.wifi
+            : [];
+
+        const connectedWifi =
+          wifiDevices.find(
+            item =>
+              item &&
+              item.state ===
+                'connected'
+          );
+
+        const diagWifi =
+          document.getElementById(
+            'diagWifi'
+          );
+
+        if (diagWifi) {
+
+          diagWifi.textContent =
+            connectedWifi
+              ? (
+                  connectedWifi.connection ||
+                  'CONECTADO'
+                )
+              : 'OFFLINE';
+        }
+
+
+        const diagNetworks =
+          document.getElementById(
+            'diagNetworks'
+          );
+
+        if (diagNetworks) {
+
+          diagNetworks.textContent =
+            data.networks != null
+              ? String(data.networks)
+              : '---';
+        }
+
+
+        const diagBrightness =
+          document.getElementById(
+            'diagBrightness'
+          );
+
+        if (diagBrightness) {
+
+          const pct =
+            data.brightness &&
+            data.brightness.percent != null
+              ? data.brightness.percent
+              : null;
+
+          diagBrightness.textContent =
+            pct != null
+              ? `${pct}%`
+              : '---';
+        }
+
+
+        if (r36Services) {
+
+          r36Services.textContent =
+            summary;
+
+          r36Services.classList.toggle(
+            'system-health-ok',
+            allOk
+          );
+
+          r36Services.classList.toggle(
+            'system-health-bad',
+            !allOk
+          );
+        }
+
+        if (ctlDiagnostics) {
+
+          ctlDiagnostics.textContent =
+            summary;
+
+          ctlDiagnostics.classList.toggle(
+            'system-health-ok',
+            allOk
+          );
+
+          ctlDiagnostics.classList.toggle(
+            'system-health-bad',
+            !allOk
+          );
+        }
+
+        if (showToast) {
+
+          const networks =
+            data.networks ?? '--';
+
+          BMO_CONTROL.toast(
+            `${summary} · ${networks} REDES`
+          );
+        }
+
+        return data;
+
+      } catch (err) {
+
+        if (r36Services) {
+
+          r36Services.textContent =
+            'API OFFLINE';
+
+          r36Services.classList.remove(
+            'system-health-ok'
+          );
+
+          r36Services.classList.add(
+            'system-health-bad'
+          );
+        }
+
+        if (ctlDiagnostics) {
+
+          ctlDiagnostics.textContent =
+            'ERRO';
+
+          ctlDiagnostics.classList.remove(
+            'system-health-ok'
+          );
+
+          ctlDiagnostics.classList.add(
+            'system-health-bad'
+          );
+        }
+
+        if (showToast) {
+
+          BMO_CONTROL.toast(
+            'DIAGNÓSTICO FALHOU'
+          );
+        }
+
+        return null;
+      }
+    }
+  };
+
+
+  /*
+   * Toda abertura do R36S SYSTEM faz
+   * uma verificacao real dos services.
+   */
+  const openBeforeSystemV2 =
+    APPS.open.bind(
+      APPS
+    );
+
+  APPS.open =
+    function(name) {
+
+      openBeforeSystemV2(
+        name
+      );
+
+      if (
+        name ===
+        'r36status'
+      ) {
+
+        SYSTEM_V2.diagnostics(
+          false
+        );
+      }
+    };
+
+
+  /*
+   * Ao entrar no CONTROL também atualizamos
+   * o card DIAGNOSTICO uma unica vez.
+   */
+  const controlOpenBeforeSystemV2 =
+    BMO_CONTROL.open.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.open =
+    function() {
+
+      controlOpenBeforeSystemV2();
+
+      SYSTEM_V2.diagnostics(
+        false
+      );
+    };
+
+
+  /*
+   * BMO_DIAGNOSTICS_VIEW_V2
+   * Render da subview.
+   */
+
+  const controlRenderBeforeDiagnosticsV2 =
+    BMO_CONTROL.render.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.render =
+    function() {
+
+      controlRenderBeforeDiagnosticsV2();
+
+      const screen =
+        document.getElementById(
+          'ctlDiagnostics'
+        );
+
+      if (screen) {
+
+        screen.classList.toggle(
+          'hidden',
+          this.view !==
+            'diagnostics'
+        );
+      }
+    };
+
+
+  /*
+   * Dentro do diagnostico o D-pad
+   * nao possui navegacao.
+   */
+
+  const diagUpBefore =
+    BMO_CONTROL.up.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.up =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagUpBefore();
+    };
+
+
+  const diagDownBefore =
+    BMO_CONTROL.down.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.down =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagDownBefore();
+    };
+
+
+  const diagLeftBefore =
+    BMO_CONTROL.left.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.left =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagLeftBefore();
+    };
+
+
+  const diagRightBefore =
+    BMO_CONTROL.right.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.right =
+    function() {
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) return;
+
+      diagRightBefore();
+    };
+
+
+  /*
+   * DIAGNOSTICO agora consulta
+   * /api/control/diagnostics de verdade.
+   */
+  const controlActivateBeforeSystemV2 =
+    BMO_CONTROL.activate.bind(
+      BMO_CONTROL
+    );
+
+  BMO_CONTROL.activate =
+    function() {
+
+      if (
+        this.view === 'main' &&
+        this.mainActions[
+          this.index
+        ] === 'diagnostics'
+      ) {
+
+        this.setView(
+          'diagnostics'
+        );
+
+        SYSTEM_V2.diagnostics(
+          false
+        );
+
+        return;
+      }
+
+
+      if (
+        this.view ===
+        'diagnostics'
+      ) {
+
+        SYSTEM_V2.diagnostics(
+          true
+        );
+
+        return;
+      }
+
+
+      controlActivateBeforeSystemV2();
+    };
+
+
+  window.BMO_SYSTEM_CONTROL_V2 =
+    SYSTEM_V2;
 
 })();
 </script>

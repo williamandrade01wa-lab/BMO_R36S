@@ -142,7 +142,9 @@ echo "[90%] Diff..."
 
 if git rev-parse --verify origin/main >/dev/null 2>&1; then
   base="$(git merge-base HEAD origin/main)"
-  git diff --check "$base"...HEAD
+  # Valida o estado completo atual contra main,
+  # incluindo commits da branch + stage + working tree.
+  git diff --check "$base"
 else
   echo "WARN: origin/main indisponivel; diff --check ignorado."
 fi

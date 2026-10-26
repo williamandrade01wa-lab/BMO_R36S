@@ -36,6 +36,7 @@ SYSTEMS = {
 
         "rom_dirs": [
             Path("/mnt/bmo-sd2/EASYROMS/sfc"),
+            Path("/home/r36s/ROMs/snes"),
         ],
 
         "extensions": {
@@ -55,6 +56,7 @@ SYSTEMS = {
 
         "rom_dirs": [
             Path("/mnt/bmo-sd2/EASYROMS/psp"),
+            Path("/home/r36s/ROMs/psp"),
         ],
 
         "extensions": {
@@ -106,11 +108,11 @@ def available_rom_dirs(system_id):
 
     system = system_info(system_id)
 
-    sd2_device = Path(
-        "/dev/disk/by-uuid/1A31-13A4"
+    sd2_mount = Path(
+        "/mnt/bmo-sd2"
     )
 
-    sd2_present = sd2_device.exists()
+    sd2_present = sd2_mount.is_mount()
 
     result = []
 
@@ -332,8 +334,8 @@ def dry_run(system_id, game_id):
 # BMO_GAME_SAVE_LAYERS_V1
 # ============================================================
 
-SD2_UUID_PATH = Path(
-    "/dev/disk/by-uuid/1A31-13A4"
+SD2_MOUNT = Path(
+    "/mnt/bmo-sd2"
 )
 
 SD2_ROOT = Path(
@@ -424,7 +426,7 @@ def game_storage():
         exist_ok=True
     )
 
-    if not SD2_UUID_PATH.exists():
+    if not SD2_MOUNT.is_mount():
 
         return {
             "mode": "local",
@@ -576,7 +578,7 @@ def psp_storage_prepare():
         "states": PSP_LOCAL_STATES,
     }
 
-    if not SD2_UUID_PATH.exists():
+    if not SD2_MOUNT.is_mount():
         return storage
 
     try:
@@ -626,7 +628,7 @@ def psp_storage_finish():
     Espelha novos saves/states para o SD2 quando disponivel.
     """
 
-    if not SD2_UUID_PATH.exists():
+    if not SD2_MOUNT.is_mount():
         return
 
     try:

@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# BMO_MOONLIGHT_LAUNCHER_V1
+# BMO_MOONLIGHT_LAUNCHER_V2
+# BMO_MOONLIGHT_HOST_CONFIG_V1
 
 set -u
 
-HOST="192.168.1.17"
+CONFIG="/etc/bmo/bmo.conf"
+
 APP="${1:-Desktop}"
 
 DISPLAY_NUM=":0"
@@ -14,6 +16,43 @@ HOTKEY="/usr/local/bin/bmo-moonlight-hotkeys.py"
 
 KIOSK_STOPPED=0
 HOTKEY_PID=""
+
+HOST="${BMO_MOONLIGHT_HOST:-}"
+
+
+read_config_value() {
+
+    local key="$1"
+
+    [ -r "$CONFIG" ] || return 0
+
+    sed -n \
+        "s/^${key}=//p" \
+        "$CONFIG" |
+    tail -n1 |
+    sed \
+        -e 's/^"//' \
+        -e 's/"$//'
+}
+
+
+if [ -z "$HOST" ]; then
+    HOST="$(read_config_value BMO_MOONLIGHT_HOST)"
+fi
+
+
+if [ -z "$HOST" ]; then
+
+    echo "ERRO: Sunshine host nao configurado."
+    echo
+    echo "Configure:"
+    echo "  /etc/bmo/bmo.conf"
+    echo
+    echo "Exemplo:"
+    echo "  BMO_MOONLIGHT_HOST=192.168.x.x"
+
+    exit 19
+fi
 
 
 cleanup() {
@@ -25,10 +64,10 @@ cleanup() {
 
         wait "$HOTKEY_PID" \
             2>/dev/null || true
+
     fi
 
 
-    # Garante que qualquer Moonlight residual encerre.
     pkill \
         -TERM \
         -u r36s \
@@ -44,6 +83,7 @@ cleanup() {
         systemctl start \
             bmo-kiosk.service \
             >/dev/null 2>&1 || true
+
     fi
 }
 
@@ -58,7 +98,6 @@ echo " APP : $APP"
 echo "============================================================"
 
 
-# Detecta binario.
 if command -v moonlight >/dev/null 2>&1; then
 
     MOONLIGHT="$(command -v moonlight)"
@@ -71,13 +110,13 @@ else
 
     echo "ERRO: Moonlight nao encontrado"
     exit 20
+
 fi
 
 
 echo "Moonlight: $MOONLIGHT"
 
 
-# Fecha GUI Moonlight antiga, caso esteja aberta.
 pkill \
     -TERM \
     -u r36s \
@@ -95,7 +134,6 @@ systemctl stop \
 KIOSK_STOPPED=1
 
 
-# Xorg deve continuar funcionando.
 if ! systemctl is-active \
         --quiet \
         bmo-xorg.service
@@ -103,6 +141,7 @@ then
 
     echo "ERRO: Xorg nao esta ativo"
     exit 21
+
 fi
 
 
@@ -138,6 +177,7 @@ runuser \
     "$APP"
 
 RC=$?
+
 
 echo
 echo "Moonlight encerrou RC=$RC"
