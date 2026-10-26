@@ -12,3 +12,8 @@
 - VERSION: versão do App, independente da imagem Linux.
 
 Não armazenar credenciais, ROMs, saves, chaves ou backups no Git. A imagem experimental/Light permanece em feat/bmo-linux-base-v1.
+
+
+## Memória e inicialização
+
+AGENTS.md define regras permanentes; USER-REQUIREMENTS registra preferências; ENVIRONMENT parâmetros/últimos IPs; PROJECT-CONTINUITY estado por área e próximo passo; WORKLOG evidências; CHECKPOINTS gates; HANDOFF prompt/transferência. docs/releases contém manifestos/checksums, não publica Releases. INICIAR-CODEX.cmd e scripts/windows/INICIAR-CODEX.ps1 são ferramentas do PC; .bmo-context é saída local ignorada.

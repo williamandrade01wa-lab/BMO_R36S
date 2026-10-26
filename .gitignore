@@ -95,3 +95,6 @@ frontend/bmo-runtime-config.js
 !install/runtime/BMO-PPSSPP-R36S-v1.20.4-runtime.tar.gz
 !install/runtime/moonlight-qt_6.2.0-1_arm64.deb
 !install/runtime/SHA256SUMS
+
+# Local AI context snapshots
+.bmo-context/

@@ -40,3 +40,10 @@ Crie uma branch de visual a partir de main, altere `frontend/index.bmo-next.html
 - Tradução: política `install/system/chromium/bmo-kiosk.json`, já aplicada no aparelho de teste.
 
 Atualizar o HTML preserva estes recursos instalados. Sons, boot e política exigem seus próprios passos de instalação quando estiverem ausentes; o atualizador visual não executa um instalador geral.
+
+
+## Memória do projeto e novas conversas
+
+Execute **INICIAR-CODEX.cmd** no clone para preparar contexto/prompt. Para CLI: `INICIAR-CODEX.cmd -StartCodex -Area visual` (ou imagem/infra/geral). O modo CLI usa worktree isolado; o modo padrão copia o prompt para usar no desktop/outro agente.
+
+Leia [HANDOFF](docs/HANDOFF.md), [requisitos permanentes](docs/USER-REQUIREMENTS.md), [ambiente](docs/ENVIRONMENT.md) e [estado atual](docs/PROJECT-CONTINUITY.md). AGENTS.md exige registrar etapas/evidências no Git e preservar outras frentes. Snapshots locais .bmo-context são auxiliares e ignorados; credenciais e conversas brutas não entram no Git.
