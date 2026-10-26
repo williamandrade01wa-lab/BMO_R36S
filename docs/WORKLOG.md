@@ -934,3 +934,11 @@ Artifact expira: 2026-10-31T04:21:41Z
 - Resultado esperado: CI ARM64 passa contratos/fixtures/resize/sanitização e gera core comprimido; baixar ao PC, conferir hashes, incluir runtime PPSSPP pinado e validar entrega completa antes de entregar.
 - Validação: gates vão rodar no GitHub. Nenhuma imagem desta nova candidata declarada pronta ainda; nenhuma Release/tag será publicada nesta etapa. R36S_REQUIRED=YES.
 - Próximo passo exato: acompanhar CI, baixar artifact core, finalizar/verificar/comprimir no PC, registrar tamanhos/SHA e entregar arquivo de teste ao usuário.
+
+
+### PureLight — core aprovado e baixado para finalização
+
+- Fonte core: af93facc944df8d019ff6189c1ccc007373dc749; CI40259216780 aprovada. Contrato atualizado, Wi-Fi/tests de segurança/resize/sanitização/compressão OK. Artifact12624200746, ZIP403604477 bytes, SHA256 c8c5ff6f744ed77586890ece54d1fee908503c4283ff180f4c23c3c837b076c7.
+- Download/CRC do ZIP e extração segura no PC concluídos. Core XZ403637264 bytes, SHA256 2ff0895dc49663d22b530fc3ef85f2280c93e0150f419ae8295b7a4c47b1bf85.
+- Finalizador PC e leitor ext4 agora versionados com dependências pinadas. Verificam payload completo, sons/política/frontend, versão/commit, sanitização, assistente v0.2.1 e logo; injetam runtime pinado na FAT sem alterar ext4; verificam SHA raw após descompressão integral.
+- Próximo passo: finalizar/comprimir no PC e gerar manifesto/checksum. Ainda sem imagem final declarada pronta; sem Release/tag. R36S_REQUIRED=YES.
