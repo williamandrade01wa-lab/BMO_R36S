@@ -4,7 +4,7 @@ After=NetworkManager.service bmo-ready-firstboot.service
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sleep 30
+ExecStartPre=/bin/sleep 90
 ExecStart=/usr/local/sbin/bmo-wifi5-report
 
 [Install]

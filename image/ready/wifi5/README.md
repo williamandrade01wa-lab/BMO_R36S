@@ -16,6 +16,12 @@ Esta pasta contém os arquivos versionáveis para testar o Wi-Fi interno RTL8811
 
 Instalar os três `.ko` em `/lib/modules/6.12.32-lts-rk3326/kernel/drivers/net/wireless/realtek/rtw88/` da **cópia** da imagem e executar `depmod -b ROOT 6.12.32-lts-rk3326`. Conferir `vermagic`, alias `usb:v0BDApC811`, firmware `rtw8821c_fw.bin` e resolução de dependências. Instalar `bmo-wifi5-report.sh` como `/usr/local/sbin/bmo-wifi5-report`, instalar o serviço em `/etc/systemd/system/` e habilitá-lo no `multi-user.target`.
 
+`assemble-ready-wifi5.sh WORK_DIR` implementa essa montagem. `WORK_DIR` deve conter `Ready-base.img` (cópia raw verificada da Ready) e `modules/rtw88_usb.ko`, `modules/rtw88_8821c.ko`, `modules/rtw88_8821cu.ko`. Execute como root em Linux/WSL com suporte a loop mounts. O script modifica somente essa cópia e gera `modprobe-dry-run.txt` em `WORK_DIR`; os arquivos do serviço vêm desta pasta versionada.
+
 O relatório é gravado na BOOT após o firstboot, sem SSID ou senha. O teste físico requer cartão extra de pelo menos 16 GB e confirmação de interface Wi-Fi, conexão em frequência 5xxx MHz, IP e `ssh` ativo. Preservar o cartão atual e a imagem Ready original. Não declarar a candidata validada sem boot real.
+
+Na montagem de 2026-11-14, os três `.ko` passaram em `vermagic` e alias USB. Os 68 CRCs exportados pelo `rtw88_core` original e compilado coincidiram, e as importações verificadas contra `rtw88_core`, `mac80211` e `cfg80211` não divergiram. `modprobe -n` resolveu a cadeia de dependências. A cópia da imagem passou em `fsck.vfat -n` e `e2fsck -fn`. Isso valida a preparação no PC; o boot e a associação em 5 GHz ainda precisam do R36S.
+
+Imagem gzip montada em 2026-11-14: SHA256 `e0888fb7f28d3cd56f29612aa4506a7ad2bb40688cb7e692db351377fa819429`, 1.891.182.973 bytes. Raw SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4`, confirmado por descompressão do gzip. Arquivo binário mantido fora do Git.
 
 Plano e evidências: [`docs/RTL8811CU-READY-WIFI5-PLAN.md`](../../../docs/RTL8811CU-READY-WIFI5-PLAN.md).

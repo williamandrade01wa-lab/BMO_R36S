@@ -5,6 +5,9 @@ BOOT=/boot/u-boot
 [ -d "$BOOT" ] || BOOT=/boot
 OUT="$BOOT/BMO-WIFI5-STATUS.txt"
 if [ "$(findmnt -n -o FSTYPE --target "$BOOT" 2>/dev/null)" != vfat ]; then
+  mount "$BOOT" 2>/dev/null || true
+fi
+if [ "$(findmnt -n -o FSTYPE --target "$BOOT" 2>/dev/null)" != vfat ]; then
   OUT=/var/log/bmo-wifi5-status.txt
 fi
 TMP="$OUT.tmp"
@@ -21,7 +24,9 @@ TMP="$OUT.tmp"
   echo "RTL8811CU_USB=$FOUND"
   printf 'DRIVER_MODULE='; modinfo -F filename rtw88_8821cu 2>&1 || true
   echo '=== NETWORK ==='
+  if command -v rfkill >/dev/null 2>&1; then rfkill list 2>&1 || true; fi
   if command -v iw >/dev/null 2>&1; then
+    iw reg get 2>&1 | head -n 12 || true
     iw dev 2>&1 | grep -E 'Interface|type' || true
     if iw phy 2>/dev/null | grep -E '\*[[:space:]]*5[0-9]{3}[[:space:]]*MHz' | grep -v 'disabled' >/dev/null; then
       echo 'FIVE_GHZ_CHANNELS=available'

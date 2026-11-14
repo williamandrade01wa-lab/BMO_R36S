@@ -2,6 +2,8 @@
 
 ## Rumo vigente: Ready v1.0.0-beta.2-WiFi5
 
+**Estado em 14/11/2026:** candidata `BMO-R36S-Ready-v1.0.0-beta.2-WiFi5.img.gz` pronta no PC, 1.891.182.973 bytes, SHA256 `e0888fb7f28d3cd56f29612aa4506a7ad2bb40688cb7e692db351377fa819429`. O gzip passou em `pigz -t` e descompactou exatamente para raw SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4`. FAT32/ext4 verificados somente leitura; BMO, driver e serviço presentes. Falta teste físico de boot, 5 GHz e SSH. Próxima ação: gravar em outro microSD de 16 GB ou maior, preservar F:, configurar a BOOT e iniciar o R36S. Depois ler `BMO-WIFI5-STATUS.txt`.
+
 O usuário escolheu uma nova imagem beta com BMO completo já instalado. A sequência vigente é: concluir o build com GCC 13, comparar `vermagic` e CRCs com os módulos da Ready original, integrar os três módulos na cópia raw, executar `depmod` e validar dependências, instalar o relatório de boot, comprimir a candidata e conferir hashes. Só depois gravar **outro** microSD de 16 GB ou maior e testar boot, associação em 5xxx MHz, IP e SSH no R36S. O plano antigo de instalar módulos no F: por hook de BOOT, abaixo, permanece apenas como histórico diagnóstico e não será executado nesta candidata.
 
 Data do registro: 13/11/2026 (America/Sao_Paulo). Estado: diagnóstico físico/USB confirmado; correção de software pendente. Este documento é um ponto de retomada, não um relato de correção concluída.

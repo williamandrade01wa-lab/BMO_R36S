@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Driver compilado e integrado à cópia da Ready
+
+- Fase: imagem candidata privada; branch `fix/rtl8811cu-ready-wifi5-beta`; commit de partida desta etapa `e32c33d`.
+- Objetivo: validar a compatibilidade dos módulos RTL8811CU e produzir uma imagem Ready beta que possa ser gravada em outro microSD.
+- Ações: build completo do kernel pinado `d5da60f7ee9fcafed61f1e93590eb85ca0ecd7c0` com config da Ready, GCC ARM64 13.4 e `LOCALVERSION=-lts-rk3326`; compilados `rtw88_usb.ko`, `rtw88_8821c.ko`, `rtw88_8821cu.ko`. O primeiro build com GCC 15 foi interrompido antes de uso; a compilação final foi refeita limpa com `CC=aarch64-linux-gnu-gcc-13` explícito. Os três módulos foram instalados apenas numa cópia raw da Ready; `depmod` e `modprobe -n` foram executados. Serviço de relatório de Wi-Fi/SSH foi integrado à imagem e à BOOT.
+- Arquivos: `image/ready/wifi5/` e documentação do projeto; a raw, módulos, logs e imagem compactada ficam fora do Git.
+- Resultado esperado: candidata com BMO completo, driver associável ao USB `0bda:c811` e relatório de boot na FAT32. Resultado obtido: imagem gzip pronta no PC, sem teste físico ainda. Gzip de 1.891.182.973 bytes, SHA256 `e0888fb7f28d3cd56f29612aa4506a7ad2bb40688cb7e692db351377fa819429`; raw SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4`.
+- Validação: `vermagic` dos três `.ko` corresponde a `6.12.32-lts-rk3326 SMP mod_unload modversions aarch64`; alias `usb:v0BDApC811...`; 68/68 CRCs exportados pelo `rtw88_core` novo e instalado coincidem; nenhuma divergência nas importações verificadas com `rtw88_core`, `mac80211` e `cfg80211`; `modprobe -n` resolve a cadeia de sete módulos. Verificação estática da imagem passou, `fsck.vfat -n` e `e2fsck -fn` limpos. `pigz -t` passou, hash gzip repetido coincidiu e descompressão em fluxo produziu a raw de hash esperado.
+- `R36S_REQUIRED=NO` para concluir compactação, hashes e entrega; `R36S_REQUIRED=YES` para validar boot, 5 GHz e SSH no hardware.
+- Risco: importações do kernel base não podem ser integralmente comparadas sem `Module.symvers` original; teste físico ainda é obrigatório. F: e Ready original preservados.
+- Próximo passo exato: pedir um microSD extra de 16 GB ou maior para gravar a candidata; abrir a BOOT, escolher ScreenFiles e configurar Wi-Fi 5 GHz e SSH; iniciar no R36S, observar tela e ler `BMO-WIFI5-STATUS.txt` após o boot.
+
 ## 2026-11-13 — Candidata Ready com RTL8811CU e diagnóstico de F:
 
 - Fase: correção de hardware/rede e imagem privada; branch `fix/rtl8811cu-ready-wifi5-beta`; commit inicial `7533e2dfb718cc12435567da8108ee036531d57f`.
