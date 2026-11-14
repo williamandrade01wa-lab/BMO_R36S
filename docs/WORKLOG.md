@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Cartão antigo preservado antes de nova gravação
+
+- Fase: Gate 5, troca da mídia de teste; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `44621c2`.
+- Objetivo: identificar F: e preservar conteúdo antes de substituir as partições por uma nova imagem beta.
+- Ações: F: é BOOT FAT32 do disco USB 2 de 62.534.975.488 bytes, distinto do cartão de 57,7 GB com setor `FF` observado anteriormente. Há partição BOOT de 268.435.456 bytes e partição Linux de 12.599.689.216 bytes, além de arquivos de configuração/backups na BOOT. Foi feita cópia **somente leitura** dos primeiros 12.884.901.888 bytes do disco, cobrindo MBR e as duas partições, em `outputs/R36S-cartao-antigo-20261114-antes-da-gravacao.img` fora do Git. SHA256 da cópia: `dc25ed6240cab3578ec4140b1474f30d50bcc24a3e074c5048d28b01f542c2df`. O conteúdo das credenciais não foi aberto. Rufus não foi localizado no PC; Win32DiskImager instalado aguarda UAC do usuário. Nenhuma gravação ou formatação ocorreu ainda.
+- Arquivos alterados: este Worklog. Scripts e backup locais em `outputs/`, fora do Git.
+- Resultado esperado/obtido: dados das partições preservados e hash verificado; gravação ainda pendente.
+- Validação: dispositivo/tamanho/offsets das partições conferidos antes da leitura, MBR `55AA`, tamanho da cópia e SHA256 calculados.
+- `R36S_REQUIRED=NO` para backup/gravação; `R36S_REQUIRED=YES` para boot físico e Wi-Fi/SSH.
+- Pendência/risco: escolher o disco USB 2 de 62,5 GB no gravador, nunca C: nem outro dispositivo; imagem raw local SHA256 `11cda8721d2e731da176e3b8616e55dfbb648a3b502994b3ce3958592a3fcbc4`. O backup local contém dados pessoais e deve ficar fora do Git/cofre.
+- Próximo passo exato: após aprovação do UAC, selecionar a raw beta e F: no gravador, confirmar capacidade/dispositivo, gravar e verificar BOOT; então configurar sem expor senhas e testar no R36S.
+
 ## 2026-11-14 — Retomada e falha de boot ainda sem causa identificada
 
 - Fase: Gate 5, persistência do boot e Wi-Fi 5 GHz; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `682a84b`.
