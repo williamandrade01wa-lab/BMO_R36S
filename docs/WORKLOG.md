@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Travamento relatado durante troca de Wi-Fi
+
+- Fase: análise de UX e migração 5 GHz; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `e22e510`.
+- Objetivo: registrar falha real e recuperar estado do R36S antes de novo teste.
+- Ações: usuário informou que ficou travado nos comandos/teclado de troca de Wi-Fi e precisou resetar. Perguntado se foi o teclado virtual do BMO ou janela PowerShell; resposta pendente. Após reset, verificado por SSH somente leitura que `192.168.1.28` voltou, serviços `bmo-ui` e `bmo-control-api` estão ativos e o Wi-Fi permanece em 2462 MHz.
+- Arquivos alterados: este Worklog, `docs/PROJECT-CONTINUITY.md`, `docs/ROADMAP.md`; nenhum arquivo do aparelho alterado nesta etapa.
+- Resultado esperado: associação 5 GHz e verificação. Resultado obtido: troca não concluída, reset necessário segundo usuário, sistema voltou em 2,4 GHz.
+- Validação: login SSH após reset; `systemctl is-active` para serviços BMO; `nmcli` confirma 2462 MHz. A causa do travamento ainda não foi reproduzida.
+- `R36S_REQUIRED=NO` para análise de código/logs; `R36S_REQUIRED=YES` para reteste após correção/contorno seguro.
+- Pendência/risco: etapa exata do travamento desconhecida. Não atribuir ao script PowerShell nem ao teclado BMO sem evidência. Não registrar senhas ou SSID nos logs do projeto.
+- Próximo passo exato: receber descrição da tela/comando travado; analisar a implementação do teclado e eventos do BMO, corrigir a causa e testar recuperação sem reset antes de retomar 5 GHz.
+
 ## 2026-11-14 — Contorno para senha Wi-Fi e melhoria do teclado BMO
 
 - Fase: migração para rede 5 GHz e esteira de UX; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `85f70f2`.
