@@ -2,10 +2,17 @@ name: Test Windows Card Wizard
 on:
   workflow_dispatch:
   push:
-    branches: [feat/bmo-linux-base-v1]
     paths:
       - 'scripts/windows/**'
       - '.github/workflows/test-windows-card-wizard.yml'
+      - 'install/light/verify-source.py'
+      - 'install/build-beta-image.sh'
+  pull_request:
+    paths:
+      - 'scripts/windows/**'
+      - '.github/workflows/test-windows-card-wizard.yml'
+      - 'install/light/verify-source.py'
+      - 'install/build-beta-image.sh'
 permissions:
   contents: read
 jobs:
@@ -17,5 +24,7 @@ jobs:
       - name: Test card preparation and rollback in temporary folders
         shell: powershell
         run: |
+          $wizard = Get-Content scripts/windows/BMO-Preparar-Cartao.ps1 -Raw
+          if ($wizard -match 'Get-FileHash') { throw 'Wizard must not depend on Get-FileHash' }
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/windows/BMO-Preparar-Cartao.ps1 -SelfTest
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

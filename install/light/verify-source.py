@@ -20,7 +20,8 @@ logo=(root/'assets/boot/logo.bmp').read_bytes()
 assert len(logo)==921654 and struct.unpack_from('<iiHHI',logo,18)==(640,480,1,24,0)
 manifest(root/'assets/boot',root/'assets/boot/logo.bmp.sha256')
 wizard=(root/'scripts/windows/BMO-Preparar-Cartao.ps1').read_text(encoding='utf-8-sig')
-assert "version='0.2.1'" in wizard and 'Ensure-BmoDirectory' in wizard
+assert "version='0.2.2'" in wizard and 'Ensure-BmoDirectory' in wizard
+assert 'Get-BmoSha256' in wizard and 'Get-FileHash' not in wizard
 installer=(root/'install/bmo-install.sh').read_text()
 assert 'assets/sounds/$SOUND' in installer and 'apply_copy' in installer
 builder=(root/'install/light/build-light-image.sh').read_text()

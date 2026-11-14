@@ -22,7 +22,7 @@ function Write-BmoDiagnostic([object]$Record,[string]$Step='unknown'){
         $attrs='unavailable'
         if($script:BmoOperationPath){try{$attrs=[string](Get-Item -LiteralPath $script:BmoOperationPath -Force -ErrorAction Stop).Attributes}catch{}}
         $entry=[ordered]@{
-            timestamp_utc=[DateTime]::UtcNow.ToString('o');product='Assistente de Preparacao BMO';version='0.2.1'
+            timestamp_utc=[DateTime]::UtcNow.ToString('o');product='Assistente de Preparacao BMO';version='0.2.2'
             step=$Step;operation=$script:BmoOperation;path=$script:BmoOperationPath;attributes=$attrs
             exception_type=$ex.GetType().FullName;hresult=('{0:X8}' -f $ex.HResult)
             message=[string]$ex.Message;category=[string]$Record.CategoryInfo.Category
@@ -53,6 +53,13 @@ function Ensure-BmoDirectory([string]$Path){
     # New-Item -Force rejects existing drive roots on Windows PowerShell 5.1.
     if([IO.Directory]::Exists($Path)){return}
     [void][IO.Directory]::CreateDirectory($Path)
+}
+function Get-BmoSha256([string]$Path){
+    # The FileHash cmdlet may be unavailable in the Windows PowerShell session.
+    $stream=[IO.File]::Open($Path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+    $sha=[Security.Cryptography.SHA256]::Create()
+    try{return [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-','')}
+    finally{$sha.Dispose();$stream.Dispose()}
 }
 function Test-BmoWritable([string]$Boot){
     $script:BmoOperation='Testar gravacao na BOOT'
@@ -195,7 +202,7 @@ function Write-BmoCard([string]$Boot,[string]$PanelPath,[hashtable]$Settings,[in
             Ensure-BmoDirectory ([IO.Path]::GetDirectoryName($item.Dest))
             Copy-Item -LiteralPath $item.Source -Destination $item.Dest -Force
             $script:BmoOperation='Conferir ScreenFile'
-            if((Get-FileHash -LiteralPath $item.Source -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $item.Dest -Algorithm SHA256).Hash){throw 'Falha ao conferir uma ScreenFile.'}
+            if((Get-BmoSha256 $item.Source) -ne (Get-BmoSha256 $item.Dest)){throw 'Falha ao conferir uma ScreenFile.'}
             $count++
             if($TestFailAfter -ge 0 -and $count -ge $TestFailAfter){throw 'Falha simulada de recuperacao.'}
         }
@@ -204,7 +211,7 @@ function Write-BmoCard([string]$Boot,[string]$PanelPath,[hashtable]$Settings,[in
         $script:BmoOperation='Substituir BMO-FIRSTBOOT.txt';$script:BmoOperationPath=$configPath
         Copy-Item -LiteralPath $temp -Destination $configPath -Force
         $script:BmoOperation='Conferir BMO-FIRSTBOOT.txt'
-        if((Get-FileHash -LiteralPath $temp -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $configPath -Algorithm SHA256).Hash){throw 'Falha ao conferir a configuracao.'}
+        if((Get-BmoSha256 $temp) -ne (Get-BmoSha256 $configPath)){throw 'Falha ao conferir a configuracao.'}
         return [pscustomobject]@{Backup=$backup;Files=$plan.Count;Config=$configPath}
     }catch{
         $failure=$_;[void](Write-BmoDiagnostic $failure 'write-card')
@@ -239,6 +246,9 @@ function Test-BmoWizard{
     $script:BmoLogRootOverride=Join-Path $root 'logs'
     $s=@{Mode='wifi';SSID='Minha Rede #= exemplo';WifiPassword='senha$()#=123';UserPassword='senha teste';SSH=$true};$passed=0
     function Assert-Test($Ok,$Message){if(-not $Ok){throw "TEST FAILED: $Message"}}
+    $hashFixture=Join-Path $root 'hash-abc.txt'
+    [IO.File]::WriteAllText($hashFixture,'abc',[Text.Encoding]::ASCII)
+    Assert-Test ((Get-BmoSha256 $hashFixture) -eq 'BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD') 'SHA256 without FileHash cmdlet';$passed++
     Assert-Test (@(Get-BmoPanels $boot).Count -eq 1) 'panel discovery';$passed++
     $config=New-BmoConfig $s
     Assert-Test ($config.Contains('WIFI_SSID=Minha Rede #= exemplo')) 'SSID literal';$passed++

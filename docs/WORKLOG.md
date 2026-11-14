@@ -1,5 +1,18 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Falha recorrente do assistente por dependência de Get-FileHash
+
+- Fase: preparação da BOOT / Gate 5; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `0d91273`.
+- Objetivo: resolver a falha real do assistente v0.2.1 no cartão recém-gravado e impedir que volte em futuros builds longos.
+- Evidência: log local `BMO-Assistente-20261114-171740-0ad52a.jsonl` tem `write-card / Conferir ScreenFile`, `CommandNotFoundException`, HRESULT `80131501`: `Get-FileHash` indisponível; o rollback registrou restauração dos arquivos anteriores. F: manteve BOOT legível. Não foram lidos SSID/senhas. O mesmo tipo de erro já aparecera em um script de atualização; a correção anterior não cobria o assistente de cartão.
+- Ações: consultar grafo Graphify localizou `Write-BmoCard()` e `Test-BmoWizard()`; substituir as duas comparações por função SHA256 via .NET `System.Security.Cryptography.SHA256`, sem cmdlet externo. Acrescentar vetor conhecido SHA256 de `abc` e executar autoteste com `Get-FileHash` simulado como indisponível. Versão do assistente passa a 0.2.2. Contratos da Light e preflight da beta barram fonte que ainda usa `Get-FileHash`; workflow de Windows passa a testar qualquer branch/PR relevante, antes de novo build pesado. Assistente e LEIA-ME v0.2.2 copiados para F: com backup local `outputs/BMO-wizard-before-v022-20261114-172751`; SHA256 dos destinos igual ao source (`81333c7aee297e3a22b71d8b7e6b25db58bcbc1a89c2d387173696be152f2663` e `8711e78c864b4b9112a283f7b2e1128486c272e5c6924053aa11078e07598737`). Janela antiga identificada pelo script F: foi fechada e a nova versão aberta.
+- Arquivos alterados: `scripts/windows/BMO-Preparar-Cartao.ps1`, `scripts/windows/LEIA-ME.txt`, `install/light/verify-source.py`, `install/build-beta-image.sh`, `.github/workflows/test-windows-card-wizard.yml`, este Worklog, `docs/PROJECT-CONTINUITY.md` e `docs/GOLDEN-RULES.md`.
+- Resultado esperado: preparar BOOT com verificação SHA256 e rollback sem depender da disponibilidade do cmdlet. Resultado obtido até agora: código corrigido e instalado no F:; repetição física do assistente ainda pendente.
+- Validação: `BMO_WIZARD_TESTS_OK=31` no Windows PowerShell 5.1, inclusive com `Get-FileHash` falso que lança exceção; sintaxe do builder beta aprovada em `bash -n`; contrato focal `WIZARD_CONTRACT_OK`; hashes da BOOT iguais ao source. `verify-source.py` completo não passou no checkout Windows por divergências CRLF do manifesto de sistema; não alterar hashes versionados com base neste checkout, pois a CI Linux usa bytes de checkout próprios. A CI no GitHub ainda precisa rodar.
+- `R36S_REQUIRED=NO` para correção/atualização da BOOT; `R36S_REQUIRED=YES` para o boot após preparação.
+- Pendência/risco: usuário precisa preencher novamente na janela v0.2.2, sem copiar configuração com senhas para Git/cofre. A raw de 12 GiB já gravada não será recompilada por esta correção de arquivos BOOT.
+- Próximo passo exato: confirmar preparação no assistente v0.2.2, verificar BOOT, ejetar e testar no R36S; conferir CI do commit antes de futuro build de imagem.
+
 ## 2026-11-14 — Grafo compartilhado e gravação direta verificada
 
 - Fase: Gate 5, nova mídia e mapa de código; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `e93d08d`.

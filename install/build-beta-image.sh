@@ -37,6 +37,16 @@ OUTPUT="$OUT/BMO-R36S-Ready-v$VERSION.img.xz"
 for cmd in sfdisk losetup e2fsck resize2fs mount chroot xz python3;do command -v "$cmd" >/dev/null || die "missing host tool: $cmd";done
 GIT_SHA="$(git -c safe.directory="$REPO" -C "$REPO" rev-parse HEAD)"
 git -c safe.directory="$REPO" -C "$REPO" diff --quiet || die 'tracked source changes not committed'
+python3 - "$REPO" <<'PY'
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+wizard = (root / 'scripts/windows/BMO-Preparar-Cartao.ps1').read_text(encoding='utf-8-sig')
+assert "version='0.2.2'" in wizard
+assert 'Get-BmoSha256' in wizard and 'Get-FileHash' not in wizard
+assert 'v0.2.2' in (root / 'scripts/windows/LEIA-ME.txt').read_text(encoding='utf-8-sig')
+print('BMO_WIZARD_HASH_CONTRACT_OK')
+PY
 log "VERSION=$VERSION SOURCE=$GIT_SHA"
 echo "$BASE_SHA  $BASE" | sha256sum -c -
 echo "$PPSSPP_SHA  $PPSSPP" | sha256sum -c -

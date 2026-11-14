@@ -1,4 +1,4 @@
-BMO - ASSISTENTE DE PREPARACAO v0.2.1
+BMO - ASSISTENTE DE PREPARACAO v0.2.2
 ===================================
 1. Extraia TODOS os arquivos deste ZIP para uma pasta no PC.
 2. Coloque o cartao do sistema no computador e feche o assistente antigo.
