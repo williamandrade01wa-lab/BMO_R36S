@@ -3,17 +3,20 @@
 
 - GET /                 -> frontend/index.bmo-next.html com gamepad-inject.js injetado (arquivo do app intacto)
 - GET /gamepad.html     -> emulador de gamepad
+- GET /assets/*         -> <repo>/assets (sons e arte de boot; sem isso o Preview fica mudo)
 - GET /gamepad-state    -> {ts, buttons[17], axes[4]} lido pelo gamepad-inject.js
 - POST /gamepad         -> {"type":"press"|"release","btn":N}
 - POST /gamepad/tap     -> {"btn":N} (press + release apos 150 ms)
 Somente 127.0.0.1. Uso: python -I scripts/preview-server.py [porta]
 """
 import json
+import posixpath
 import sys
 import threading
 import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parent.parent / "frontend"
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8360
@@ -46,6 +49,13 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def translate_path(self, path):
+        # /assets/* (sons, boot) vem de <repo>/assets; o resto de frontend/
+        p = posixpath.normpath(unquote(path.split("?")[0].split("#")[0]))
+        if p.startswith("/assets/") and ".." not in p.split("/"):
+            return str(ROOT.parent / p.lstrip("/"))
+        return super().translate_path(path)
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")

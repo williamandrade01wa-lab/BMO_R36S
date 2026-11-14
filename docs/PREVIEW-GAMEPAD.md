@@ -24,3 +24,9 @@ maestri portal evaluate "BMO Preview" "String(MAIN_MENU.visible)"
 maestri portal click "BMO Gamepad" '[data-btn="14"]'                                                   # D-pad baixo
 ```
 Resultado medido: 12 de 12 toques espaçados e 3 de 3 em rajada (0,35 s); B e SELECT fecham o teclado Wi-Fi com `APPS.current=null`.
+
+## Áudio no Preview (2026-11-14)
+
+- O servidor também entrega `/assets/*` a partir de `<repo>/assets` (sons e arte de boot), com bloqueio de `..`. Antes, `/assets/sounds/*.wav` dava 404 e o Preview ficava mudo (o app cai no modo `browser-fallback`, Web Audio, procurando `/assets/sounds/`).
+- O navegador só libera o áudio depois de um gesto do usuário: clique no Preview e rode `unlockBmoBrowserAudio()`. Conferir: `BMO_SOUND_DIAG` (`audioCtxState: running`, `resolvedBase: /assets/sounds/`, `lastError: null`).
+- Medido: as 14 carinhas tocaram o som (`playedCount` +1 cada, sem erro); `glitch` usa o som `error` por mapeamento do app; `error` e `success` tocam direto por `playBrowserBmoSound`.
