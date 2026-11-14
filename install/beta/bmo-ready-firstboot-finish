@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "BMO: configuracao concluida. A interface sera aberta."
+echo "O IP e o estado do SSH estao em BMO-RESUMO.txt na BOOT."
+sleep 8
+if [ -f /var/run/resize2fs-reboot ]; then
+    echo "BMO: reiniciando para concluir a expansao do cartao."
+    sync
+    systemctl --no-block reboot
+fi

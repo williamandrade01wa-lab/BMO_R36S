@@ -1,0 +1,12 @@
+# Additional runtime commands used by kiosk, launcher and PulseAudio configs
+x11-utils
+xauth
+unclutter
+dbus-x11
+dbus-user-session
+xserver-xorg-input-libinput
+xserver-xorg-video-fbdev
+libgl1-mesa-dri
+pulseaudio
+pulseaudio-utils
+exfatprogs

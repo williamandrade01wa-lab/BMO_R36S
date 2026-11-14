@@ -1,0 +1,45 @@
+BMO READY v1.0.0 - FILESYSTEM POLICY
+
+PRESERVE FROM BMO LINUX PURE:
+- kernel
+- bootloader
+- DTB
+- /boot
+- root filesystem entry in /etc/fstab
+- boot filesystem entry in /etc/fstab
+- base Xorg configuration
+- base Armbian udev configuration
+- base modprobe configuration
+
+MANAGED BY BMO INSTALLER:
+- /opt/bmo-ui
+- /usr/local/bin/bmo-*
+- /usr/local/bin/r36s-*
+- /usr/local/sbin/bmo-*
+- /etc/default/bmo-kiosk
+- /etc/systemd/system/bmo-*.service
+- /etc/systemd/system/r36s-*.service
+- /etc/udev/rules.d/99-bmo-usb-power.rules
+- sanitized RetroArch configuration
+- sanitized PPSSPP configuration
+- PPSSPP frozen runtime
+
+NEVER COPY WHOLE /etc/fstab FROM REFERENCE DEVICE.
+
+SD2:
+The installer/configurator may add or update only the
+BMO-managed SD2 mount entry after identifying the actual
+target filesystem/device.
+
+NEVER PACKAGE:
+- ROMs / ISOs
+- game covers
+- saves / states
+- favorites
+- Wi-Fi credentials
+- SSH private keys
+- Moonlight.conf
+- Moonlight pairing identity
+- browser profile
+- caches
+- runtime logs

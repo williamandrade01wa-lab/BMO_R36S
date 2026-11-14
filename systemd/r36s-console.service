@@ -1,0 +1,12 @@
+[Unit]
+Description=R36S Console on tty1
+After=getty@tty1.service
+Wants=getty@tty1.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/chvt 1
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Optional Games card only; never format or alter its partition table.
+set -euo pipefail
+TARGET=/mnt/bmo-sd2
+[ -f /var/lib/bmo/firstboot.done ] || exit 0
+mountpoint -q "$TARGET" && exit 0
+ROOT_DEV="$(findmnt -n -o SOURCE /)"
+ROOT_DEV="$(readlink -f "$ROOT_DEV")"
+ROOT_PARENT="$(lsblk -n -o PKNAME "$ROOT_DEV" | head -1)"
+ROOT_PARENT="$(basename "$ROOT_PARENT")"
+[[ "$ROOT_PARENT" =~ ^mmcblk[0-9]+$ ]] || { echo "BMO: origem do sistema desconhecida; TF2 ignorado.";exit 0; }
+CANDIDATE=""
+TYPE=""
+for dev in /dev/mmcblk[0-9]p1; do
+    [ -b "$dev" ] || continue
+    parent="$(lsblk -n -o PKNAME "$dev" | head -1)"
+    [ "$(basename "$parent")" != "$ROOT_PARENT" ] || continue
+    fs="$(blkid -s TYPE -o value "$dev" || true)"
+    case "$fs" in exfat|vfat) ;; *) continue;; esac
+    [ -z "$CANDIDATE" ] || { echo 'BMO: mais de um cartao Games; montagem automatica ignorada.';exit 0; }
+    CANDIDATE="$dev";TYPE="$fs"
+done
+[ -n "$CANDIDATE" ] || exit 0
+install -d -m 0755 "$TARGET"
+mount -t "$TYPE" -o ro,nosuid,nodev,noexec,uid=1000,gid=1000,umask=0022 "$CANDIDATE" "$TARGET"
+if [ ! -d "$TARGET/EASYROMS" ]; then
+    umount "$TARGET"
+    echo 'BMO: cartao sem EASYROMS; mantido sem alteracoes.'
+    exit 0
+fi
+mount -o remount,rw,nosuid,nodev,noexec,uid=1000,gid=1000,umask=0022 "$TARGET"
+echo "BMO: Games montado em $TARGET"

@@ -1,0 +1,22 @@
+# Explicit image-only tools. APT plan must not remove anything else.
+armbian-config
+linux-headers-lts-rk3326
+bison
+flex
+make
+gcc
+gcc-14
+gcc-aarch64-linux-gnu
+gcc-14-aarch64-linux-gnu
+cpp
+cpp-14
+cpp-aarch64-linux-gnu
+cpp-14-aarch64-linux-gnu
+libc6-dev
+libcrypt-dev
+libelf-dev
+libgcc-14-dev
+libssl-dev
+libzstd-dev
+linux-libc-dev
+zlib1g-dev

@@ -1,0 +1,3 @@
+# BMO deployment helper
+# Le Potato entra via SSH como r36s e pode elevar somente este helper.
+r36s ALL=(root) NOPASSWD: /usr/local/sbin/bmo-deploy-helper *

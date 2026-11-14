@@ -1,0 +1,582 @@
+#!/bin/bash
+
+set -euo pipefail
+
+CONFIG="/etc/bmo/bmo.conf"
+VERSION_FILE="/etc/bmo/version.env"
+CANDIDATE_FILE="/etc/bmo/candidate.env"
+
+DEPLOY_HELPER="/usr/local/sbin/bmo-deploy-helper"
+
+DEFAULT_REPO_DIR="/var/lib/bmo/repo"
+DEFAULT_KEY="/etc/bmo/github_deploy_key"
+
+
+die() {
+    echo "ERRO: $*" >&2
+    exit 1
+}
+
+
+require_root() {
+
+    [ "$EUID" -eq 0 ] ||
+        die "bmo-maintenance requer root"
+}
+
+
+load_config() {
+
+    [ -f "$CONFIG" ] ||
+        die "config ausente: $CONFIG"
+
+    [ "$(stat -c '%u' "$CONFIG")" = "0" ] ||
+        die "config precisa pertencer ao root"
+
+    if find "$CONFIG" \
+        -perm /022 \
+        -print \
+        -quit |
+        grep -q .
+    then
+        die "config nao pode ser gravavel por grupo/outros"
+    fi
+
+    # shellcheck disable=SC1090
+    source "$CONFIG"
+
+    BMO_REPO_URL="${BMO_REPO_URL:-}"
+    BMO_BRANCH="${BMO_BRANCH:-main}"
+    BMO_CHANNEL="${BMO_CHANNEL:-stable}"
+    BMO_REPO_DIR="${BMO_REPO_DIR:-$DEFAULT_REPO_DIR}"
+    BMO_GIT_KEY="${BMO_GIT_KEY:-$DEFAULT_KEY}"
+
+    [ -n "$BMO_REPO_URL" ] ||
+        die "BMO_REPO_URL nao configurado"
+
+    case "$BMO_REPO_URL" in
+        git@github.com:*/*.git|ssh://git@github.com/*/*.git)
+            ;;
+        *)
+            die "repo de update precisa usar SSH do github.com"
+            ;;
+    esac
+
+    [[ "$BMO_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]] ||
+        die "branch invalida"
+
+    case "$BMO_CHANNEL" in
+        stable|beta|dev)
+            ;;
+        *)
+            die "channel invalido"
+            ;;
+    esac
+}
+
+
+require_git_key() {
+
+    [ -f "$BMO_GIT_KEY" ] ||
+        die "deploy key ausente: $BMO_GIT_KEY"
+
+    [ "$(stat -c '%u' "$BMO_GIT_KEY")" = "0" ] ||
+        die "deploy key precisa pertencer ao root"
+
+    if find "$BMO_GIT_KEY" \
+        -perm /077 \
+        -print \
+        -quit |
+        grep -q .
+    then
+        die "deploy key deve ter permissao 0600"
+    fi
+}
+
+
+git_ssh() {
+
+    printf '%s\n' \
+        "ssh -i $BMO_GIT_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+}
+
+
+git_bmo() {
+
+    GIT_SSH_COMMAND="$(git_ssh)" \
+        git \
+        -C "$BMO_REPO_DIR" \
+        "$@"
+}
+
+
+ensure_repo() {
+
+    require_git_key
+
+    install \
+        -d \
+        -o root \
+        -g root \
+        -m 0700 \
+        "$(dirname "$BMO_REPO_DIR")"
+
+
+    if [ ! -d "$BMO_REPO_DIR/.git" ]; then
+
+        GIT_SSH_COMMAND="$(git_ssh)" \
+            git clone \
+            --no-checkout \
+            "$BMO_REPO_URL" \
+            "$BMO_REPO_DIR"
+
+    fi
+
+
+    [ "$(stat -c '%u' "$BMO_REPO_DIR")" = "0" ] ||
+        die "repo updater precisa pertencer ao root"
+
+
+    if find "$BMO_REPO_DIR" \
+        -maxdepth 0 \
+        -perm /022 \
+        -print \
+        -quit |
+        grep -q .
+    then
+        die "repo updater nao pode ser gravavel por grupo/outros"
+    fi
+
+
+    CURRENT_ORIGIN="$(
+        git_bmo remote get-url origin
+    )"
+
+    [ "$CURRENT_ORIGIN" = "$BMO_REPO_URL" ] || {
+        git_bmo \
+            remote \
+            set-url \
+            origin \
+            "$BMO_REPO_URL"
+    }
+
+}
+
+
+fetch_remote() {
+
+    ensure_repo
+
+    git_bmo \
+        fetch \
+        --prune \
+        origin \
+        "$BMO_BRANCH"
+
+    TARGET="$(
+        git_bmo \
+            rev-parse \
+            "refs/remotes/origin/$BMO_BRANCH"
+    )"
+
+    [[ "$TARGET" =~ ^[0-9a-f]{40}$ ]] ||
+        die "commit remoto invalido"
+
+    printf '%s\n' "$TARGET"
+}
+
+
+installed_commit() {
+
+    if [ -r "$VERSION_FILE" ]; then
+
+        sed -n \
+            's/^BMO_GIT_COMMIT=//p' \
+            "$VERSION_FILE" |
+        tail -n1
+
+    fi
+}
+
+
+candidate_commit() {
+
+    if [ -r "$CANDIDATE_FILE" ]; then
+
+        sed -n \
+            's/^BMO_GIT_COMMIT=//p' \
+            "$CANDIDATE_FILE" |
+        tail -n1
+
+    fi
+}
+
+
+write_candidate_state() {
+
+    local commit="$1"
+    local sha="$2"
+
+    cat > "$CANDIDATE_FILE" <<STATE
+BMO_GIT_COMMIT=$commit
+BMO_FRONTEND_SHA256=$sha
+STATE
+
+    chown root:root "$CANDIDATE_FILE"
+    chmod 0644 "$CANDIDATE_FILE"
+}
+
+
+write_version_state() {
+
+    local commit="$1"
+    local sha="$2"
+
+    cat > "$VERSION_FILE" <<STATE
+BMO_GIT_COMMIT=$commit
+BMO_FRONTEND_SHA256=$sha
+BMO_CHANNEL=$BMO_CHANNEL
+STATE
+
+    chown root:root "$VERSION_FILE"
+    chmod 0644 "$VERSION_FILE"
+}
+
+
+validate_candidate_html() {
+
+    local file="$1"
+
+    [ -s "$file" ] ||
+        die "candidate vazio"
+
+    local marker
+
+    for marker in \
+        BMO_PC_STREAM_V1 \
+        BMO_MAIN_MENU_SCROLL_V2 \
+        BMO_GAMES_FAST_NAV_V1 \
+        BMO_GAMES_VIRTUAL_WINDOW_V1 \
+        BMO_GAMES_LAZY_LOAD_V1 \
+        BMO_FAVORITES_XY_V1
+    do
+
+        grep -Fq "$marker" "$file" ||
+            die "candidate sem marcador $marker"
+
+    done
+}
+
+
+runtime_changes_are_frontend_only() {
+
+    local from="$1"
+    local to="$2"
+
+    local bad=""
+
+    bad="$(
+        git_bmo \
+            diff \
+            --name-only \
+            "$from" \
+            "$to" |
+        grep -Ev \
+            '^(\.gitignore|README\.md|AGENTS\.md|docs/.*|frontend/index(\.bmo-next)?\.html)$' \
+        || true
+    )"
+
+    if [ -n "$bad" ]; then
+
+        echo "FULL_UPDATE_REQUIRED"
+        echo "$bad"
+
+        return 1
+    fi
+
+    return 0
+}
+
+
+do_status() {
+
+    echo "BMO_CHANNEL=$BMO_CHANNEL"
+    echo "BMO_BRANCH=$BMO_BRANCH"
+
+    echo "INSTALLED_COMMIT=$(
+        installed_commit || true
+    )"
+
+    echo "CANDIDATE_COMMIT=$(
+        candidate_commit || true
+    )"
+
+    if [ -x "$DEPLOY_HELPER" ]; then
+        "$DEPLOY_HELPER" status
+    fi
+}
+
+
+do_verify() {
+
+    [ -x "$DEPLOY_HELPER" ] ||
+        die "deploy helper ausente"
+
+    "$DEPLOY_HELPER" status
+
+    systemctl is-active \
+        --quiet \
+        bmo-ui.service
+
+    systemctl is-active \
+        --quiet \
+        bmo-kiosk.service
+
+    systemctl is-active \
+        --quiet \
+        bmo-control-api.service
+
+    echo "BMO_VERIFY_OK"
+}
+
+
+do_check_update() {
+
+    local target
+    local installed
+
+    target="$(fetch_remote)"
+    installed="$(installed_commit || true)"
+
+    echo "INSTALLED_COMMIT=$installed"
+    echo "REMOTE_COMMIT=$target"
+
+    if [ "$installed" = "$target" ]; then
+        echo "UPDATE_AVAILABLE=NO"
+    else
+        echo "UPDATE_AVAILABLE=YES"
+    fi
+}
+
+
+do_update() {
+
+    local target
+    local installed
+    local stage
+    local incoming
+    local sha
+
+    target="$(fetch_remote)"
+    installed="$(installed_commit || true)"
+
+
+    [ -n "$installed" ] || {
+        die "versao instalada desconhecida; execute instalacao inicial"
+    }
+
+
+    if [ "$installed" = "$target" ]; then
+
+        echo "ALREADY_UP_TO_DATE"
+        return 0
+
+    fi
+
+
+    git_bmo \
+        cat-file \
+        -e \
+        "$installed^{commit}" \
+        2>/dev/null || {
+
+            git_bmo \
+                fetch \
+                origin \
+                "$installed"
+        }
+
+
+    runtime_changes_are_frontend_only \
+        "$installed" \
+        "$target" || {
+
+            die \
+                "update altera componentes de sistema; use instalador completo"
+
+        }
+
+
+    stage="$(
+        mktemp \
+            /var/lib/bmo/candidate.XXXXXX.html
+    )"
+
+
+    git_bmo \
+        show \
+        "$target:frontend/index.bmo-next.html" \
+        > "$stage"
+
+
+    validate_candidate_html "$stage"
+
+
+    sha="$(
+        sha256sum "$stage" |
+        awk '{print $1}'
+    )"
+
+
+    incoming="/home/r36s/.bmo-deploy/incoming/update-$target.html"
+
+    install \
+        -d \
+        -o r36s \
+        -g r36s \
+        -m 0755 \
+        /home/r36s/.bmo-deploy/incoming
+
+
+    install \
+        -o r36s \
+        -g r36s \
+        -m 0644 \
+        "$stage" \
+        "$incoming"
+
+
+    rm -f "$stage"
+
+
+    "$DEPLOY_HELPER" \
+        install-candidate \
+        "$incoming"
+
+    "$DEPLOY_HELPER" \
+        use-candidate
+
+    "$DEPLOY_HELPER" \
+        restart-kiosk
+
+
+    write_candidate_state \
+        "$target" \
+        "$sha"
+
+
+    echo "CANDIDATE_COMMIT=$target"
+    echo "CANDIDATE_SHA256=$sha"
+    echo "BMO_UPDATE_CANDIDATE_OK"
+}
+
+
+do_promote() {
+
+    local commit
+    local sha
+
+    commit="$(candidate_commit || true)"
+
+    [ -n "$commit" ] ||
+        die "candidate de update inexistente"
+
+    sha="$(
+        sed -n \
+            's/^BMO_FRONTEND_SHA256=//p' \
+            "$CANDIDATE_FILE" |
+        tail -n1
+    )"
+
+
+    "$DEPLOY_HELPER" \
+        promote-production
+
+    "$DEPLOY_HELPER" \
+        use-production
+
+    "$DEPLOY_HELPER" \
+        restart-kiosk
+
+
+    write_version_state \
+        "$commit" \
+        "$sha"
+
+    rm -f "$CANDIDATE_FILE"
+
+    echo "BMO_PROMOTE_OK"
+}
+
+
+do_rollback() {
+
+    local id="${1:-}"
+
+    if [ -z "$id" ]; then
+
+        id="$(
+            "$DEPLOY_HELPER" \
+                list-backups |
+            head -n1
+        )"
+
+    fi
+
+
+    [ -n "$id" ] ||
+        die "nenhum backup disponivel"
+
+
+    "$DEPLOY_HELPER" \
+        rollback-frontend \
+        "$id"
+
+    "$DEPLOY_HELPER" \
+        use-production
+
+    "$DEPLOY_HELPER" \
+        restart-kiosk
+
+    rm -f "$CANDIDATE_FILE"
+
+    echo "ROLLBACK_ID=$id"
+    echo "BMO_ROLLBACK_OK"
+}
+
+
+require_root
+load_config
+
+
+case "${1:-}" in
+
+    status)
+        do_status
+        ;;
+
+    verify)
+        do_verify
+        ;;
+
+    check-update)
+        do_check_update
+        ;;
+
+    update)
+        do_update
+        ;;
+
+    promote)
+        do_promote
+        ;;
+
+    rollback)
+        do_rollback "${2:-}"
+        ;;
+
+    *)
+        die "comando nao permitido"
+        ;;
+
+esac

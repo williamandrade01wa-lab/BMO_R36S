@@ -1,0 +1,11 @@
+[Unit]
+Description=BMO Ready Wi-Fi 5 and SSH status on BOOT
+After=NetworkManager.service bmo-ready-firstboot.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 90
+ExecStart=/usr/local/sbin/bmo-wifi5-report
+
+[Install]
+WantedBy=multi-user.target

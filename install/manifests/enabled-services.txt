@@ -1,0 +1,13 @@
+# BMO Ready v1.0.0
+# Serviços habilitados no baseline funcional.
+
+bmo-control-api.service
+bmo-kiosk.service
+bmo-ui.service
+bmo-vt.service
+bmo-x-init.service
+bmo-xorg.service
+r36s-battery-api.service
+r36s-console.service
+r36s-sound-api.service
+r36s-status-api.service

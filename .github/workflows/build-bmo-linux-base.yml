@@ -1,0 +1,93 @@
+name: Build BMO Linux Base
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/bmo-linux-base-v1]
+    paths:
+      - 'image/armbian/**'
+      - '.github/workflows/build-bmo-linux-base.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bmo-linux-base-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Preflight BMO Linux Base
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout BMO
+        uses: actions/checkout@v4
+
+      - name: Validate source contract and safety
+        shell: bash
+        run: bash image/armbian/ci/preflight.sh
+
+  build:
+    name: R36S Trixie minimal v0.2
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout BMO
+        uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup || true
+          docker system prune -af || true
+          df -h
+
+      - name: Install host prerequisites
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git qemu-user-static binfmt-support xz-utils ca-certificates
+          sudo update-binfmts --enable || true
+
+      - name: Build minimal image
+        shell: bash
+        run: bash image/armbian/build-bmo-linux-base.sh
+
+      - name: Validate image contract
+        shell: bash
+        run: |
+          mkdir -p image/armbian/output
+          set -o pipefail
+          bash image/armbian/ci/validate-image.sh \
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img \
+            2>&1 | tee image/armbian/output/validation-report.txt
+
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmo-linux-base-validation-${{ github.run_id }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: image/armbian/output/validation-report.txt
+
+      - name: Compress image and checksum
+        shell: bash
+        run: |
+          cd image/armbian/output
+          xz -T0 -6 --extreme bmo-linux-base-r36s-trixie-v0.2.img
+          sha256sum bmo-linux-base-r36s-trixie-v0.2.img.xz > bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
+          ls -lh
+          cat bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmo-linux-base-r36s-trixie-v0.2
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img.xz
+            image/armbian/output/bmo-linux-base-r36s-trixie-v0.2.img.xz.sha256

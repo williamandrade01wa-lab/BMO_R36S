@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "${1:-}" = install ];then
+    [ "$EUID" -eq 0 ] || { echo 'Use sudo bmo install';exit 1; }
+    if [ -f /var/lib/bmo/light/install.done ];then
+        echo 'BMO instalado. Consulte bmo status e bmo doctor.'
+    else
+        systemctl reset-failed bmo-light-install.service || true
+        systemctl start --no-block bmo-light-install.service
+        echo 'Instalacao iniciada. Progresso na tela e na BOOT/BMO-INSTALACAO.txt.'
+    fi
+else
+    exec /usr/local/libexec/bmo-base "$@"
+fi

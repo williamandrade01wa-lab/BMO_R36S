@@ -1,0 +1,33 @@
+# BMO / R36S first-run overrides
+#
+# Use este arquivo apenas como referencia.
+# A imagem original ja possui firstrun_overrides.txt na particao BOOT.
+# Edite o arquivo que veio com a imagem antes do primeiro boot.
+#
+# Dentro do Linux, a particao BOOT e montada em /boot/u-boot e o
+# script original carrega /boot/u-boot/firstrun_overrides.txt.
+#
+# NUNCA coloque senhas reais neste arquivo versionado no Git.
+#
+# IMPORTANTE:
+# Este arquivo e carregado como Shell. Para evitar que espacos e caracteres
+# especiais sejam interpretados, prefira aspas simples nos valores editaveis.
+# Se sua senha contiver uma aspa simples ('), ela precisa ser escapada de forma
+# apropriada antes do primeiro boot.
+
+# Senha administrativa root
+rootpass='CHANGE_ME_ROOT_PASSWORD'
+
+# Usuario principal
+FancyUserName='R36S'
+username='r36s'
+userpass='CHANGE_ME_R36S_PASSWORD'
+
+# Wi-Fi
+ssid='CHANGE_ME_WIFI_SSID'
+wifipass='CHANGE_ME_WIFI_PASSWORD'
+
+# Brasil / horario local
+# Estes dois campos sao suportados pelo script de primeiro login da imagem.
+timezone='America/Sao_Paulo'
+locale='pt_BR.UTF-8'

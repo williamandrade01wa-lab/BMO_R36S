@@ -1,0 +1,11 @@
+# partition	kind	source_path	image_path
+boot	file	image/armbian/userpatches/overlay/usr/share/bmo/BMO-FIRSTBOOT.txt	/BMO-FIRSTBOOT.txt
+boot	file	image/armbian/userpatches/overlay/usr/share/bmo/README-FIRST-BOOT.txt	/README-FIRST-BOOT.txt
+root	exec	image/armbian/userpatches/overlay/usr/local/bin/bmo	/usr/local/bin/bmo
+root	exec	image/armbian/userpatches/overlay/usr/local/sbin/bmo-firstboot	/usr/local/sbin/bmo-firstboot
+root	file	image/armbian/userpatches/overlay/etc/bmo/source.conf	/etc/bmo/source.conf
+root	file	image/armbian/userpatches/overlay/etc/NetworkManager/conf.d/20-bmo.conf	/etc/NetworkManager/conf.d/20-bmo.conf
+root	file	image/armbian/userpatches/overlay/etc/netplan/90-bmo-networkmanager.yaml	/etc/netplan/90-bmo-networkmanager.yaml
+root	file	image/armbian/userpatches/overlay/etc/udev/rules.d/99-bmo-usb-power.rules	/etc/udev/rules.d/99-bmo-usb-power.rules
+
+root	file	image/armbian/userpatches/overlay/etc/profile.d/90-bmo-welcome.sh	/etc/profile.d/90-bmo-welcome.sh

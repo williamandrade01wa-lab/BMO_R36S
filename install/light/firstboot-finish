@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "BMO LIGHT: rede configurada. IP/SSH em BMO-RESUMO.txt."
+if [ -f /var/run/resize2fs-reboot ];then
+    echo "BMO LIGHT: reiniciando para concluir a expansao do SD."
+    sync
+    systemctl --no-block reboot
+else
+    echo "BMO LIGHT: preparando instalacao automatica. Mantenha a rede e a energia ligadas."
+fi

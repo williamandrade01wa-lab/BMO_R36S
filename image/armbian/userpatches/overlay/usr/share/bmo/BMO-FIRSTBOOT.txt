@@ -1,0 +1,29 @@
+# BMO - COMECE AQUI
+# Abra no Bloco de Notas. Edite somente depois do sinal =.
+# Nao coloque aspas. Mantenha cada resposta em uma unica linha.
+# Retire o cartao TF2 de jogos durante todo o primeiro boot!
+
+# 1. WI-FI
+# Digite o nome e a senha exatamente como no seu roteador.
+# Para usar cabo/adaptador Ethernet ou ficar sem rede, deixe vazio.
+REDE_WIFI=
+SENHA_WIFI=
+
+# 2. SENHA DO R36S
+# Escolha sua senha. Voce nao precisa enviar essa senha a ninguem.
+# Para acesso remoto, ela precisa ser diferente de r36s.
+SENHA_USUARIO=r36s
+
+# 3. ACESSO PELO COMPUTADOR (SSH)
+# sim = permitir acesso remoto; nao = manter desligado.
+ACESSO_REMOTO=nao
+
+# PRONTO! Salve, remova o cartao com seguranca e ligue o R36S.
+# O IP e o resultado aparecerao na tela e em BMO-RESUMO.txt.
+# As senhas serao apagadas deste arquivo apos a configuracao.
+#
+# Nao precisa preencher nada abaixo para uma instalacao comum.
+# Opcoes avancadas continuam aceitas: WIFI_ENABLED, WIFI_HIDDEN,
+# WIFI_SECURITY, WIFI_IPV4_MODE, WIRED_IPV4_MODE, SSH_PORT,
+# USER_NAME, HOSTNAME, TIMEZONE e LOCALE.
+# Use os nomes antigos OU os nomes acima; nao repita a mesma opcao.

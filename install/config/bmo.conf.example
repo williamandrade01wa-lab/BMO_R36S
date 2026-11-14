@@ -1,0 +1,36 @@
+# BMO device configuration
+#
+# Este arquivo e apenas um modelo.
+# O instalador cria /etc/bmo/bmo.conf no aparelho.
+#
+# ------------------------------------------------------------
+# REPOSITORIO / UPDATES
+# ------------------------------------------------------------
+#
+# DESENVOLVIMENTO PRIVADO (estado atual):
+#   BMO_REPO_URL=git@github.com:OWNER/BMO_R36S.git
+#   Requer uma Deploy Key somente leitura em BMO_GIT_KEY.
+#
+# DISTRIBUICAO PUBLICA (objetivo futuro):
+#   BMO_REPO_URL=https://github.com/OWNER/BMO_R36S.git
+#   Nao exigira chave/token para clone/fetch.
+#
+# A migracao para HTTPS publico so deve ser ativada depois que o
+# suporte correspondente do updater for validado fisicamente.
+
+BMO_REPO_URL=
+BMO_BRANCH=main
+BMO_CHANNEL=stable
+
+BMO_REPO_DIR=/var/lib/bmo/repo
+
+# Usado somente quando BMO_REPO_URL for privado via SSH.
+BMO_GIT_KEY=/etc/bmo/github_deploy_key
+
+# Sunshine / Moonlight
+BMO_MOONLIGHT_HOST=
+
+# BMO Hub / SSE opcional.
+# Exemplo:
+# BMO_HUB_EVENTS_URL=http://host:8084/api/events
+BMO_HUB_EVENTS_URL=

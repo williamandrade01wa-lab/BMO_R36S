@@ -1,0 +1,33 @@
+BMO - ASSISTENTE DE PREPARACAO v0.2.2
+===================================
+1. Extraia TODOS os arquivos deste ZIP para uma pasta no PC.
+2. Coloque o cartao do sistema no computador e feche o assistente antigo.
+3. Abra ABRIR-BMO.cmd, escolha BOOT e siga as perguntas.
+4. Confira o resumo e clique em Preparar cartao.
+5. Remova com seguranca. TF2 de jogos FORA durante todo primeiro boot.
+
+O assistente copia as ScreenFiles, preserva originais, faz backup e cria
+BMO-FIRSTBOOT.txt. Sem editar o TXT ou colocar aspas.
+
+WI-FI
+Prefira rede de 2,4 GHz para maior compatibilidade. Usar 5 GHz exige que
+o adaptador USB do R36S suporte essa faixa. O computador nao consegue
+deduzir a capacidade do adaptador do R36S pelo nome da rede.
+Na imagem Light atualizada, BMO-WIFI.txt mostra o diagnostico do adaptador.
+
+LOGS E PERMISSOES
+Em caso de erro, clique em Abrir log. O registro inclui operacao, arquivo,
+tipo de erro, HRESULT e ambiente; nao inclui senhas nem conteudo do TXT.
+A pasta preferida fica no PC em %LOCALAPPDATA%\BMO\Logs; ha fallback local.
+O CMD tambem registra falhas que acontecem antes de abrir a janela.
+Voce pode compartilhar o log de diagnostico. Nao compartilhe o TXT
+preenchido nem os backups do cartao, pois estes contem configuracoes reais.
+
+O assistente testa gravacao somente apos a confirmacao final. Tenta restaurar
+arquivos anteriores se uma copia falhar, preservando atributos de arquivo.
+Nenhum cartao e formatado; nao altera permissoes do Windows nem exige admin
+como solucao padrao. Confira protecao contra gravacao/arquivos em uso.
+
+Use antes do primeiro boot. Em cartao ja configurado, salvar o TXT nao
+reaplica a configuracao automaticamente.
+

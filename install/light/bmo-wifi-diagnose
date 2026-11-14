@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Report adapter capabilities without SSIDs, MAC addresses or credentials."""
+import pathlib,re,shutil,subprocess
+def parse_bands(text):
+    supported=set();enabled=set()
+    for freq,tail in re.findall(r"\*\s+(\d+)\s+MHz([^\n]*)",text):
+        n=int(freq)
+        band="2.4 GHz" if 2400<=n<=2500 else "5 GHz" if 4900<=n<5925 else "6 GHz" if 5925<=n<=7125 else None
+        if band:
+            supported.add(band)
+            if "disabled" not in tail.lower():enabled.add(band)
+    return sorted(supported),sorted(enabled)
+def command(args):
+    try:return subprocess.run(args,capture_output=True,text=True,timeout=6,check=False).stdout
+    except (OSError,subprocess.TimeoutExpired):return ""
+def report():
+    rows=["BMO - Diagnostico do adaptador Wi-Fi","Sem SSID, MAC ou senhas neste relatorio.",""]
+    found=False
+    for net in sorted(pathlib.Path("/sys/class/net").iterdir()):
+        if not (net/"wireless").exists() and not (net/"phy80211").exists():continue
+        found=True;rows.append("Interface: "+net.name)
+        driver=net/"device"/"driver"
+        rows.append("Driver: "+(driver.resolve().name if driver.exists() else "nao identificado"))
+        device=(net/"device").resolve()
+        for candidate in [device,*list(device.parents)[:5]]:
+            if (candidate/"idVendor").is_file() and (candidate/"idProduct").is_file():
+                rows.append("USB: "+(candidate/"idVendor").read_text().strip()+":"+(candidate/"idProduct").read_text().strip());break
+        phy=(net/"phy80211").resolve().name
+        if shutil.which("iw") and re.fullmatch(r"phy\d+",phy):
+            supported,enabled=parse_bands(command(["iw","phy",phy,"info"]))
+            rows.append("Bandas suportadas: "+(", ".join(supported) or "nao confirmadas"))
+            rows.append("Bandas habilitadas no dominio atual: "+(", ".join(enabled) or "nao confirmadas"))
+        else:rows.append("Bandas nao confirmadas (informacao iw/phy indisponivel).")
+        rows.append("")
+    if not found:rows.append("Nenhum adaptador Wi-Fi detectado neste momento. Confira USB/hub/driver.")
+    rows.append("Prefira 2,4 GHz para compatibilidade. Rede 5 GHz exige adaptador e dominio regulatorio compativeis.")
+    return "\n".join(rows)+"\n"
+def main():
+    try:text=report()
+    except Exception:text="BMO: nao foi possivel concluir o diagnostico Wi-Fi. Nenhuma senha foi coletada.\n"
+    print(text,flush=True)
+    boot=pathlib.Path("/boot/u-boot")
+    if boot.is_mount():
+        try:(boot/"BMO-WIFI.txt").write_text(text,encoding="utf-8")
+        except OSError:pass
+if __name__=="__main__":main()

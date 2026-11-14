@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Automatic installation on marked BMO Light images only.
+set -euo pipefail
+SOURCE=/usr/share/bmo/light/source
+STATE=/var/lib/bmo/light
+BOOT=/boot/u-boot
+RUNTIME="$BOOT/BMO-RUN/PPSSPP.TGZ"
+RUNTIME_SHA=1af91efd8374a2c164e5f2ffa37b3d65980b825a207cbb09c688b2997088c5ad
+STAGE=""
+die(){ echo "BMO LIGHT: $*" >&2;exit 1; }
+verify(){
+    local root="$1" allow="$2" source="$1/usr/share/bmo/light/source" archive="$1/boot/u-boot/BMO-RUN/PPSSPP.TGZ"
+    [ -f "$root/etc/bmo/light-image.env" ] || die 'alvo nao e uma imagem Light'
+    [ -f "$source/SHA256SUMS" ] || die 'payload ausente'
+    (cd "$source" && sha256sum -c SHA256SUMS >/dev/null) || die 'payload divergente'
+    if [ -f "$archive" ];then
+        echo "$RUNTIME_SHA  $archive" | sha256sum -c -
+    else
+        [ "$allow" = YES ] || die 'runtime PPSSPP ausente na BOOT'
+        echo BMO_LIGHT_CORE_ONLY_RUNTIME_PENDING
+    fi
+    echo BMO_LIGHT_PAYLOAD_OK
+}
+if [ "${1:-}" = --verify ];then
+    [ "$#" -ge 2 ] || die 'use --verify ROOT [--allow-missing-runtime]'
+    allow=NO;[ "${3:-}" != --allow-missing-runtime ] || allow=YES
+    verify "$(realpath -e "$2")" "$allow";exit
+fi
+[ "$#" -eq 0 ] || die 'argumento desconhecido'
+[ "$EUID" -eq 0 ] || die 'execute com sudo'
+[ -f /etc/bmo/light-image.env ] || die 'recusado: host nao e BMO Light'
+[ "$(uname -m)" = aarch64 ] || die 'arquitetura inesperada'
+install -d -m 0755 "$STATE" /var/log
+exec 9>"$STATE/install.lock"
+flock -n 9 || exit 0
+[ ! -f "$STATE/install.done" ] || { echo 'BMO LIGHT: instalacao ja concluida';exit 0; }
+exec > >(tee -a /var/log/bmo-light-install.log) 2>&1
+status(){
+    printf '\nBMO LIGHT - %s\n' "$*"
+    if mountpoint -q "$BOOT";then printf '%s\n' "$*" > "$BOOT/BMO-INSTALACAO.txt";fi
+}
+cleanup(){
+    local rc=$?
+    trap - EXIT
+    if [ -n "$STAGE" ] && [[ "$STAGE" == /var/tmp/bmo-light.* ]];then rm -rf -- "$STAGE";fi
+    if [ "$rc" -ne 0 ];then status "Instalacao pendente (codigo $rc). Nova tentativa automatica; confira rede e BMO-RESUMO.txt.";fi
+    exit "$rc"
+}
+trap cleanup EXIT
+verify "" NO
+status 'Etapa 1/7: aguardando rede e expansao do cartao'
+[ ! -f /var/run/resize2fs-reboot ] || exit 75
+[ -f /var/lib/bmo/firstboot.done ] || die 'configuracao inicial ainda nao terminou'
+id r36s >/dev/null
+[ "$(id -u r36s)" = 1000 ] && [ "$(id -g r36s)" = 1000 ] || die 'usuario inesperado'
+nm-online --quiet --timeout=30 || exit 75
+AVAILABLE="$(df --output=avail -B1 / | tail -1)"
+[ "$AVAILABLE" -ge 2600000000 ] || die 'espaco livre insuficiente; use SD de 8 GB+ e confirme expansao'
+export DEBIAN_FRONTEND=noninteractive
+status 'Etapa 2/7: preparando repositorios'
+apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
+apt-get install -y --no-install-recommends ca-certificates curl
+if ! apt-cache show moonlight-qt >/dev/null 2>&1;then
+    curl --fail --show-error --location --retry 3 https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-qt/setup.deb.sh | bash
+    apt-get update
+fi
+status 'Etapa 3/7: baixando e instalando dependencias do BMO (pode demorar)'
+mapfile -t PKGS < <(grep -Ev '^[[:space:]]*(#|$)' "$SOURCE/install/manifests/required-packages.txt")
+mapfile -t EXTRAS < <(grep -Ev '^[[:space:]]*(#|$)' "$SOURCE/install/beta/extra-packages.txt")
+apt-get -o Acquire::Retries=3 install -y --no-install-recommends "${PKGS[@]}" "${EXTRAS[@]}" moonlight-qt=6.2.0-1
+while IFS= read -r group;do
+    [[ -z "$group" || "$group" == \#* ]] && continue
+    getent group "$group" >/dev/null || groupadd "$group"
+    usermod -a -G "$group" r36s
+done < "$SOURCE/install/manifests/required-groups.txt"
+status 'Etapa 4/7: instalando interface, controles e emuladores'
+STAGE="$(mktemp -d /var/tmp/bmo-light.XXXXXX)"
+touch "$STAGE/.bmo-apply-v3-sandbox" "$STAGE/.bmo-ready-sandbox"
+bash "$SOURCE/install/bmo-install.sh" --beta-pins --apply --root "$STAGE" --ppsspp-runtime "$RUNTIME"
+bash "$SOURCE/install/phases/40-system-config.sh" --root "$STAGE"
+FSTAB_SHA="$(sha256sum /etc/fstab | cut -d' ' -f1)"
+cp -a "$STAGE/opt/." /opt/
+cp -a "$STAGE/usr/." /usr/
+cp -a "$STAGE/etc/." /etc/
+cp -a "$STAGE/home/." /home/
+[ "$(sha256sum /etc/fstab | cut -d' ' -f1)" = "$FSTAB_SHA" ] || die 'fstab alterado'
+status 'Etapa 5/7: configurando audio, TF2 e servicos'
+install -m 0755 "$SOURCE/install/beta/bmo-sd2-auto" /usr/local/sbin/bmo-sd2-auto
+install -m 0644 "$SOURCE/install/beta/bmo-sd2-auto.service" /etc/systemd/system/bmo-sd2-auto.service
+install -d /var/lib/systemd/linger /etc/systemd/system/bmo-kiosk.service.d
+touch /var/lib/systemd/linger/r36s
+cat > /etc/systemd/system/bmo-kiosk.service.d/20-audio.conf <<'UNIT'
+[Unit]
+After=user@1000.service bmo-sd2-auto.service
+Wants=user@1000.service bmo-sd2-auto.service
+[Service]
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native
+UNIT
+mapfile -t UNITS < <(grep -Ev '^[[:space:]]*(#|$)' "$SOURCE/install/manifests/enabled-services.txt")
+for unit in "${UNITS[@]}";do
+    install -d "/etc/systemd/system/$unit.d"
+    cat > "/etc/systemd/system/$unit.d/10-light-install.conf" <<'UNIT'
+[Unit]
+After=bmo-light-install.service
+Requires=bmo-light-install.service
+UNIT
+done
+systemctl daemon-reload
+systemctl --global enable pulseaudio.socket
+systemctl enable "${UNITS[@]}" bmo-sd2-auto.service
+status 'Etapa 6/7: verificando instalacao'
+for cmd in chromium Xorg xdpyinfo xauth unclutter dbus-run-session pulseaudio retroarch moonlight-qt;do command -v "$cmd" >/dev/null || die "falta $cmd";done
+ldd /opt/src/ppsspp/build-bmo/PPSSPPSDL > "$STATE/ppsspp-ldd.txt"
+! grep -q 'not found' "$STATE/ppsspp-ldd.txt" || die 'biblioteca PPSSPP ausente'
+systemd-analyze verify /etc/systemd/system/bmo-kiosk.service /etc/systemd/system/bmo-xorg.service /etc/systemd/system/bmo-ui.service
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+date --iso-8601=seconds > "$STATE/install.done.tmp"
+mv "$STATE/install.done.tmp" "$STATE/install.done"
+status 'Etapa 7/7: BMO instalado! Abrindo interface.'
+/usr/local/sbin/bmo-firstboot --summary || true
+sleep 5
+systemctl --no-block start bmo-sd2-auto.service "${UNITS[@]}"
+echo BMO_LIGHT_INSTALL_COMPLETE_OK

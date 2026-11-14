@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -euo pipefail
+
+HELPER="/usr/local/sbin/bmo-maintenance"
+CONFIG="/etc/bmo/bmo.conf"
+
+
+usage() {
+
+    cat <<'TXT'
+BMO
+
+Uso:
+  bmo status
+  bmo verify
+  bmo check-update
+  bmo update
+  bmo promote
+  bmo rollback [backup-id]
+  bmo config
+TXT
+}
+
+
+run_helper() {
+
+    [ -x "$HELPER" ] || {
+        echo "ERRO: bmo-maintenance nao instalado." >&2
+        exit 20
+    }
+
+    sudo -n "$HELPER" "$@"
+}
+
+
+case "${1:-}" in
+
+    status)
+        run_helper status
+        ;;
+
+    verify)
+        run_helper verify
+        ;;
+
+    check-update)
+        run_helper check-update
+        ;;
+
+    update)
+        run_helper update
+        ;;
+
+    promote)
+        run_helper promote
+        ;;
+
+    rollback)
+
+        if [ -n "${2:-}" ]; then
+            run_helper rollback "$2"
+        else
+            run_helper rollback
+        fi
+        ;;
+
+    config)
+
+        if [ -r "$CONFIG" ]; then
+            cat "$CONFIG"
+        else
+            echo "CONFIG_NOT_INSTALLED"
+        fi
+        ;;
+
+    -h|--help|help|"")
+        usage
+        ;;
+
+    *)
+        usage >&2
+        exit 2
+        ;;
+
+esac
