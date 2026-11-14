@@ -9582,7 +9582,16 @@
             if (pressed && !this.previous[index]) {
               const action = this.actions[index];
 
-              if (SYSTEM_PANEL.visible) {
+              // The Wi-Fi keyboard can outlive the CONTROL view if another
+              // button changes APPS.current. Keep its exit path independent.
+              if (BMO_WIFI_KEYBOARD.visible) {
+                if (index === 0 || index === 8) BMO_WIFI_KEYBOARD.close();
+                else if (index === 1) BMO_WIFI_KEYBOARD.activate();
+                else if (index === 13) BMO_WIFI_KEYBOARD.up();
+                else if (index === 14) BMO_WIFI_KEYBOARD.down();
+                else if (index === 15) BMO_WIFI_KEYBOARD.left();
+                else if (index === 16) BMO_WIFI_KEYBOARD.right();
+              } else if (SYSTEM_PANEL.visible) {
                 if ([0, 8, 9].includes(index) && action) action();
               } else if (APPS.current === 'control') {
                 if (

@@ -1,5 +1,29 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Teclado preso recuperado sem reset; candidate de B ativo
+
+- Fase: Gate 5, teclado Wi-Fi e migração 5 GHz; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `b179824`.
+- Objetivo: diagnosticar ocorrência ao vivo, recuperar BMO e corrigir a rota de saída do teclado.
+- Ações: usuário relatou nova ocorrência e que todos os botões pararam de responder. SSH mostrou kiosk/UI/API ativos, HTTP 200 e DevTools disponível; sem erros de serviço. Leitura CDP sem senha/SSID mostrou `BMO_WIFI_KEYBOARD.visible=true` e `APPS.current=null`, embora o teclado dependesse de `APPS.current === 'control'` para B fechar. Chamada CDP apenas para `BMO_WIFI_KEYBOARD.close()` removeu a sobreposição, e o usuário confirmou retorno dos botões sem reset. Frontends de produção e candidate alterados para priorizar B/SELECT, A e D-pad do teclado enquanto ele estiver visível, independente do app subjacente. Candidate implantado por helper com backup, SHA256 `5a9c38d351660a75c338fca9ee9a6616d6d344578a3cb047f4c9f79d6627d43b`, entrada `index.bmo-next.html` e HTTP 200.
+- Arquivos alterados: `frontend/index.html`, `frontend/index.bmo-next.html`, este Worklog e `docs/PROJECT-CONTINUITY.md`; script local de deploy `outputs/R36S-TESTAR-TECLADO-CANDIDATE.ps1` fora do Git.
+- Resultado esperado/obtido: B e SELECT fecharam o teclado no candidate e o usuário confirmou que o controle continuou respondendo. O mesmo SHA256 foi promovido à produção pelo helper, com backup `20261114-030812`.
+- Validação: sete scripts inline de cada frontend passaram no parser JavaScript; `git diff --check`; SHA256 local/candidate/produção `5a9c38d351660a75c338fca9ee9a6616d6d344578a3cb047f4c9f79d6627d43b`, entrada final `index.html`, HTTP 200 e kiosk/UI/API ativos. Nenhuma senha ou SSID lidos pelo CDP.
+- `R36S_REQUIRED=NO` para esta correção; `R36S_REQUIRED=YES` para confirmar 5 GHz.
+- Pendência/risco: a causa de `APPS.current=null` sob o teclado não foi reproduzida isoladamente; a rota de saída agora independe desse estado. Associação 5 GHz ainda pendente.
+- Próximo passo exato: conectar a rede de 5 GHz pelo PowerShell do PC (aceita maiúsculas/símbolos), verificar frequência 5xxx MHz por SSH e persistência após reboot.
+
+## 2026-11-14 — Política Chromium aplicada e gatilho B identificado
+
+- Fase: Gate 5, validação física do kiosk e teclado Wi-Fi; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `b179824`.
+- Objetivo: confirmar correção do aviso de idioma e delimitar o travamento do teclado.
+- Ações: política versionada copiada e instalada no R36S via SSH com sudo digitado pelo usuário; somente o kiosk reiniciado. Usuário confirmou visualmente que o popup sumiu. Usuário também esclareceu que o teclado de Wi-Fi travou **ao tentar sair com B**.
+- Arquivos alterados: este Worklog, `docs/PROJECT-CONTINUITY.md` e `docs/ROADMAP.md`; no R36S, `/etc/chromium/policies/managed/bmo-kiosk.json`.
+- Resultado esperado/obtido: popup removido; política com `TranslateEnabled=false`, Chromium, `bmo-kiosk`, `bmo-ui` e `bmo-control-api` ativos. A correção do teclado ainda não foi implementada.
+- Validação: SSH leu política e hash igual ao arquivo local, três serviços ativos, processo Chromium em execução; usuário confirmou ausência visual do aviso.
+- `R36S_REQUIRED=NO` para análise e candidate do teclado; `R36S_REQUIRED=YES` para validar navegação B e associação 5 GHz.
+- Pendência/risco: comportamento exato da tela após B ainda não esclarecido; não concluir causa somente pelo código. Política instalada na beta atual não muda imagens antigas já gravadas.
+- Próximo passo exato: reproduzir saída B do teclado em candidate, corrigir o travamento, validar sem reset e então associar em 5 GHz.
+
 ## 2026-11-14 — Teclado BMO confirmado e política Chromium ausente na beta
 
 - Fase: Gate 5, Wi-Fi 5 GHz e experiência do kiosk; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `217b6df`.
