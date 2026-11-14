@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Contorno para senha Wi-Fi e melhoria do teclado BMO
+
+- Fase: migração para rede 5 GHz e esteira de UX; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `85f70f2`.
+- Objetivo: permitir usar senha com maiúsculas/símbolos no R36S agora e registrar correção do teclado virtual para a próxima versão.
+- Ações: usuário relatou limitação de entrada no BMO. Inspecionado `frontend/index.bmo-next.html`: teclado definido por lista fixa de caracteres e navegação em grade; a versão instalada ainda não foi comparada, então a causa exata permanece aberta. Adicionada tarefa ao Gate 5 do Roadmap. Criado `outputs/R36S-ACESSO-WIFI5.ps1` e lançador `.cmd` no PC para abrir SSH ou conectar rede 5 GHz usando `sudo nmcli --ask` em terminal interativo; SSID é digitado localmente e codificado no transporte para evitar interpretação pelo shell, senha é digitada no terminal, sem arquivo/log ou argumento de comando. O script verifica a frequência após a troca.
+- Arquivos alterados: `docs/ROADMAP.md`, `docs/PROJECT-CONTINUITY.md`, este Worklog; PowerShell e lançador em `outputs` fora do Git.
+- Resultado esperado: usuário conseguir conectar à rede 5 GHz com senha completa, e a limitação do teclado ficar rastreada. Resultado obtido: contorno preparado, ainda não executado no aparelho; tarefa registrada.
+- Validação: sintaxe PowerShell verificada; codificação do SSID testada por SSH com nome fictício e comprimento confirmado; `nmcli 1.52.1` no R36S oferece `device wifi connect` e `--ask`.
+- `R36S_REQUIRED=YES` para executar a troca e confirmar frequência, IP e reinício.
+- Pendência/risco: o SSH pode cair durante a troca e o IP pode mudar; o teclado do build instalado não foi reproduzido nem corrigido nesta etapa.
+- Próximo passo exato: abrir o lançador no PC, escolher opção 2, digitar nome da rede, senha de sudo e senha Wi-Fi na janela; informar IP atual. Depois validar 5xxx MHz por SSH e reinício, e planejar correção de teclado no frontend com teste de gamepad.
+
 ## 2026-11-14 — Acesso SSH funcional e banda atual medida
 
 - Fase: validação física Ready Wi-Fi 5; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `44bc049`.
