@@ -2,6 +2,8 @@
 
 ## Rumo vigente: Ready v1.0.0-beta.2-WiFi5
 
+**Handoff físico em 14/11/2026:** o microSD extra foi inserido no mesmo adaptador e assumiu F:. Foi identificado como disco USB 2 de 57,7 GB, único volume exFAT vazio, diferente do cartão anterior de cerca de 62,5 GB com BOOT FAT32. A raw validada `BMO-R36S-Ready-v1.0.0-beta.2-WiFi5.img` está em `outputs` para o Rufus. O Rufus foi aberto com privilégio elevado pelo usuário; a automação de interface não pode controlar essa janela. O usuário fará a gravação e avisará quando aparecer `Pronto`. Depois verificar as partições e arquivos BOOT antes de mover para o R36S.
+
 **Estado em 14/11/2026:** candidata `BMO-R36S-Ready-v1.0.0-beta.2-WiFi5.img.gz` pronta no PC, 1.891.182.973 bytes, SHA256 `e0888fb7f28d3cd56f29612aa4506a7ad2bb40688cb7e692db351377fa819429`. O gzip passou em `pigz -t` e descompactou exatamente para raw SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4`. FAT32/ext4 verificados somente leitura; BMO, driver e serviço presentes. Falta teste físico de boot, 5 GHz e SSH. Próxima ação: gravar em outro microSD de 16 GB ou maior, preservar F:, configurar a BOOT e iniciar o R36S. Depois ler `BMO-WIFI5-STATUS.txt`.
 
 O usuário escolheu uma nova imagem beta com BMO completo já instalado. A sequência vigente é: concluir o build com GCC 13, comparar `vermagic` e CRCs com os módulos da Ready original, integrar os três módulos na cópia raw, executar `depmod` e validar dependências, instalar o relatório de boot, comprimir a candidata e conferir hashes. Só depois gravar **outro** microSD de 16 GB ou maior e testar boot, associação em 5xxx MHz, IP e SSH no R36S. O plano antigo de instalar módulos no F: por hook de BOOT, abaixo, permanece apenas como histórico diagnóstico e não será executado nesta candidata.
@@ -40,7 +42,7 @@ Fazer o Wi-Fi interno aparecer como interface de rede no BMO e conectar a uma re
 
 ## Próximo passo exato
 
-O build, a integração, `fsck`, gzip e hashes foram concluídos. Branch privada no GitHub: `fix/rtl8811cu-ready-wifi5-beta`, commit `8fd8b2c3f765c6747fccac9d60c0ed67e8134186`. Aguardar o usuário inserir um microSD **extra** de 16 GB ou maior no PC e informar sua letra, preservando F:. Gravar nele a candidata já verificada, abrir a BOOT para selecionar ScreenFiles e configurar rede 5 GHz e SSH com senha nova; depois colocá-lo no R36S. Após o primeiro boot e eventual reinício, devolver o cartão ao PC e ler `BMO-WIFI5-STATUS.txt`. O aceite físico exige interface Wi-Fi, conexão em frequência 5xxx MHz, IP, SSH ativo e boot estável. Não colocar credenciais no relatório.
+O build, a integração, `fsck`, gzip e hashes foram concluídos. Branch privada no GitHub: `fix/rtl8811cu-ready-wifi5-beta`. Aguardar o usuário informar `Pronto` no Rufus; verificar disco USB 2 e BOOT recém-gravada. Em seguida selecionar ScreenFiles e configurar rede 5 GHz e SSH com senha nova; depois colocar o cartão no R36S. Após o primeiro boot e eventual reinício, devolver o cartão ao PC e ler `BMO-WIFI5-STATUS.txt`. O aceite físico exige interface Wi-Fi, conexão em frequência 5xxx MHz, IP, SSH ativo e boot estável. Não colocar credenciais no relatório.
 
 `R36S_REQUIRED=YES` para a coleta/validação física; `R36S_REQUIRED=NO` para análise, compilação e validação prévia.
 

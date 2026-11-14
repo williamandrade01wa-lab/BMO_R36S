@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Cartão extra identificado e gravação via Rufus
+
+- Fase: validação física da candidata; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `cff5846f0839aa11b4d2d8e5156bdb51781d6c8e`.
+- Objetivo: gravar a beta Ready em um microSD extra, preservando o cartão anterior.
+- Ações: o usuário trocou o cartão no mesmo adaptador. F: passou a ser disco USB 2 de 57.671.680.000 bytes, único volume exFAT vazio; o cartão anterior era de cerca de 62,5 GB com BOOT FAT32. A raw beta validada foi movida para `outputs/BMO-R36S-Ready-v1.0.0-beta.2-WiFi5.img` para seleção no Rufus, preservando gzip e hashes. O usuário abriu o Rufus elevado. O controle de interface não opera janela de integridade superior, então a seleção e gravação foram entregues ao usuário.
+- Arquivos: documentação do projeto e raw em `outputs` fora do Git.
+- Resultado esperado: Rufus mostrar `Pronto`, partições BOOT FAT32 + ext4 visíveis no disco extra, e boot no R36S. Resultado obtido: cartão extra identificado; gravação ainda não confirmada.
+- Validação: tamanho e filesystem do novo F: inspecionados antes da gravação; raw de 12.884.901.888 bytes com SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4` validado por ida e volta do gzip.
+- `R36S_REQUIRED=NO` enquanto gravação/checagem no PC estiverem pendentes; `R36S_REQUIRED=YES` para boot, Wi-Fi 5 GHz e SSH.
+- Risco: destino errado no Rufus apagaria outro disco. Instruído a confirmar o dispositivo Generic STORAGE DEVICE de 57,7 GB; nenhuma gravação da GUI foi feita pelo agente.
+- Próximo passo exato: aguardar `Pronto` do Rufus; verificar as partições e a BOOT do cartão extra, configurar ScreenFiles e firstboot, então testar no R36S.
+
 ## 2026-11-14 — Driver compilado e integrado à cópia da Ready
 
 - Fase: imagem candidata privada; branch `fix/rtl8811cu-ready-wifi5-beta`; commit de partida desta etapa `e32c33d`.
