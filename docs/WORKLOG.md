@@ -1,16 +1,65 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Cartão original também apresentou tela preta
+
+- Fase: isolamento da falha de boot; branch `fix/rtl8811cu-ready-wifi5-beta`.
+- Objetivo: distinguir defeito específico da beta de uma condição comum ao R36S/cartões.
+- Ações: após a beta ter sido verificada integralmente, o usuário testou o cartão original em TF1 sem TF2 por até três minutos e relatou tela preta. Foi orientado a desligar até apagar LED e devolver o original ao PC para leitura somente dos arquivos de boot e diagnóstico.
+- Arquivos alterados: este Worklog e `docs/PROJECT-CONTINUITY.md`; nenhum cartão modificado pelo agente nesta etapa.
+- Resultado esperado: cartão original mostrar BMO se a falha fosse específica da beta. Resultado obtido: tela preta também no original.
+- Validação: observação física reportada pelo usuário. Ainda sem leitura pós-teste do original.
+- `R36S_REQUIRED=NO` para leitura do cartão ao retornar; `R36S_REQUIRED=YES` para testes físicos posteriores.
+- Pendência/risco: causa comum ainda indefinida. Não atribuir automaticamente à solda, driver ou painel. Preservar o cartão original e não ler credenciais.
+- Próximo passo exato: identificar BOOT original no PC, procurar hook residual e conferir `boot.ini`, `PanCho.ini`, `logo.env`, ScreenFiles e relatórios recentes; comparar com beta antes de alterar qualquer boot.
+
+## 2026-11-14 — Leitura da beta após tela preta
+
+- Fase: diagnóstico físico Ready Wi-Fi 5; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `0ba2cb6`.
+- Objetivo: determinar se a tela preta veio de gravação incompleta do microSD ou de um boot que chegou ao firstboot.
+- Ações: F: beta foi identificado por tamanho, barramento USB, rótulo BOOT e offsets de partição. Com UAC autorizado pelo usuário, copiada somente para leitura a partição ext4 de 12.599.689.216 bytes. Inspecionados logs e estado sem ler `BMO-FIRSTBOOT.txt` ou credenciais. Comparados todos os bytes da cópia ext4 com a raw beta e os 16 MiB iniciais do disco físico com a raw. Comparados metadados ext4 da Base run9 e Ready beta e arquivos de boot principais.
+- Arquivos alterados: somente cópia temporária e scripts de diagnóstico fora do Git, mais este Worklog e `docs/PROJECT-CONTINUITY.md`. MicroSD beta não foi modificado pelo diagnóstico.
+- Resultado esperado: localizar marcador de firstboot/relatório Wi-Fi ou defeito de gravação. Resultado obtido: nenhum marcador/log novo; região ext4 integralmente idêntica à raw, assim como os primeiros 16 MiB do cartão. Base run9 e beta usam mesmo rótulo `armbian` e recursos ext4; bootloader inicial, `boot.ini`, `PanCho.ini`, `logo.env`, kernel, initrd e DTB principal coincidem. Não há evidência de montagem ext4 para escrita no teste. Estágio exato da falha não identificado.
+- Validação: `CARD_ROOTFS_BYTE_IDENTICAL_TO_SOURCE`, `CARD_BOOTLOADER_REGION_BYTE_IDENTICAL_TO_SOURCE`; serviços firstboot e relatório Wi-Fi presentes/habilitados na ext4; sem seus artefatos de execução. F: BOOT FAT32 saudável.
+- `R36S_REQUIRED=YES` para diferenciar falha da beta de falha geral no aparelho.
+- Pendência/risco: Wi-Fi 5 GHz e SSH permanecem sem teste físico; tela preta pode ter causas antes ou durante o boot do kernel. A imagem Base run9 é referência de build, não prova de que o cartão original ainda inicia. Cópia temporária ext4 deve ser apagada depois da análise.
+- Próximo passo exato: usuário ejetar F: beta, ligar R36S por até três minutos com **cartão original** em TF1 e TF2 vazio; informar se BMO aparece. Preservar original. Se iniciar, comparar BOOT original com beta; se não, diagnosticar hardware/alimentação/tela.
+
+## 2026-11-14 — Primeiro boot da beta: tela preta com LED ativo
+
+- Fase: teste físico Ready Wi-Fi 5; branch `fix/rtl8811cu-ready-wifi5-beta`.
+- Objetivo: verificar boot, painel, conexão 5 GHz e SSH após preparação bem-sucedida do cartão.
+- Ações: usuário colocou cartão beta em TF1 sem TF2 e manteve R36S ligado por cinco minutos; foi orientado a não reiniciar antes desse intervalo. Tela permaneceu preta, LED ativo. Instruído a desligar, devolver cartão ao PC e avisar F:.
+- Arquivos alterados: este Worklog e `docs/PROJECT-CONTINUITY.md`; nenhum arquivo do cartão modificado durante o teste.
+- Resultado esperado: BMO visível, diagnóstico BOOT e Wi-Fi/SSH ativos. Resultado obtido: tela preta; serviço de relatório e rede ainda sem evidência.
+- Validação: relato do usuário de tela preta após cinco minutos e LED ativo. A causa não pode ser concluída só pela tela.
+- `R36S_REQUIRED=NO` para leitura do cartão quando retornar ao PC; `R36S_REQUIRED=YES` para novo boot após diagnóstico.
+- Risco: possibilidade de firstboot incompleto/boot parcial/painel incorreto. Não reaplicar hook temporário que causou tela preta antes.
+- Próximo passo exato: ler `BMO-WIFI5-STATUS.txt` e outros arquivos de estado na BOOT, sem abrir credenciais; identificar se o Linux alcançou systemd e só então decidir correção.
+
+## 2026-11-14 — Corrigido assistente antigo embutido na beta
+
+- Fase: preparação BOOT antes do primeiro boot; branch `fix/rtl8811cu-ready-wifi5-beta`.
+- Objetivo: resolver o rollback do assistente ao copiar ScreenFiles e configurar Wi-Fi 5 GHz/SSH no cartão extra.
+- Evidência: captura do usuário mostra painel 4, SSID selecionado e SSH ligado, seguida de “A gravação falhou; os arquivos anteriores foram restaurados”. F: tinha 23 diretórios `.BMO-backup-*`, sem falta de espaço (cerca de 262 MB livres). O script embutido na imagem usava `New-Item -ItemType Directory -Force` na raiz da unidade, falha conhecida já corrigida na v0.2.1 do Git.
+- Ações: executados 30 autotestes da v0.2.1 com sucesso. Backups de `BMO-Preparar-Cartao.ps1`, `ABRIR-BMO.cmd` e `LEIA-ME.txt` antigos guardados em `work/F-wizard-before-v021/`; os três foram substituídos apenas no cartão extra e tiveram SHA256 conferido. O usuário foi instruído a fechar a GUI antiga e relançar `F:\ABRIR-BMO.cmd` para usar o código atualizado.
+- Arquivos alterados: três arquivos do assistente no microSD extra e este registro. BMO-FIRSTBOOT/credenciais não foram lidos.
+- Resultado esperado: assistente v0.2.1 concluir sem rollback. Resultado obtido: usuário confirmou conclusão sem erro após fechar/reabrir a GUI. `BMO-FIRSTBOOT.txt` atualizado, sem leitura de conteúdo/credenciais; DTBO de painel 4 na raiz coincide com `ScreenFiles/Panel 4/mipi-panel.dtbo`.
+- Validação: `BMO_WIZARD_TESTS_OK=30`; SHA256 do script v0.2.1 `E84D521A8C7E0C10A08B4C5846551D2F08D975F6063D200A57D38DD7A6123444` igual em F:.
+- `R36S_REQUIRED=NO` para esta preparação; `R36S_REQUIRED=YES` após concluir firstboot e mover o cartão ao aparelho.
+- Risco: raw beta já recebeu os três arquivos da v0.2.1 e passou novamente em `fsck.vfat -n`, `e2fsck -fn` e verificação estática; gzip revisado e hashes ainda em andamento. O gzip anterior foi preservado em `work/ready-wifi5/`.
+- Próximo passo exato: usuário ejetar o cartão e iniciar em TF1 sem TF2, aguardar boot/expansão e informar tela; concluir gzip/hash revisado no PC e depois ler `BMO-WIFI5-STATUS.txt` da BOOT.
+
 ## 2026-11-14 — Cartão extra identificado e gravação via Rufus
 
 - Fase: validação física da candidata; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `cff5846f0839aa11b4d2d8e5156bdb51781d6c8e`.
 - Objetivo: gravar a beta Ready em um microSD extra, preservando o cartão anterior.
 - Ações: o usuário trocou o cartão no mesmo adaptador. F: passou a ser disco USB 2 de 57.671.680.000 bytes, único volume exFAT vazio; o cartão anterior era de cerca de 62,5 GB com BOOT FAT32. A raw beta validada foi movida para `outputs/BMO-R36S-Ready-v1.0.0-beta.2-WiFi5.img` para seleção no Rufus, preservando gzip e hashes. O usuário abriu o Rufus elevado. O controle de interface não opera janela de integridade superior, então a seleção e gravação foram entregues ao usuário.
 - Arquivos: documentação do projeto e raw em `outputs` fora do Git.
-- Resultado esperado: Rufus mostrar `Pronto`, partições BOOT FAT32 + ext4 visíveis no disco extra, e boot no R36S. Resultado obtido: cartão extra identificado; gravação ainda não confirmada.
-- Validação: tamanho e filesystem do novo F: inspecionados antes da gravação; raw de 12.884.901.888 bytes com SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4` validado por ida e volta do gzip.
+- Resultado esperado: Rufus mostrar `Pronto`, partições BOOT FAT32 + ext4 visíveis no disco extra, e boot no R36S. Resultado obtido: usuário informou conclusão da gravação; Windows mostra BOOT FAT32 de 256 MiB e segunda partição Linux de 12.599.689.216 bytes nos offsets esperados. Boot no R36S ainda pendente.
+- Validação: tamanho e filesystem do novo F: inspecionados antes da gravação; raw de 12.884.901.888 bytes com SHA256 `896c2d2a8c0ff4a5f2cd6ca0597b7a2c909cc4fb017e8c48f8b063d508f95ec4` validado por ida e volta do gzip. Após gravação, F: BOOT FAT32 legível; hashes de `BMO-WIFI5-BETA.txt`, `boot.ini`, `ABRIR-BMO.cmd` e `logo.bmp` iguais aos da imagem fonte. `chkdsk F:` não relatou problemas, mas avisou volume em uso.
 - `R36S_REQUIRED=NO` enquanto gravação/checagem no PC estiverem pendentes; `R36S_REQUIRED=YES` para boot, Wi-Fi 5 GHz e SSH.
 - Risco: destino errado no Rufus apagaria outro disco. Instruído a confirmar o dispositivo Generic STORAGE DEVICE de 57,7 GB; nenhuma gravação da GUI foi feita pelo agente.
-- Próximo passo exato: aguardar `Pronto` do Rufus; verificar as partições e a BOOT do cartão extra, configurar ScreenFiles e firstboot, então testar no R36S.
+- Próximo passo exato: usuário executar `F:\ABRIR-BMO.cmd`, escolher painel correto, configurar Wi-Fi 5 GHz e SSH com senha nova; verificar saída do assistente sem ler credenciais, ejetar com segurança e iniciar no R36S sem TF2.
 
 ## 2026-11-14 — Driver compilado e integrado à cópia da Ready
 
