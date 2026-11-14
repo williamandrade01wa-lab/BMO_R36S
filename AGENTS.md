@@ -10,6 +10,10 @@ A regra de produto é:
 
 Toda decisão técnica deve proteger essa experiência final.
 
+## Segundo Cérebro do usuário
+
+O usuário mantém um cofre Obsidian em `G:\Meu Drive\Segundo Cérebro\Cérebro` para conhecimento durável de projetos. As regras locais estão em `docs/GOLDEN-RULES.md`. Ao registrar uma decisão ou resultado durável, mantenha este repositório como fonte canônica e acrescente ao cofre uma síntese com referência ao arquivo/commit quando o drive estiver disponível. Não copie credenciais nem use o cofre como substituto do Git.
+
 ## Continuidade obrigatória entre chats/agentes
 
 O projeto **não pode depender da memória de uma conversa**.

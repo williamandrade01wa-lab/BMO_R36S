@@ -1,5 +1,29 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Acesso SSH funcional e banda atual medida
+
+- Fase: validação física Ready Wi-Fi 5; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `44bc049`.
+- Objetivo: obter login SSH autorizado e comprovar driver e banda de rádio do Wi-Fi interno.
+- Ações: após autorização explícita do usuário, adicionada chave pública de diagnóstico ao `authorized_keys` da conta `r36s`; senha digitada apenas em janela local, sem registro. A chave local teve uma senha acidental formada por aspas devido à passagem de argumento no PowerShell, corrigida localmente sem trocar a chave pública. Login por chave passou. Executados comandos somente leitura via SSH para USB, módulos, driver, IP, NetworkManager, frequência e serviço SSH. Nenhum SSID, MAC ou senha foi registrado.
+- Arquivos alterados: chave privada local fora do Git, `~r36s/.ssh/authorized_keys` no aparelho, este Worklog, `docs/PROJECT-CONTINUITY.md`, `docs/RTL8811CU-READY-WIFI5-PLAN.md`; scripts temporários de diagnóstico fora do Git.
+- Resultado esperado: Wi-Fi 5 GHz e SSH ativos. Resultado obtido: SSH funcional; USB `0bda:c811`, `rtw88_8821cu`, `rtw88_8821c`, `rtw88_usb`, `rtw88_core` presentes, driver `rtw_8821cu`, interface conectada com IP `192.168.1.28/24`, serviço SSH ativo. Frequência **2462 MHz**, portanto conexão atual é 2,4 GHz. Há três APs visíveis em 5 GHz, mas o SSID atual aparece apenas em 2,4 GHz.
+- Validação: `SSH_LOGIN_OK` com usuário `r36s` e kernel `6.12.32-lts-rk3326`; leitura de `lsusb`, `lsmod`, `/sys/class/net/.../driver`, `nmcli` e `systemctl`. ACL da chave local permite usuário/admin/SYSTEM.
+- `R36S_REQUIRED=YES` para selecionar no aparelho uma rede 5 GHz e confirmar a nova associação.
+- Pendência/risco: senha da nova rede deve ser digitada no BMO pelo usuário. A troca de rede pode mudar o IP e interromper SSH; nenhuma frequência 5 GHz foi confirmada ainda.
+- Próximo passo exato: usuário conectar uma rede 5 GHz via interface BMO e informar IP; reconectar por SSH, comprovar frequência 5xxx MHz, IP e estabilidade após reinício.
+
+## 2026-11-14 — BMO iniciou; Wi-Fi aparente e SSH alcançável
+
+- Fase: validação física Ready Wi-Fi 5; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `44bc049`.
+- Objetivo: retomar o teste após o usuário corrigir o procedimento que resultava em tela preta e obter acesso SSH.
+- Ações: usuário informou BMO visível na imagem beta e Wi-Fi aparentemente funcional; forneceu IP `192.168.1.28`. Do PC, conexão TCP à porta 22 passou. SSH em modo sem senha alcançou o servidor, que respondeu `Permission denied (publickey,password)`. A revisão automática bloqueou a proposta de adicionar uma chave pública persistente sem autorização explícita; nenhuma mudança de autenticação ocorreu no R36S e a chave local criada foi removida. Também foi estruturado o Segundo Cérebro do usuário em Obsidian, com notas iniciais do BMO e regras de registro.
+- Arquivos alterados: `AGENTS.md`, `docs/GOLDEN-RULES.md`, `docs/PROJECT-CONTINUITY.md`, este Worklog; notas do Obsidian e instrução global do Codex fora do Git.
+- Resultado esperado: boot, Wi-Fi 5 GHz e login SSH. Resultado obtido: BMO inicia por relato do usuário, Wi-Fi aparente, IP informado, porta SSH aberta; autenticação e frequência 5 GHz ainda não validadas.
+- Validação: teste TCP porta 22 aberto e resposta SSH com métodos `publickey,password`; observação de BMO e Wi-Fi relatada pelo usuário.
+- `R36S_REQUIRED=YES` para login e medição de banda/driver no aparelho.
+- Pendência/risco: não inferir 5 GHz apenas por conexão Wi-Fi; nenhuma credencial foi lida. Login exige senha digitada localmente ou autorização explícita para instalar chave de diagnóstico.
+- Próximo passo exato: concluir acesso SSH autorizado e executar comandos somente leitura para `iw dev ... link`, `nmcli`, `lsusb`, `lsmod`, `journalctl` e `sshd`; registrar frequência, IP e estabilidade.
+
 ## 2026-11-14 — Cartão original também apresentou tela preta
 
 - Fase: isolamento da falha de boot; branch `fix/rtl8811cu-ready-wifi5-beta`.
