@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-13 — Candidata Ready com RTL8811CU e diagnóstico de F:
+
+- Fase: correção de hardware/rede e imagem privada; branch `fix/rtl8811cu-ready-wifi5-beta`; commit inicial `7533e2dfb718cc12435567da8108ee036531d57f`.
+- Objetivo: produzir Ready v1.0.0-beta.2-WiFi5 com BMO já instalado, driver para USB `0bda:c811`, relatório de Wi-Fi 5 GHz e SSH.
+- Ações: dois diagnósticos via BOOT confirmaram enumeração USB, firmware e ausência de `rtw88_usb`, `rtw88_8821c`, `rtw88_8821cu`; `sshd -t` passou. Duas tentativas posteriores de exportar headers via hook deixaram tela preta sem relatório; hooks removidos e `boot.ini` restaurado. Ready v1.0.0-beta.1 verificada por SHA256, descompactada em cópia e rootfs inspecionado somente leitura. Build do kernel pinado `d5da60f7ee9fcafed61f1e93590eb85ca0ecd7c0`, config da Ready e GCC ARM64 13 iniciado para gerar módulos e símbolos.
+- Arquivos: `docs/RTL8811CU-READY-WIFI5-PLAN.md`, `image/ready/wifi5/bmo-wifi5-report.sh`, `image/ready/wifi5/bmo-wifi5-report.service`, este Worklog e `docs/PROJECT-CONTINUITY.md`. Imagens e logs grandes ficam fora do Git.
+- Resultado esperado: candidata privada inicializável com interface Wi-Fi em 5 GHz e SSH acessível. Resultado obtido até agora: diagnóstico confirmado e compilação em andamento; nenhuma validação física da candidata ainda.
+- Validação: SHA256 do gzip Ready original `e21a446dccfde7e115a8e0cf79ae251d41aca02f3edfb4c274e4bc405b1794a7` e raw `b7a9ab2567084f42da2c6a7628fbacd68c683ff120f64dca54fc252f15e35f7e`; config calcula release `6.12.32-lts-rk3326`. F: FAT32 passou no `chkdsk` somente leitura, em hashes repetidos de quatro arquivos e comparação de `boot.ini` com backup. Root ext4 do cartão e intermitência não foram validados.
+- `R36S_REQUIRED=NO` para build, montagem e validação prévia; `R36S_REQUIRED=YES` para testar boot, Wi-Fi 5 GHz e SSH no aparelho.
+- Risco: compatibilidade dos CRC de símbolos com o kernel instalado; tela preta anterior pode ter causa independente; não sobrescrever F:.
+- Próximo passo exato: concluir build, validar `.ko`/símbolos, injetar na cópia da Ready, comprimir e calcular hash; então pedir somente a troca física para cartão extra.
+
 > Registro cronológico obrigatório das etapas significativas do projeto.
 >
 > Histórico anterior à reorganização documental de 2026-10-18 foi preservado **sem alteração** em [`docs/archive/WORKLOG-through-2026-10-18.md`](archive/WORKLOG-through-2026-10-18.md).
