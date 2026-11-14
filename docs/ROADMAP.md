@@ -120,7 +120,7 @@ Objetivo: experiência funcional de uso diário.
 - [ ] navegação por gamepad;
 - [ ] SYSTEM / CONTROL;
 - [ ] teclado Wi-Fi acessível pelo gamepad: maiúsculas, minúsculas e símbolos usuais de senhas WPA; testar entrada real e navegação entre todas as teclas;
-- [ ] reproduzir e corrigir travamento relatado ao usar os comandos/teclado de troca de Wi-Fi; confirmar recuperação sem reset do R36S;
+- [ ] reproduzir e corrigir travamento confirmado no teclado virtual de Wi-Fi do BMO no R36S; confirmar recuperação sem reset;
 - [ ] Favorites X/Y;
 - [ ] Fast Nav / Virtual Window / Lazy Load;
 - [ ] GBA/SNES;

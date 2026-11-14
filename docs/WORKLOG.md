@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Teclado BMO confirmado e política Chromium ausente na beta
+
+- Fase: Gate 5, Wi-Fi 5 GHz e experiência do kiosk; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `217b6df`.
+- Objetivo: localizar o travamento e remover o aviso de idioma/tradução do Chromium no aparelho atual e nas próximas imagens.
+- Ações: usuário esclareceu que travou o **teclado virtual do BMO no R36S**, não o PowerShell. Frontend `BMO_WIFI_KEYBOARD` localizado em `frontend/index.html`; causa específica ainda não reproduzida. Por SSH, launcher e processo Chromium já têm flags de desativação de tradução, mas a política gerenciada não existe no aparelho atual. A política versionada `TranslateEnabled=false` já havia resolvido o aviso em teste anterior. Preparado script local para instalação via SSH com senha de sudo digitada pelo usuário; acrescentada checagem obrigatória da política no builder beta.
+- Arquivos alterados: `install/build-beta-image.sh`, este Worklog, `docs/PROJECT-CONTINUITY.md`, `docs/ROADMAP.md`; montagem local `work/ready-wifi5/assemble-ready-wifi5.sh` e `outputs/R36S-DESATIVAR-TRADUCAO.ps1` fora do Git.
+- Resultado esperado: popup de idioma ausente na beta atual e nas novas imagens; teclado Wi-Fi utilizável. Resultado obtido: causa do popup identificada como ausência da política; instalação no aparelho e confirmação visual pendentes; travamento do teclado ainda precisa de reprodução/correção.
+- Validação: SSH confirmou `bmo-kiosk.service` ativo, flags presentes e arquivo de política ausente. O builder agora compara o arquivo instalado ao arquivo versionado antes de aceitar a imagem.
+- `R36S_REQUIRED=YES` para confirmar visualmente o popup e retestar teclado; `R36S_REQUIRED=NO` para revisão do código e checagem offline.
+- Pendência/risco: script remoto requer sudo interativo do usuário. Não registrar a senha. Não implantar alteração do teclado diretamente em produção; usar candidate.
+- Próximo passo exato: usuário concluir a instalação da política no PowerShell; validar estado por SSH e confirmação visual. Em paralelo, reproduzir o travamento do teclado no candidate e implementar correção.
+
 ## 2026-11-14 — Travamento relatado durante troca de Wi-Fi
 
 - Fase: análise de UX e migração 5 GHz; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `e22e510`.

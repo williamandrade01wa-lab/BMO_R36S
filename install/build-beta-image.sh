@@ -133,6 +133,9 @@ for line in (source/"install/manifests/enabled-services.txt").read_text().splitl
     assert "Requires=bmo-ready-firstboot.service" in drop.read_text()
 assert (r/"boot/u-boot/ABRIR-BMO.cmd").is_file()
 assert (r/"boot/u-boot/BMO-FIRSTBOOT.txt").is_file()
+policy=r/"etc/chromium/policies/managed/bmo-kiosk.json"
+assert policy.is_file(), "Chromium translation policy missing from beta"
+assert policy.read_bytes()==(source/"install/system/chromium/bmo-kiosk.json").read_bytes()
 assert (r/"etc/systemd/system/bmo-ready-firstboot.service").is_file()
 assert not (r/"root/.not_logged_in_yet").exists()
 assert not [p for p in (r/"home/r36s/ROMs").rglob("*") if p.is_file()]
