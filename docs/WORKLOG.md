@@ -1,17 +1,17 @@
 # BMO R36S — Worklog
 
-## 2026-11-14 — Grafo compartilhado e gravação direta do cartão em andamento
+## 2026-11-14 — Grafo compartilhado e gravação direta verificada
 
 - Fase: Gate 5, nova mídia e mapa de código; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `e93d08d`.
 - Objetivo: gravar a beta no cartão antigo preservado e tornar as relações de código consultáveis por todas as IAs.
-- Ações: Rufus não foi localizado no PC; Win32DiskImager elevado não abriu janela controlável. A primeira tentativa de escrita direta passou em disco/imagem/backup, mas o Windows negou acesso bruto após `Clear-Disk`; a tabela antiga continuou visível. A segunda parou porque o leitor removível não aceita `Set-Disk -IsOffline`; a terceira parou antes da escrita por conversão de inteiro no script. O script corrigido bloqueou/desmontou F: via `FSCTL_LOCK_VOLUME`/`FSCTL_DISMOUNT_VOLUME` e começou a escrever a raw em `PhysicalDrive2`. Acompanhar `outputs/R36S-beta-gravacao-disco2.txt`; sucesso exige `WRITE_VERIFY_OK` com SHA256 da leitura final igual ao da imagem. Backup local anterior permanece íntegro.
+- Ações: Rufus não foi localizado no PC; Win32DiskImager elevado não abriu janela controlável. A primeira tentativa de escrita direta passou em disco/imagem/backup, mas o Windows negou acesso bruto após `Clear-Disk`; a tabela antiga continuou visível. A segunda parou porque o leitor removível não aceita `Set-Disk -IsOffline`; a terceira parou antes da escrita por conversão de inteiro no script. O script corrigido bloqueou/desmontou F: via `FSCTL_LOCK_VOLUME`/`FSCTL_DISMOUNT_VOLUME`, escreveu a raw em `PhysicalDrive2` e leu de volta os 12.884.901.888 bytes. `outputs/R36S-beta-gravacao-disco2.txt` terminou em `WRITE_VERIFY_OK` com SHA256 `11cda8721d2e731da176e3b8616e55dfbb648a3b502994b3ce3958592a3fcbc4`, idêntico ao da imagem. Backup local anterior permanece íntegro. A BOOT FAT32 montou em F: com `ABRIR-BMO.cmd`, assistente v0.2.1, `BMO-FIRSTBOOT.txt`, ScreenFiles, `boot.ini` e logo presentes. O assistente foi aberto para configuração local de Wi-Fi/SSH pelo usuário, sem ler senhas.
 - Graphify: extração `--code-only` do commit `e93d08d` em pasta local fora do Git, 592 nós, 1.077 relações e 61 comunidades. Exportados 653 notas/canvas, `graph.json`, relatório e HTML ao vault separado `G:\Meu Drive\Segundo Cérebro\Mapas-de-codigo\R36S`. SHA256 de `graph.json`: `84e4dc5690580140e754f81a99b309bd7e35bd2269179c46259251d04cf38a16`. A fonte, síntese, índice e log do cofre principal foram conectados; IA Memory registra o mapa. Uma consulta BFS do fluxo Wi-Fi/API/kiosk foi executada no grafo. Extração omitiu 49 docs e 52 arquivos não classificados; nomeação por Claude CLI consumiu 36.337 tokens de entrada/721 de saída segundo relatório.
 - Arquivos alterados: este Worklog. Scripts de gravação/imagens/backup ficam em `outputs/` fora do Git; grafo local em `work/graphify-r36s` fora do Git; export no cofre de mapas.
-- Resultado esperado/obtido: grafo consultável e compartilhado; gravação ainda em andamento nesta entrada, sem declarar imagem pronta no cartão.
-- Validação: hash do grafo copiado conferido; 653 notas/canvas presentes; relatório de escrita progrediu sem erro até a última observação. Validação integral da mídia pendente.
+- Resultado esperado/obtido: grafo consultável e compartilhado; imagem raw gravada e verificada integralmente no cartão. Preparação da BOOT e boot físico ainda pendentes.
+- Validação: hash do grafo copiado conferido; 653 notas/canvas presentes; SHA256 de leitura de volta do cartão igual ao source; BOOT e arquivos públicos essenciais conferidos.
 - `R36S_REQUIRED=NO` para mapa e gravação no PC; `R36S_REQUIRED=YES` para boot, BMO, SSH e 5 GHz.
-- Pendência/risco: aguardar `WRITE_VERIFY_OK`, conferir BOOT e preparar cartão; depois teste físico. O backup pode conter credenciais e não entra no Git/cofre.
-- Próximo passo exato: concluir verificação SHA256 lida do cartão, conferir partições/BOOT, aplicar assistente de configuração sem ler senha, e testar no R36S.
+- Pendência/risco: confirmar que o assistente preparou BOOT sem erro; depois teste físico. O backup pode conter credenciais e não entra no Git/cofre.
+- Próximo passo exato: aguardar conclusão do assistente pelo usuário, conferir somente arquivos públicos da BOOT, ejetar o cartão com segurança e testar boot/BMO/SSH/5 GHz no R36S.
 
 ## 2026-11-14 — Cartão antigo preservado antes de nova gravação
 
