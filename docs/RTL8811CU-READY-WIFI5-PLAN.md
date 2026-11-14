@@ -40,7 +40,7 @@ Fazer o Wi-Fi interno aparecer como interface de rede no BMO e conectar a uma re
 
 ## Próximo passo exato
 
-Acompanhar `work/ready-wifi5/kernel-build.log` e confirmar a geração de `rtw88_usb.ko`, `rtw88_8821c.ko` e `rtw88_8821cu.ko`. Validar `vermagic`, ID `0bda:c811`, símbolos e `modprobe` em modo seco. Depois injetar módulos e o serviço `bmo-wifi5-report` na cópia da Ready, gerar candidata privada `v1.0.0-beta.2-WiFi5`, verificar imagem/compressão/hash e testar fisicamente em cartão extra de 16 GB ou maior. O teste deve confirmar conexão em frequência 5xxx MHz e SSH ativo com senha nova ou chave, sem colocar credenciais no relatório.
+O build, a integração, `fsck`, gzip e hashes foram concluídos. Branch privada no GitHub: `fix/rtl8811cu-ready-wifi5-beta`, commit `8fd8b2c3f765c6747fccac9d60c0ed67e8134186`. Aguardar o usuário inserir um microSD **extra** de 16 GB ou maior no PC e informar sua letra, preservando F:. Gravar nele a candidata já verificada, abrir a BOOT para selecionar ScreenFiles e configurar rede 5 GHz e SSH com senha nova; depois colocá-lo no R36S. Após o primeiro boot e eventual reinício, devolver o cartão ao PC e ler `BMO-WIFI5-STATUS.txt`. O aceite físico exige interface Wi-Fi, conexão em frequência 5xxx MHz, IP, SSH ativo e boot estável. Não colocar credenciais no relatório.
 
 `R36S_REQUIRED=YES` para a coleta/validação física; `R36S_REQUIRED=NO` para análise, compilação e validação prévia.
 
