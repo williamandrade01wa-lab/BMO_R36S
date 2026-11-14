@@ -7,3 +7,4 @@
 - Não copie arquivos inteiros do cartão, senhas de Wi-Fi/SSH, chaves ou tokens para o cofre.
 - Se `G:` não estiver disponível, conclua o registro neste repositório e anote a sincronização do cofre como pendência.
 - Registre cada acerto e erro com causa, correção, teste e prevenção. Antes de uma compilação ou gravação longa, consulte o Worklog e os gotchas, procure a mesma dependência em **todos os scripts distribuídos** e rode um gate curto no ambiente real do usuário. Uma correção pontual não encerra uma classe de falhas até a esteira barrar sua recorrência.
+- Para políticas do Chromium, teste a imagem final no aparelho: arquivo no caminho efetivo, permissões, leitura pelo navegador e ausência visual do aviso após reboot. A existência do JSON na fonte ou na imagem não encerra a validação.

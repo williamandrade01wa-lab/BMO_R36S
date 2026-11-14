@@ -1,5 +1,12 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Boot físico da nova beta: BMO voltou, aviso de idioma reapareceu
+
+- Relato do usuário: nova mídia iniciou BMO em `192.168.1.28`; aviso de idioma/tradução do Chromium reapareceu; Wi-Fi **aparentemente** em 5 GHz. O popup tinha sido removido na imagem anterior após política instalada via SSH. Logo, o gate de build que verificava presença/valor do JSON não comprovou o efeito no kiosk da nova imagem.
+- Validação remota desta sessão: TCP/SSH respondeu em `192.168.1.28` com nova chave ED25519 (esperado após regravar; fingerprint guardado somente em arquivo local). O arquivo `known_hosts` global não foi alterado; com host separado, a chave de diagnóstico antiga foi rejeitada: `Permission denied (publickey,password)`. A nova mídia não herdou a autorização anterior. Não houve login SSH. Endpoints HTTP em 8088/8080 recusaram conexão. Frequência real e estado da política no sistema **não foram confirmados**; nenhuma senha foi lida.
+- Falha de processo: a documentação anterior dizia que o builder exigia `TranslateEnabled=false`, mas tratou isso como prevenção completa. O teste físico mostrou que a presença do arquivo na fonte não garante aplicação pela instalação/Chromium. Além disso, a imagem raw usada foi compilada antes das últimas alterações em UI/API; separar versão da BOOT atualizada da versão interna da imagem.
+- Próxima sessão: confirmar frequência via BMO ou comando `iw dev wlan0 link` após autenticar por senha local e reinstalar a chave pública autorizada; inspecionar caminho real da política, ownership, conteúdo, linha de comando e página `chrome://policy` do Chromium no aparelho; corrigir a fase que instala a política e criar teste de imagem final/runtime antes de nova compilação longa. Não aceitar só checagem de arquivo fonte. Fazer backup antes de modificar o aparelho.
+- `R36S_REQUIRED=YES`; validação visual do popup já falhou. Usuário pediu continuidade em outra sessão.
 ## 2026-11-14 — Falha recorrente do assistente por dependência de Get-FileHash
 
 - Fase: preparação da BOOT / Gate 5; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `0d91273`.
