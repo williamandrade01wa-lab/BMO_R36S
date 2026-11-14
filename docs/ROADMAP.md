@@ -119,7 +119,7 @@ Objetivo: experiência funcional de uso diário.
 - [ ] backend/control API;
 - [ ] navegação por gamepad;
 - [ ] SYSTEM / CONTROL;
-- [ ] teclado Wi-Fi acessível pelo gamepad: maiúsculas, minúsculas e símbolos usuais de senhas WPA; testar entrada real e navegação entre todas as teclas;
+- [ ] teclado Wi-Fi acessível pelo gamepad: páginas de maiúsculas, minúsculas e todos os símbolos ASCII implementadas no candidate; testar entrada real e navegação física entre todas as teclas antes de concluir;
 - [x] reproduzir e corrigir travamento ao usar B para sair do teclado virtual de Wi-Fi do BMO no R36S; B e SELECT validados no candidate, recuperação sem reset e promoção a produção com backup em 2026-11-14;
 - [ ] Favorites X/Y;
 - [ ] Fast Nav / Virtual Window / Lazy Load;

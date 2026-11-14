@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Teclado Wi-Fi com maiúsculas, minúsculas e símbolos
+
+- Fase: Gate 5, associação em 5 GHz pelo próprio BMO; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `a98357a`.
+- Objetivo: permitir digitar a senha da rede 5 GHz no aparelho, sem depender de PowerShell para caracteres ausentes.
+- Ações: usuário confirmou que ainda estava em 2,4 GHz e pediu teclado completo. SSH leu apenas metadados: perfil ativo sem banda fixa, SSID ativo visto só em 2,4 GHz, três redes 5 GHz visíveis; sem ler SSID ou senha. Frontends de produção e candidate receberam páginas de letras maiúsculas, minúsculas e símbolos, incluindo espaço; ações do teclado passaram de quatro a seis com navegação D-pad correspondente. B/SELECT continuam como saídas de emergência.
+- Arquivos alterados: `frontend/index.html`, `frontend/index.bmo-next.html`, `scripts/test-wifi-keyboard.mjs`, este Worklog, `docs/PROJECT-CONTINUITY.md` e `docs/ROADMAP.md`.
+- Resultado esperado: digitar qualquer caractere ASCII imprimível da senha e selecionar uma rede 5 GHz pelo BMO. Resultado obtido: implementação e teste local concluídos; teste físico no candidate pendente.
+- Validação: sete scripts inline de cada frontend passaram no parser JavaScript; teste do teclado confirma cobertura dos 95 caracteres ASCII imprimíveis, 50 teclas por página, alternância e acesso às seis ações; `git diff --check`.
+- `R36S_REQUIRED=YES` para testar o candidate e depois frequência 5xxx MHz.
+- Pendência/risco: a navegação e a conexão ainda precisam de teste físico; produção não deve ser promovida antes disso. Não registrar senhas nem SSID.
+- Próximo passo exato: implantar candidate com backup, usuário testar troca de páginas/entrada e B, conectar rede 5 GHz no BMO, verificar frequência por SSH e só então promover.
+
 ## 2026-11-14 — Teclado preso recuperado sem reset; candidate de B ativo
 
 - Fase: Gate 5, teclado Wi-Fi e migração 5 GHz; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `b179824`.

@@ -911,9 +911,9 @@
       display: grid;
 
       grid-template-columns:
-        repeat(4, 1fr);
+        repeat(6, 1fr);
 
-      gap: 5px;
+      gap: 3px;
 
       margin-top: 7px;
     }
@@ -5617,21 +5617,35 @@
 
       index: 0,
 
+      page: 'upper',
 
-      chars: [
-        'A','B','C','D','E','F','G','H','I','J',
-        'K','L','M','N','O','P','Q','R','S','T',
-        'U','V','W','X','Y','Z','0','1','2','3',
-        '4','5','6','7','8','9','@','#','$','%',
-        '-','_','.','!','?','+','=','/','(',')'
-      ],
+      letterPage: 'upper',
+
+      get chars() {
+        if (this.page === 'symbols') {
+          const punctuation = Array.from(
+            { length: 95 },
+            (_, i) => String.fromCharCode(i + 32)
+          ).filter(c => !/[A-Za-z0-9]/.test(c));
+          return [...punctuation, ...'0123456789@#$%&*!'];
+        }
+
+        const letters = this.page === 'lower'
+          ? 'abcdefghijklmnopqrstuvwxyz'
+          : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        return [
+          ...letters,
+          ...'0123456789',
+          '@','#','$','%','-','_','.','!','?','+','=','/','(',')'
+        ];
+      },
 
 
       get totalKeys() {
 
         return (
           this.chars.length +
-          4
+          6
         );
       },
 
@@ -5662,6 +5676,10 @@
           false;
 
         this.index = 0;
+
+        this.page = 'upper';
+
+        this.letterPage = 'upper';
 
 
         document
@@ -5716,6 +5734,10 @@
         this.showPassword =
           false;
 
+        this.page = 'upper';
+
+        this.letterPage = 'upper';
+
         BMO_CONTROL.render();
       },
 
@@ -5745,7 +5767,7 @@
                   }
                 "
               >
-                ${BMO_CONTROL.escape(c)}
+                ${c === ' ' ? 'ESP' : BMO_CONTROL.escape(c)}
               </div>
             `
           ).join('');
@@ -5755,6 +5777,16 @@
           document.querySelectorAll(
             '#wifiKbActions .wifi-kb-action'
           );
+
+        if (actions[0]) {
+          actions[0].textContent =
+            this.letterPage === 'upper' ? 'abc' : 'ABC';
+        }
+
+        if (actions[1]) {
+          actions[1].textContent =
+            this.page === 'symbols' ? 'LETRAS' : 'SÍMBOLOS';
+        }
 
 
         actions.forEach(
@@ -5843,10 +5875,7 @@
 
           this.index =
             40 +
-            Math.min(
-              9,
-              actionCol * 3
-            );
+            Math.round(actionCol * 9 / 5);
         }
 
 
@@ -5883,28 +5912,9 @@
             cols;
 
 
-          let action = 0;
-
-          if (col >= 8) {
-            action = 3;
-          }
-
-          else if (
-            col >= 5
-          ) {
-            action = 2;
-          }
-
-          else if (
-            col >= 3
-          ) {
-            action = 1;
-          }
-
-
           this.index =
             this.chars.length +
-            action;
+            Math.round(col * 5 / 9);
         }
 
 
@@ -5958,10 +5968,10 @@
             (
               a -
               1 +
-              4
+              6
             )
             %
-            4;
+            6;
 
 
           this.index =
@@ -6021,7 +6031,7 @@
               1
             )
             %
-            4;
+            6;
 
 
           this.index =
@@ -6206,12 +6216,32 @@
           this.chars.length;
 
 
-        /*
-          MOSTRAR
-        */
-
         if (
           action === 0
+        ) {
+
+          this.letterPage =
+            this.letterPage === 'upper' ? 'lower' : 'upper';
+
+          this.page = this.letterPage;
+
+          this.render();
+        }
+
+        else if (
+          action === 1
+        ) {
+
+          this.page = this.page === 'symbols'
+            ? this.letterPage
+            : 'symbols';
+
+          this.render();
+        }
+
+        /* MOSTRAR */
+        else if (
+          action === 2
         ) {
 
           this.showPassword =
@@ -6226,7 +6256,7 @@
         */
 
         else if (
-          action === 1
+          action === 3
         ) {
 
           this.value =
@@ -6244,7 +6274,7 @@
         */
 
         else if (
-          action === 2
+          action === 4
         ) {
 
           this.connect();
@@ -6256,7 +6286,7 @@
         */
 
         else if (
-          action === 3
+          action === 5
         ) {
 
           this.close();
@@ -10921,6 +10951,14 @@ window.stopBmoSleepMode =
       <div
         class="wifi-kb-actions"
         id="wifiKbActions">
+
+        <div class="wifi-kb-action">
+          abc
+        </div>
+
+        <div class="wifi-kb-action">
+          SÍMBOLOS
+        </div>
 
         <div class="wifi-kb-action">
           MOSTRAR
