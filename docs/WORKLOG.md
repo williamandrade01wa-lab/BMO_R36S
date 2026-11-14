@@ -1,5 +1,29 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — 5 GHz e GitHub confirmados; pausa a pedido do usuário
+
+- Fase: Gate 5, Wi-Fi 5 GHz e SSH; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `689333d`.
+- Objetivo: validar conexão real após corrigir `key-mgmt` e deixar estado seguro para retomada.
+- Ações: primeira tentativa de instalar backend fez backup e rollback porque health foi consultado imediatamente após restart, antes da porta abrir; sem traceback. Instalador ajustado para aguardar até 15 s. Segunda instalação concluiu `CONTROL_API_CANDIDATE_OK`; SSH confirmou hash do backend igual ao local, serviço ativo e health HTTP 200. Usuário conectou pelo BMO. SSH mediu 5240 MHz, sinal 81%, taxa de associação 433300 kbit/s (433,3 Mb/s); `https://github.com/` respondeu HTTP 200 em 0,67 s. Scan da API mostrou a rede ativa apenas em 5 GHz. Perfil WPA salvo com autoconnect=yes, mas banda do perfil vazia e prioridade 0, igual ao perfil antigo. Frontend candidate com status visível implantado, SHA256 `18184e62bdd1410ff7c2ff7b0099fd20a80ecee2601b09a2c63159b5b601706f`, entrada `index.bmo-next.html`, HTTP 200; CDP confirmou campo de status presente. Produção frontend não promovida. Usuário pediu pausa para dormir; túnel CDP fechado.
+- Arquivos alterados: backend, dois frontends, testes locais, este Worklog, `docs/PROJECT-CONTINUITY.md`; instaladores locais em `outputs/` fora do Git; backend no R36S com backup em `/home/r36s/.bmo-deploy/backups/`.
+- Resultado esperado/obtido: Wi-Fi 5 GHz, SSH e GitHub funcionam. Velocidade de internet em Mbps não foi medida; 433,3 Mb/s é taxa de associação do rádio.
+- Validação: testes locais `BMO_WIFI_CONTROL_OK` e teclado ASCII; API health 200, frontend HTTP 200, frequência 5240 MHz, SSH ativo, GitHub HTTP 200.
+- `R36S_REQUIRED=YES` na retomada para confirmar reconexão após reboot e testar interface candidate; `R36S_REQUIRED=NO` para revisão de código/documentação.
+- Pendência/risco: 5 GHz e perfil antigo têm prioridade de autoconexão 0; confirmar persistência e, se necessário, preferir 5 GHz. Frontend candidate ainda não validado fisicamente nem promovido. Nenhuma credencial registrada.
+- Próximo passo exato: após o usuário retomar, verificar estado do R36S; testar reboot controlado e frequência; ajustar prioridade se necessário; testar mensagem visível do candidate; promover após teste físico e registrar checkpoint.
+
+## 2026-11-14 — Erro real de conexão WPA no BMO
+
+- Fase: Gate 5, Wi-Fi 5 GHz pelo BMO; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `689333d`.
+- Objetivo: corrigir o botão CONECTAR após o usuário confirmar que o teclado completo funciona, mas a conexão não ocorre.
+- Ações: usuário deixou o teclado aberto com CONECTAR selecionado. CDP leu só estado não secreto: página de minúsculas, ação 4 selecionada, senha com 9 caracteres e rede WPA2; nenhum caractere, SSID ou senha foi mostrado. A API recebeu chamadas e retornou HTTP 500. Numa tentativa autorizada pelo usuário, a mensagem foi sanitizada no próprio aparelho antes de sair: `802-11-wireless-security.key-mgmt: property is missing`. O toast de falha estava oculto pelo teclado. Scan retornava banda nula porque `nmcli` fornece frequência com sufixo `MHz` e o parser usava `int()` direto.
+- Arquivos alterados: `backend/bmo-control-api.py`, `frontend/index.html`, `frontend/index.bmo-next.html`, `scripts/test-wifi-control.py`, este Worklog e `docs/PROJECT-CONTINUITY.md`.
+- Resultado esperado: conexão WPA explícita, indicação visível de sucesso/falha e seleção da banda 5 GHz. Resultado obtido nesta etapa: implementação e teste local concluídos; teste físico ainda pendente.
+- Validação: backend cria perfil temporário com `key-mgmt=wpa-psk`, fixa banda quando selecionada e remove perfil se falhar; scan preserva SSIDs nas duas bandas e interpreta `MHz`; teste local `BMO_WIFI_CONTROL_OK`, sintaxe Python, parser JavaScript e teste do teclado passaram. Serviços ativos, 2,4 GHz ainda em 2462 MHz; diagnóstico de erro sem guardar credenciais.
+- `R36S_REQUIRED=NO` para implementação; `R36S_REQUIRED=YES` para teste do candidate.
+- Pendência/risco: conexão pode derrubar SSH e mudar IP; não alterar produção antes do teste físico.
+- Próximo passo exato: implantar frontend candidate e backend com backup reversível; usuário tentar conectar rede 5 GHz, conferir status visível e medir frequência. Se falhar, restaurar backend anterior.
+
 ## 2026-11-14 — Teclado Wi-Fi com maiúsculas, minúsculas e símbolos
 
 - Fase: Gate 5, associação em 5 GHz pelo próprio BMO; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `a98357a`.

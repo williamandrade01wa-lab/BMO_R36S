@@ -918,6 +918,15 @@
       margin-top: 7px;
     }
 
+    .wifi-kb-status {
+      min-height: 14px;
+      margin-top: 4px;
+      color: #d7ffec;
+      font-size: 9px;
+      font-weight: 800;
+      text-align: center;
+    }
+
     .wifi-kb-action {
       display: flex;
       align-items: center;
@@ -5615,6 +5624,10 @@
 
       showPassword: false,
 
+      status: '',
+
+      connecting: false,
+
       index: 0,
 
       page: 'upper',
@@ -5675,6 +5688,10 @@
         this.showPassword =
           false;
 
+        this.status = '';
+
+        this.connecting = false;
+
         this.index = 0;
 
         this.page = 'upper';
@@ -5733,6 +5750,10 @@
 
         this.showPassword =
           false;
+
+        this.status = '';
+
+        this.connecting = false;
 
         this.page = 'upper';
 
@@ -5833,6 +5854,9 @@
               '_'
             );
         }
+
+        const status = document.getElementById('wifiKbStatus');
+        if (status) status.textContent = this.status;
       },
 
 
@@ -6046,15 +6070,16 @@
 
       async connect() {
 
+        if (this.connecting) return;
+
         const ssid =
           this.network?.ssid;
 
 
         if (!ssid) {
 
-          BMO_CONTROL.toast(
-            'REDE INVALIDA'
-          );
+          this.status = 'REDE INVÁLIDA';
+          this.render();
 
           return;
         }
@@ -6073,17 +6098,16 @@
           this.value.length < 8
         ) {
 
-          BMO_CONTROL.toast(
-            'SENHA MUITO CURTA'
-          );
+          this.status = 'SENHA MUITO CURTA';
+          this.render();
 
           return;
         }
 
 
-        BMO_CONTROL.toast(
-          'CONECTANDO...'
-        );
+        this.connecting = true;
+        this.status = 'CONECTANDO... AGUARDE ATÉ 35 S';
+        this.render();
 
 
         try {
@@ -6113,7 +6137,10 @@
                       ssid,
 
                     password:
-                      this.value
+                      this.value,
+
+                    band:
+                      this.network?.band || null
                   })
               }
             );
@@ -6164,15 +6191,16 @@
 
         catch (err) {
 
-          console.error(
-            '[BMO WIFI CONNECT]',
-            err
-          );
+          const message = String(err?.message || '');
+          this.status = /secret|password|senha/i.test(message)
+            ? 'NÃO CONECTOU · CONFIRA A SENHA'
+            : 'NÃO CONECTOU · TENTE NOVAMENTE';
+          this.render();
+        }
 
-
-          BMO_CONTROL.toast(
-            'FALHA AO CONECTAR'
-          );
+        finally {
+          this.connecting = false;
+          if (this.visible) this.render();
         }
       },
 
@@ -6182,6 +6210,8 @@
         if (!this.visible) {
           return;
         }
+
+        if (this.connecting) return;
 
 
         /*
@@ -6202,6 +6232,7 @@
               this.chars[
                 this.index
               ];
+            this.status = '';
           }
 
 
@@ -6264,6 +6295,8 @@
               0,
               -1
             );
+
+          this.status = '';
 
           this.render();
         }
@@ -10947,6 +10980,8 @@ window.stopBmoSleepMode =
         class="wifi-kb-grid"
         id="wifiKbGrid">
       </div>
+
+      <div class="wifi-kb-status" id="wifiKbStatus" role="status"></div>
 
       <div
         class="wifi-kb-actions"

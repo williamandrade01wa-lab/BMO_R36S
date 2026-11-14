@@ -2,7 +2,9 @@
 
 import json
 import os
+import re
 import subprocess
+import uuid
 from pathlib import Path
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -92,6 +94,8 @@ def wifi_devices():
     ok, out, err = run([
         "nmcli",
         "-t",
+        "-e",
+        "no",
         "-f",
         "DEVICE,TYPE,STATE,CONNECTION",
         "device"
@@ -156,32 +160,33 @@ def wifi_scan():
     seen = set()
 
     for line in out.splitlines():
-        parts = line.split(":")
+        active, sep, rest = line.partition(":")
 
-        if len(parts) < 5:
+        if not sep or rest.count(":") < 3:
             continue
 
-        active, ssid, signal, freq, security = parts[:5]
+        ssid, signal, freq, security = rest.rsplit(":", 3)
 
-        if not ssid or ssid in seen:
+        if not ssid:
             continue
-
-        seen.add(ssid)
 
         try:
             sig = int(signal)
         except Exception:
             sig = None
 
-        try:
-            f = int(freq)
-        except Exception:
-            f = None
+        match = re.search(r"\d+", freq)
+        f = int(match.group()) if match else None
 
         band = None
 
         if f:
             band = "5 GHz" if f >= 4900 else "2.4 GHz"
+
+        key = (ssid, band)
+        if key in seen:
+            continue
+        seen.add(key)
 
         result.append({
             "ssid": ssid,
@@ -237,7 +242,7 @@ def reconnect_wifi():
 
 
 
-def connect_wifi(ssid, password=""):
+def connect_wifi(ssid, password="", band=None):
 
     if not isinstance(ssid, str):
         return False, "SSID invalido"
@@ -263,6 +268,9 @@ def connect_wifi(ssid, password=""):
     if password and len(password) < 8:
         return False, "senha muito curta"
 
+    if band not in (None, "2.4 GHz", "5 GHz"):
+        return False, "banda Wi-Fi invalida"
+
 
     devices = wifi_devices()
 
@@ -272,41 +280,53 @@ def connect_wifi(ssid, password=""):
     dev = devices[0]["device"]
 
 
-    cmd = [
-        "nmcli",
-        "--wait",
-        "30",
-        "device",
-        "wifi",
-        "connect",
-        ssid,
-        "ifname",
-        dev
-    ]
+    profile = "bmo-wifi-" + uuid.uuid4().hex[:12]
+    created = False
 
+    def failure(message):
+        # Never echo credentials or the private SSID in API errors.
+        if password:
+            message = message.replace(password, "[PASSWORD]")
+        message = message.replace(ssid, "[SSID]")
+        return False, message or "falha ao conectar"
 
-    if password:
-        cmd.extend([
-            "password",
-            password
-        ])
+    try:
+        ok, out, err = run([
+            "nmcli", "connection", "add", "type", "wifi",
+            "ifname", dev, "con-name", profile, "ssid", ssid,
+            "connection.autoconnect", "no"
+        ], 15)
+        if not ok:
+            return failure(err or out)
+        created = True
 
+        settings = ["nmcli", "connection", "modify", profile]
+        if band:
+            settings += ["802-11-wireless.band", "a" if band == "5 GHz" else "bg"]
+        if password:
+            settings += [
+                "802-11-wireless-security.key-mgmt", "wpa-psk",
+                "802-11-wireless-security.psk", password
+            ]
+        ok, out, err = run(settings, 15)
+        if not ok:
+            return failure(err or out)
 
-    ok, out, err = run(
-        cmd,
-        35
-    )
+        ok, out, err = run([
+            "nmcli", "--wait", "35", "connection", "up", profile
+        ], 40)
+        if not ok:
+            return failure(err or out)
 
-
-    if ok:
+        run([
+            "nmcli", "connection", "modify", profile,
+            "connection.autoconnect", "yes"
+        ], 10)
+        created = False
         return True, out or "Wi-Fi conectado"
-
-
-    return False, (
-        err
-        or out
-        or "falha ao conectar"
-    )
+    finally:
+        if created:
+            run(["nmcli", "connection", "delete", profile], 10)
 
 
 def sound_test():
@@ -1213,7 +1233,8 @@ class Handler(BaseHTTPRequestHandler):
         elif action == "wifi_connect":
             ok, result = connect_wifi(
                 data.get("ssid"),
-                data.get("password", "")
+                data.get("password", ""),
+                data.get("band")
             )
 
         elif action == "brightness_up":
