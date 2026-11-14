@@ -9,18 +9,29 @@
 
   <style>
     /* ==========================================================================
-       BMO DISPLAY OS - TELA CHEIA NATIVA
+       BMO DISPLAY OS - TELA CHEIA NATIVA (BMO_VISUAL_V1)
        ========================================================================== */
     :root {
-      /* Cor da Tela BMO (Menta pastel idêntico ao cartoon) */
+      /* Paleta semântica do BMO (contraste otimizado 12.6:1 em 640x480 IPS) */
       --bmo-bg: #AEE8CA;
-      --bmo-face: #0E362F;
-      --bmo-face-soft: rgba(14, 54, 47, 0.4);
-      --bmo-blush: #FF7B89;
+      --bmo-bg-warm: #B5EED0;
+      --bmo-bg-sleep: #9DD8BB;
+      --bmo-bg-sad: #A2DEC2;
+      --bmo-bg-glitch: #98D6B8;
+      --bmo-face: #092B25;
+      --bmo-face-soft: rgba(9, 43, 37, 0.44);
+      --bmo-surface: rgba(9, 43, 37, 0.06);
+      --bmo-blush: #FF758F;
+      --bmo-heart: #E63966;
 
-      /* Tipografia */
-      --font-subtitle: Arial, Helvetica, sans-serif;
-      --font-mono: 'Courier New', monospace;
+      /* Curvas de animação (Emil Kowalski custom easings) */
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      /* Tipografia refinada com kerning óptico e números tabulares */
+      --font-subtitle: 'Trebuchet MS', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
     }
 
     * {
@@ -36,9 +47,28 @@
       height: 100vh;
       overflow: hidden;
       background-color: var(--bmo-bg);
+      color: var(--bmo-face);
       font-family: var(--font-subtitle);
+      font-kerning: normal;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       cursor: none;
-      transition: background-color 0.3s ease;
+      transition: background-color 220ms var(--ease-out);
+    }
+
+    body.state-love,
+    body.state-laugh,
+    body.state-excited {
+      background-color: var(--bmo-bg-warm);
+    }
+
+    body.state-sleep {
+      background-color: var(--bmo-bg-sleep);
+    }
+
+    body.state-sad {
+      background-color: var(--bmo-bg-sad);
     }
 
     /* Container de Tela Cheia */
@@ -69,13 +99,60 @@
       width: min(88vw, 560px);
       height: min(64vh, 310px);
       display: block;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 180ms var(--ease-spring);
     }
 
     .face-part {
       fill: var(--bmo-face);
       stroke: var(--bmo-face);
-      transition: all 0.15s ease-out;
+      transition:
+        transform 160ms var(--ease-out),
+        fill 160ms var(--ease-out),
+        stroke 160ms var(--ease-out),
+        opacity 160ms var(--ease-out);
+    }
+
+    .face-part[fill="none"] {
+      fill: none;
+    }
+
+    .face-mouth-d {
+      fill: #d1475c;
+      stroke: var(--bmo-face);
+      stroke-width: 10px;
+      stroke-linejoin: round;
+    }
+
+    .face-blush {
+      fill: var(--bmo-blush);
+      stroke: none;
+      opacity: 0.42;
+      transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+    }
+
+    .state-love .face-blush,
+    .state-laugh .face-blush,
+    .state-excited .face-blush {
+      opacity: 0.62;
+    }
+
+    .face-heart {
+      fill: var(--bmo-heart);
+      stroke: var(--bmo-face);
+      stroke-width: 4.5px;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .state-love .face-heart {
+      animation: bmo-heart-pulse 0.8s infinite alternate var(--ease-in-out);
+    }
+
+    @keyframes bmo-heart-pulse {
+      from { transform: scale(0.96); }
+      to { transform: scale(1.06); }
     }
 
     /* ==========================================================================
@@ -84,6 +161,7 @@
 
     /* 1. Piscar Natural (Usado na maioria das expressões ativas) */
     .blink-eye {
+      transform-box: fill-box;
       transform-origin: center;
       animation: bmo-blink 4s infinite ease-in-out;
     }
@@ -94,8 +172,10 @@
     }
 
     /* 2. Modo Fala (Boca se movimentando dinamicamente ao falar) */
-    .is-talking .talking-mouth {
-      transform-origin: 220px 145px;
+    .is-talking .talking-mouth,
+    .state-talking .talking-mouth {
+      transform-box: fill-box;
+      transform-origin: center;
       animation: bmo-talk-mouth 0.22s infinite alternate ease-in-out;
     }
 
@@ -112,7 +192,8 @@
     }
 
     /* Leve balanço do rosto durante a fala */
-    .is-talking .face-svg {
+    .is-talking .face-svg,
+    .state-talking .face-svg {
       animation: bmo-talk-bob 0.44s infinite alternate ease-in-out;
     }
     @keyframes bmo-talk-bob {
@@ -145,19 +226,21 @@
     }
 
     /* 5. Erro Crítico / Glitch */
-    .state-glitch {
-      background-color: #9cd6ba !important;
+    body.state-glitch {
+      background-color: var(--bmo-bg-glitch);
     }
     .state-glitch .face-svg {
-      animation: bmo-glitch-shake 0.18s infinite steps(2);
-      filter: drop-shadow(-4px 0px #ff0055) drop-shadow(4px 0px #00e5ff);
+      animation: bmo-glitch-shake 1.2s infinite steps(1);
+      filter:
+        drop-shadow(-2.5px 0px rgba(255, 23, 84, 0.82))
+        drop-shadow(2.5px 0px rgba(0, 216, 246, 0.82));
     }
     @keyframes bmo-glitch-shake {
-      0% { transform: translate(0, 0) skew(0deg); }
-      25% { transform: translate(-4px, 2px) skewX(3deg); }
-      50% { transform: translate(4px, -2px) skewX(-3deg); }
-      75% { transform: translate(-2px, -2px); }
-      100% { transform: translate(3px, 2px); }
+      0%, 68%, 100% { transform: translate(0, 0) skewX(0deg); }
+      72% { transform: translate(-3px, 1px) skewX(2.5deg); }
+      76% { transform: translate(3px, -1px) skewX(-2.5deg); }
+      80% { transform: translate(-2px, 0px) skewX(0deg); }
+      84% { transform: translate(2px, 1px) skewX(1.5deg); }
     }
 
     /* 6. Apaixonado (Love) */
@@ -205,29 +288,40 @@
     }
 
     .subtitle-box {
-      background: rgba(14, 54, 47, 0.94);
-      color: #AEE8CA;
-      padding: 10px 20px;
+      background: rgba(9, 43, 37, 0.95);
+      color: var(--bmo-bg);
+      padding: 10px 22px;
       border-radius: 999px;
-      border: 3px solid #000000;
-      box-shadow: 4px 4px 0px #000000;
-      font-size: clamp(0.9rem, 2.7vw, 1.15rem);
+      border: 3px solid var(--bmo-face);
+      box-shadow: 4px 4px 0px var(--bmo-face);
+      font-size: clamp(0.95rem, 2.7vw, 1.18rem);
       font-weight: 800;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.025em;
       text-align: center;
+      text-wrap: balance;
       line-height: 1.35;
       max-width: 100%;
       display: inline-block;
       opacity: 0;
-      transform: translateY(16px);
-      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      transform: translateY(10px) scale(0.96);
+      transition:
+        opacity 180ms var(--ease-out),
+        transform 180ms var(--ease-out);
       word-wrap: break-word;
     }
 
     /* Estado visível da legenda */
     .subtitle-box.visible {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
+    }
+
+    .clock-time,
+    .weather-temp,
+    .stat-value,
+    .system-value,
+    .ctl-brightness-screen-value {
+      font-variant-numeric: tabular-nums;
     }
 
     /* ==========================================================================
@@ -3139,6 +3233,8 @@
         id: 'happy',
         className: 'state-happy',
         render: (isTalking) => `
+          <ellipse class="face-blush" cx="84" cy="154" rx="18" ry="10" />
+          <ellipse class="face-blush" cx="356" cy="154" rx="18" ry="10" />
           <circle class="face-part blink-eye" cx="120" cy="130" r="19" />
           ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
@@ -3153,6 +3249,8 @@
         id: 'talking',
         className: 'state-talking',
         render: (isTalking) => `
+          <ellipse class="face-blush" cx="84" cy="154" rx="18" ry="10" />
+          <ellipse class="face-blush" cx="356" cy="154" rx="18" ry="10" />
           <circle class="face-part blink-eye" cx="120" cy="130" r="19" />
           <ellipse class="face-part talking-mouth" cx="220" cy="145" rx="22" ry="20" />
           <circle class="face-part blink-eye" cx="320" cy="130" r="19" />
@@ -3189,14 +3287,14 @@
         id: 'glitch',
         className: 'state-glitch',
         render: (isTalking) => `
-          <line class="face-part" x1="95" y1="105" x2="145" y2="155" stroke-width="14" stroke-linecap="round" />
-          <line class="face-part" x1="145" y1="105" x2="95" y2="155" stroke-width="14" stroke-linecap="round" />
+          <line class="face-part" x1="101" y1="107" x2="139" y2="145" stroke-width="12" stroke-linecap="round" />
+          <line class="face-part" x1="139" y1="107" x2="101" y2="145" stroke-width="12" stroke-linecap="round" />
           ${isTalking
-            ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="22" ry="16" />`
-            : `<line class="face-part" x1="185" y1="145" x2="255" y2="145" stroke-width="12" stroke-linecap="round" />`
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="148" rx="22" ry="16" />`
+            : `<path class="face-part" d="M 188 152 L 204 142 L 220 154 L 236 142 L 252 152" fill="none" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />`
           }
-          <line class="face-part" x1="295" y1="105" x2="345" y2="155" stroke-width="14" stroke-linecap="round" />
-          <line class="face-part" x1="345" y1="105" x2="295" y2="155" stroke-width="14" stroke-linecap="round" />
+          <line class="face-part" x1="301" y1="107" x2="339" y2="145" stroke-width="12" stroke-linecap="round" />
+          <line class="face-part" x1="339" y1="107" x2="301" y2="145" stroke-width="12" stroke-linecap="round" />
         `
       },
 
@@ -3205,15 +3303,17 @@
         id: 'love',
         className: 'state-love',
         render: (isTalking) => `
+          <ellipse class="face-blush" cx="74" cy="158" rx="20" ry="11" />
+          <ellipse class="face-blush" cx="366" cy="158" rx="20" ry="11" />
           <!-- Coração Esquerdo -->
-          <path class="face-part" d="M 120 138 A 12 12 0 0 0 102 120 A 12 12 0 0 0 120 144 A 12 12 0 0 0 138 120 A 12 12 0 0 0 120 138 Z" transform="rotate(45 120 130) scale(1.6) translate(-40, -40)" />
+          <path class="face-part face-heart" d="M 120 153 C 112 146 92 133 92 117 C 92 105 108 101 120 114 C 132 101 148 105 148 117 C 148 133 128 146 120 153 Z" />
           <!-- Sorriso -->
           ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="145" rx="20" ry="18" />`
-            : `<path class="face-part" d="M 195 138 Q 220 168 245 138" fill="none" stroke-width="12" stroke-linecap="round" />`
+            : `<path class="face-part" d="M 192 138 Q 220 168 248 138" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
           <!-- Coração Direito -->
-          <path class="face-part" d="M 320 138 A 12 12 0 0 0 302 120 A 12 12 0 0 0 320 144 A 12 12 0 0 0 338 120 A 12 12 0 0 0 320 138 Z" transform="rotate(45 320 130) scale(1.6) translate(-85, 20)" />
+          <path class="face-part face-heart" d="M 320 153 C 312 146 292 133 292 117 C 292 105 308 101 320 114 C 332 101 348 105 348 117 C 348 133 328 146 320 153 Z" />
         `
       },
 
@@ -3223,15 +3323,15 @@
         className: 'state-angry',
         render: (isTalking) => `
           <!-- Sobrancelha & Olho Esquerdo -->
-          <line class="face-part" x1="90" y1="105" x2="145" y2="128" stroke-width="12" stroke-linecap="round" />
+          <line class="face-part" x1="90" y1="99" x2="145" y2="122" stroke-width="12" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="120" cy="142" r="16" />
-          <!-- Boca Reta / Irritada -->
+          <!-- Boca Franzida / Irritada -->
           ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="22" ry="18" />`
-            : `<line class="face-part" x1="190" y1="155" x2="250" y2="155" stroke-width="12" stroke-linecap="round" />`
+            : `<path class="face-part" d="M 192 158 Q 220 146 248 158" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
           <!-- Sobrancelha & Olho Direito -->
-          <line class="face-part" x1="350" y1="105" x2="295" y2="128" stroke-width="12" stroke-linecap="round" />
+          <line class="face-part" x1="350" y1="99" x2="295" y2="122" stroke-width="12" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="320" cy="142" r="16" />
         `
       },
@@ -3242,15 +3342,15 @@
         className: 'state-sad',
         render: (isTalking) => `
           <!-- Sobrancelhas caídas -->
-          <line class="face-part" x1="95" y1="118" x2="145" y2="105" stroke-width="10" stroke-linecap="round" />
-          <circle class="face-part blink-eye" cx="120" cy="135" r="18" />
+          <line class="face-part" x1="95" y1="110" x2="145" y2="96" stroke-width="10" stroke-linecap="round" />
+          <circle class="face-part blink-eye" cx="120" cy="138" r="17" />
           <!-- Boca para baixo -->
           ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="155" rx="20" ry="16" />`
             : `<path class="face-part" d="M 195 158 Q 220 135 245 158" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
-          <line class="face-part" x1="345" y1="118" x2="295" y2="105" stroke-width="10" stroke-linecap="round" />
-          <circle class="face-part blink-eye" cx="320" cy="135" r="18" />
+          <line class="face-part" x1="345" y1="110" x2="295" y2="96" stroke-width="10" stroke-linecap="round" />
+          <circle class="face-part blink-eye" cx="320" cy="138" r="17" />
         `
       },
 
@@ -3259,6 +3359,8 @@
         id: 'laugh',
         className: 'state-laugh',
         render: (isTalking) => `
+          <ellipse class="face-blush" cx="82" cy="156" rx="20" ry="11" />
+          <ellipse class="face-blush" cx="358" cy="156" rx="20" ry="11" />
           <!-- Olhos Fechados de Felicidade ^ ^ -->
           <path class="face-part" d="M 95 138 Q 120 110 145 138" fill="none" stroke-width="12" stroke-linecap="round" />
           <!-- Boca Aberta Sorrindo 'D' -->
@@ -3272,8 +3374,10 @@
         id: 'wink',
         className: 'state-wink',
         render: (isTalking) => `
-          <!-- Olho Fechado piscando -->
-          <line class="face-part" x1="95" y1="130" x2="145" y2="130" stroke-width="13" stroke-linecap="round" />
+          <ellipse class="face-blush" cx="84" cy="154" rx="18" ry="10" />
+          <ellipse class="face-blush" cx="356" cy="154" rx="18" ry="10" />
+          <!-- Olho Fechado piscando em arco -->
+          <path class="face-part" d="M 96 134 Q 120 112 144 134" fill="none" stroke-width="12" stroke-linecap="round" />
           <!-- Boca sorrindo de lado -->
           ${isTalking
             ? `<ellipse class="face-part talking-mouth" cx="225" cy="145" rx="20" ry="18" />`
@@ -3294,7 +3398,60 @@
             ? `<ellipse class="face-part talking-mouth" cx="220" cy="148" rx="18" ry="16" />`
             : `<path class="face-part" d="M 195 150 Q 220 144 245 148" fill="none" stroke-width="12" stroke-linecap="round" />`
           }
+          <path class="face-part" d="M 296 92 Q 320 82 344 94" fill="none" stroke-width="9" stroke-linecap="round" />
           <circle class="face-part blink-eye" cx="320" cy="124" r="21" />
+        `
+      },
+
+      // 12. Empolgado / Conquista (Excited)
+      excited: {
+        id: 'excited',
+        className: 'state-excited',
+        render: (isTalking) => `
+          <ellipse class="face-blush" cx="76" cy="158" rx="18" ry="10" />
+          <ellipse class="face-blush" cx="364" cy="158" rx="18" ry="10" />
+          <path class="face-part" d="M 120 84 C 125 112, 132 119, 160 124 C 132 129, 125 136, 120 164 C 115 136, 108 129, 80 124 C 108 119, 115 112, 120 84 Z" stroke-width="6" stroke-linejoin="round" />
+          <path d="M 120 110 L 126 124 L 120 138 L 114 124 Z" fill="var(--bmo-bg)" />
+          <path class="face-part" d="M 320 84 C 325 112, 332 119, 360 124 C 332 129, 325 136, 320 164 C 315 136, 308 129, 280 124 C 308 119, 315 112, 320 84 Z" stroke-width="6" stroke-linejoin="round" />
+          <path d="M 320 110 L 326 124 L 320 138 L 314 124 Z" fill="var(--bmo-bg)" />
+          <path class="face-part" d="M 74 88 L 77 96 L 85 99 L 77 102 L 74 110 L 71 102 L 63 99 L 71 96 Z" />
+          <path class="face-part" d="M 366 88 L 369 96 L 377 99 L 369 102 L 366 110 L 363 102 L 355 99 L 363 96 Z" />
+          ${isTalking
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="160" rx="24" ry="20" />`
+            : `<path class="face-part face-mouth-d" d="M 176 146 Q 220 152 264 146 C 264 202, 176 202, 176 146 Z" /><path d="M 196 176 Q 220 162 244 176" fill="none" stroke="#ff8598" stroke-width="10" stroke-linecap="round" />`
+          }
+        `
+      },
+
+      // 13. Tonto / Confuso (Dizzy)
+      dizzy: {
+        id: 'dizzy',
+        className: 'state-dizzy',
+        render: (isTalking) => `
+          <path class="face-part" d="M 120 126 C 124 122, 128 128, 122 133 C 113 139, 104 129, 109 117 C 116 103, 135 106, 139 122 C 144 141, 122 156, 103 146 C 85 136, 89 106, 112 96 C 134 87, 156 106, 152 131" fill="none" stroke-width="9.5" stroke-linecap="round" />
+          <path class="face-part" d="M 320 126 C 316 122, 312 128, 318 133 C 327 139, 336 129, 331 117 C 324 103, 305 106, 301 122 C 296 141, 318 156, 337 146 C 355 136, 351 106, 328 96 C 306 87, 284 106, 288 131" fill="none" stroke-width="9.5" stroke-linecap="round" />
+          ${isTalking
+            ? `<ellipse class="face-part talking-mouth" cx="220" cy="170" rx="22" ry="16" />`
+            : `<path class="face-part" d="M 170 170 C 187 150, 203 190, 220 170 C 237 150, 253 190, 270 170" fill="none" stroke-width="11" stroke-linecap="round" />`
+          }
+        `
+      },
+
+      // 14. Esperto / Sorriso de Canto (Smug)
+      smug: {
+        id: 'smug',
+        className: 'state-smug',
+        render: (isTalking) => `
+          <path class="face-part" d="M 92 104 Q 120 100 148 106" fill="none" stroke-width="9" stroke-linecap="round" />
+          <path class="face-part" d="M 292 102 Q 320 80 348 92" fill="none" stroke-width="9" stroke-linecap="round" />
+          <line class="face-part" x1="94" y1="122" x2="146" y2="122" stroke-width="11" stroke-linecap="round" />
+          <path class="face-part" d="M 104 122 A 18 18 0 0 0 140 122 Z" />
+          <line class="face-part" x1="294" y1="122" x2="346" y2="122" stroke-width="11" stroke-linecap="round" />
+          <path class="face-part" d="M 304 122 A 18 18 0 0 0 340 122 Z" />
+          ${isTalking
+            ? `<ellipse class="face-part talking-mouth" cx="225" cy="155" rx="20" ry="16" />`
+            : `<path class="face-part" d="M 184 166 Q 224 170 258 148" fill="none" stroke-width="11" stroke-linecap="round" /><path class="face-part" d="M 255 139 Q 266 146 261 159" fill="none" stroke-width="8" stroke-linecap="round" />`
+          }
         `
       }
     };
@@ -3417,6 +3574,19 @@
       },
 
       /**
+       * Dispara uma reação completa (expressão visual + áudio correspondente)
+       * Falha controladamente (retorna false) se o ID for inválido.
+       * @param {string} name
+       * @returns {boolean}
+       */
+      triggerReaction(name) {
+        if (typeof setExpressionAndSound === 'function') {
+          return setExpressionAndSound(name);
+        }
+        return this.setExpression(name);
+      },
+
+      /**
        * Retorna lista de expressões disponíveis
        */
       getExpressions() {
@@ -3440,6 +3610,7 @@
     window.setExpression = (name) => BMO.setExpression(name);
     window.say = (text, opts) => BMO.say(text, opts);
     window.setSubtitle = (text) => BMO.setSubtitle(text);
+    window.triggerBmoReaction = (name) => BMO.triggerReaction(name);
 
     /**
      * =========================================================================
@@ -3457,7 +3628,17 @@
       switch (data.type) {
         case 'BMO_EXPRESSION':
         case 'EXPRESSION':
-          if (data.expression) BMO.setExpression(data.expression);
+          if (data.expression) {
+            if (data.withSound) {
+              BMO.triggerReaction(data.expression);
+            } else {
+              BMO.setExpression(data.expression);
+            }
+          }
+          break;
+        case 'BMO_REACTION':
+        case 'REACTION':
+          if (data.reaction) BMO.triggerReaction(data.reaction);
           break;
         case 'BMO_SAY':
         case 'SAY':
@@ -3514,7 +3695,7 @@
       // Teclas 1 a 9 alternam expressões
       const num = parseInt(e.key);
       if (!isNaN(num) && num >= 1 && num <= exprKeys.length) {
-        BMO.setExpression(exprKeys[num - 1]);
+        setExpressionAndSound(exprKeys[num - 1]);
       }
       // Tecla T ativa fala de teste
       if (e.key.toLowerCase() === 't') {
@@ -3969,12 +4150,19 @@
        ========================================================================= */
 
     function setExpressionAndSound(expression) {
-      BMO.setExpression(expression);
+      if (!BMO_EXPRESSIONS || !BMO_EXPRESSIONS[expression]) {
+        console.warn(`[BMO OS] Reação '${expression}' inválida. Opções:`, Object.keys(BMO_EXPRESSIONS || {}));
+        return false;
+      }
 
-      if (typeof window.playBmoSound === "function") {
+      const ok = BMO.setExpression(expression);
+
+      if (ok && typeof window.playBmoSound === "function") {
         window.playBmoSound(expression);
       }
+      return ok;
     }
+    window.setExpressionAndSound = setExpressionAndSound;
 
 
     /* ================================================================
@@ -4974,6 +5162,15 @@
           );
 
         } catch (err) {
+
+          if (
+            action === 'sound_test' &&
+            typeof window.playBmoSound === 'function'
+          ) {
+            window.playBmoSound('success');
+            this.toast('ÁUDIO OK');
+            return;
+          }
 
           this.toast(
             'AÇÃO FALHOU'
@@ -10493,6 +10690,17 @@
 const BMO_SOUND_API =
     "http://127.0.0.1:8087/api/sound";
 
+const BMO_SOUND_HEALTH_API =
+    "http://127.0.0.1:8087/health";
+
+const BMO_SOUND_LOCAL_BASES = [
+    window.BMO_RUNTIME_CONFIG?.soundsBaseUrl || "",
+    "/assets/sounds/",
+    "../assets/sounds/",
+    "assets/sounds/",
+    "/sounds/"
+].filter(Boolean);
+
 const BMO_SOUND_MAP = {
     happy: "happy",
     thinking: "thinking",
@@ -10509,13 +10717,343 @@ const BMO_SOUND_MAP = {
     laugh: "laugh",
     talking: "talking",
 
-    success: "success"
+    success: "success",
+
+    excited: "excited",
+    dizzy: "dizzy",
+    smug: "smug"
 };
 
 let lastBmoSound = "";
 let lastBmoSoundAt = 0;
 
 let bmoSleepTimer = null;
+
+/*
+ * Estado do backend de áudio nativo do R36S (127.0.0.1:8087)
+ * "unknown" | "online" | "offline"
+ */
+let bmoNativeSoundState = "unknown";
+let bmoResolvedSoundBase = null;
+let bmoAudioCtx = null;
+let bmoActiveBrowserSource = null;
+let bmoActiveBrowserAudio = null;
+const bmoAudioBufferCache = new Map();
+const bmoAudioLoadingMap = new Map();
+
+const BMO_SOUND_DIAG = {
+    mode: "unknown",
+    lastSound: null,
+    lastPlayedAt: 0,
+    playedCount: 0,
+    audioCtxState: "uninitialized",
+    resolvedBase: null,
+    lastError: null
+};
+window.BMO_SOUND_DIAG = BMO_SOUND_DIAG;
+
+
+/* =========================================================
+   WEB AUDIO / DESKTOP BROWSER FALLBACK + AUTOPLAY UNLOCK
+   ========================================================= */
+
+function ensureBmoAudioContext() {
+
+    if (!bmoAudioCtx) {
+        const Ctx =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if (Ctx) {
+            try {
+                bmoAudioCtx = new Ctx();
+            } catch (e) {
+                BMO_SOUND_DIAG.lastError = String(e);
+            }
+        }
+    }
+
+    if (bmoAudioCtx) {
+        BMO_SOUND_DIAG.audioCtxState =
+            bmoAudioCtx.state;
+    }
+
+    return bmoAudioCtx;
+}
+
+
+function unlockBmoBrowserAudio() {
+
+    const ctx =
+        ensureBmoAudioContext();
+
+    if (!ctx)
+        return;
+
+    if (ctx.state === "suspended") {
+        ctx.resume().then(() => {
+            BMO_SOUND_DIAG.audioCtxState =
+                ctx.state;
+        }).catch(() => {});
+    }
+
+    try {
+        const silent =
+            ctx.createBuffer(1, 1, 22050);
+        const src =
+            ctx.createBufferSource();
+        src.buffer = silent;
+        src.connect(ctx.destination);
+        src.start(0);
+    } catch (e) {}
+
+    BMO_SOUND_DIAG.audioCtxState =
+        ctx.state;
+}
+
+[
+    "pointerdown",
+    "mousedown",
+    "touchstart",
+    "keydown",
+    "click",
+    "gamepadconnected"
+].forEach(evtName => {
+    window.addEventListener(
+        evtName,
+        unlockBmoBrowserAudio,
+        { passive: true, capture: true }
+    );
+});
+
+
+function stopActiveBrowserSound() {
+
+    if (bmoActiveBrowserSource) {
+        try {
+            bmoActiveBrowserSource.stop();
+            bmoActiveBrowserSource.disconnect();
+        } catch (e) {}
+        bmoActiveBrowserSource = null;
+    }
+
+    if (bmoActiveBrowserAudio) {
+        try {
+            bmoActiveBrowserAudio.pause();
+            bmoActiveBrowserAudio.currentTime = 0;
+        } catch (e) {}
+        bmoActiveBrowserAudio = null;
+    }
+}
+
+
+async function resolveBmoSoundUrl(sound) {
+
+    const fileName =
+        encodeURIComponent(sound) + ".wav";
+
+    if (bmoResolvedSoundBase) {
+        return bmoResolvedSoundBase + fileName;
+    }
+
+    for (const base of BMO_SOUND_LOCAL_BASES) {
+        const normalizedBase =
+            base.endsWith("/") ? base : (base + "/");
+        const candidateUrl =
+            normalizedBase + fileName;
+
+        try {
+            const res = await fetch(
+                candidateUrl,
+                { method: "HEAD", cache: "no-store" }
+            );
+            if (res.ok) {
+                bmoResolvedSoundBase = normalizedBase;
+                BMO_SOUND_DIAG.resolvedBase = normalizedBase;
+                return candidateUrl;
+            }
+        } catch (e) {}
+    }
+
+    const fallbackBase =
+        BMO_SOUND_LOCAL_BASES[0] || "/assets/sounds/";
+    return (fallbackBase.endsWith("/") ? fallbackBase : fallbackBase + "/") + fileName;
+}
+
+
+async function loadBmoSoundBuffer(sound) {
+
+    if (bmoAudioBufferCache.has(sound)) {
+        return bmoAudioBufferCache.get(sound);
+    }
+
+    if (bmoAudioLoadingMap.has(sound)) {
+        return bmoAudioLoadingMap.get(sound);
+    }
+
+    const promise = (async () => {
+        const ctx = ensureBmoAudioContext();
+        if (!ctx) return null;
+
+        let lastErr = null;
+        const bases = bmoResolvedSoundBase
+            ? [bmoResolvedSoundBase, ...BMO_SOUND_LOCAL_BASES.filter(b => b !== bmoResolvedSoundBase)]
+            : BMO_SOUND_LOCAL_BASES;
+
+        for (const base of bases) {
+            const normalizedBase =
+                base.endsWith("/") ? base : (base + "/");
+            const url =
+                normalizedBase + encodeURIComponent(sound) + ".wav";
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) continue;
+
+                const arrayBuf = await res.arrayBuffer();
+                const audioBuf = await ctx.decodeAudioData(arrayBuf.slice(0));
+
+                bmoResolvedSoundBase = normalizedBase;
+                BMO_SOUND_DIAG.resolvedBase = normalizedBase;
+                bmoAudioBufferCache.set(sound, audioBuf);
+                return audioBuf;
+            } catch (err) {
+                lastErr = err;
+            }
+        }
+
+        if (lastErr) {
+            BMO_SOUND_DIAG.lastError = String(lastErr);
+        }
+        return null;
+    })();
+
+    bmoAudioLoadingMap.set(sound, promise);
+    try {
+        return await promise;
+    } finally {
+        bmoAudioLoadingMap.delete(sound);
+    }
+}
+
+
+function preloadBmoBrowserSounds() {
+
+    const uniqueSounds =
+        Array.from(
+            new Set(Object.values(BMO_SOUND_MAP))
+        );
+
+    uniqueSounds.forEach(sound => {
+        loadBmoSoundBuffer(sound).catch(() => {});
+    });
+}
+
+
+async function playBrowserBmoSound(sound) {
+
+    stopActiveBrowserSound();
+
+    const ctx = ensureBmoAudioContext();
+
+    if (ctx) {
+        if (ctx.state === "suspended") {
+            try {
+                await ctx.resume();
+            } catch (e) {}
+        }
+
+        BMO_SOUND_DIAG.audioCtxState = ctx.state;
+
+        try {
+            const buffer = await loadBmoSoundBuffer(sound);
+            if (buffer && ctx.state === "running") {
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(ctx.destination);
+                bmoActiveBrowserSource = source;
+                source.onended = () => {
+                    if (bmoActiveBrowserSource === source) {
+                        bmoActiveBrowserSource = null;
+                    }
+                };
+                source.start(0);
+
+                BMO_SOUND_DIAG.mode = "webaudio";
+                BMO_SOUND_DIAG.lastSound = sound;
+                BMO_SOUND_DIAG.lastPlayedAt = Date.now();
+                BMO_SOUND_DIAG.playedCount += 1;
+                return true;
+            }
+        } catch (err) {
+            BMO_SOUND_DIAG.lastError = String(err);
+        }
+    }
+
+    try {
+        const url = await resolveBmoSoundUrl(sound);
+        const audio = new Audio(url);
+        audio.preload = "auto";
+        bmoActiveBrowserAudio = audio;
+        audio.onended = () => {
+            if (bmoActiveBrowserAudio === audio) {
+                bmoActiveBrowserAudio = null;
+            }
+        };
+        await audio.play();
+
+        BMO_SOUND_DIAG.mode = "html5audio";
+        BMO_SOUND_DIAG.lastSound = sound;
+        BMO_SOUND_DIAG.lastPlayedAt = Date.now();
+        BMO_SOUND_DIAG.playedCount += 1;
+        return true;
+    } catch (err) {
+        BMO_SOUND_DIAG.lastError = String(err);
+        console.warn("[BMO SOUND] Browser fallback falhou:", err);
+        return false;
+    }
+}
+
+
+async function probeBmoSoundBackend() {
+
+    const controller =
+        typeof AbortController !== "undefined"
+            ? new AbortController()
+            : null;
+
+    const timer = controller
+        ? setTimeout(() => controller.abort(), 250)
+        : null;
+
+    try {
+        const res = await fetch(
+            BMO_SOUND_HEALTH_API,
+            {
+                method: "GET",
+                cache: "no-store",
+                signal: controller ? controller.signal : undefined
+            }
+        );
+
+        if (res.ok) {
+            bmoNativeSoundState = "online";
+            BMO_SOUND_DIAG.mode = "r36s-native";
+            return true;
+        }
+    } catch (e) {
+        // 127.0.0.1:8087 indisponível (ambiente desktop/browser PC)
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+
+    bmoNativeSoundState = "offline";
+    BMO_SOUND_DIAG.mode = "browser-fallback";
+    preloadBmoBrowserSounds();
+    return false;
+}
+
+probeBmoSoundBackend();
 
 
 /* =========================================================
@@ -10555,10 +11093,24 @@ function ensureBmoSleepZzz() {
 
 
 /* =========================================================
-   PLAYER REAL
+   PLAYER REAL (R36S NATIVE + FALLBACK BROWSER DESKTOP)
    ========================================================= */
 
 function triggerBmoSound(sound) {
+
+    if (bmoNativeSoundState === "offline") {
+        playBrowserBmoSound(sound);
+        return;
+    }
+
+    const controller =
+        (bmoNativeSoundState === "unknown" && typeof AbortController !== "undefined")
+            ? new AbortController()
+            : null;
+
+    const timer = controller
+        ? setTimeout(() => controller.abort(), 200)
+        : null;
 
     fetch(
         BMO_SOUND_API,
@@ -10572,14 +11124,34 @@ function triggerBmoSound(sound) {
 
             body: JSON.stringify({
                 sound: sound
-            })
-        }
-    ).catch(error => {
+            }),
 
+            signal: controller ? controller.signal : undefined
+        }
+    ).then(res => {
+
+        if (timer) clearTimeout(timer);
+
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+
+        bmoNativeSoundState = "online";
+        BMO_SOUND_DIAG.mode = "r36s-native";
+        BMO_SOUND_DIAG.lastSound = sound;
+        BMO_SOUND_DIAG.lastPlayedAt = Date.now();
+        BMO_SOUND_DIAG.playedCount += 1;
+
+    }).catch(error => {
+
+        if (timer) clearTimeout(timer);
+
+        bmoNativeSoundState = "offline";
         console.warn(
-            "[BMO SOUND]",
+            "[BMO SOUND] API local indisponível, usando áudio do navegador:",
             error
         );
+        playBrowserBmoSound(sound);
 
     });
 }
@@ -10671,6 +11243,8 @@ function stopBmoSleepMode() {
         );
 
         bmoSleepTimer = null;
+
+        stopActiveBrowserSound();
 
         console.log(
             "[BMO SLEEP] finalizado"
