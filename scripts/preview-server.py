@@ -5,7 +5,7 @@
 - GET /gamepad.html     -> emulador de gamepad
 - GET /gamepad-state    -> {ts, buttons[17], axes[4]} lido pelo gamepad-inject.js
 - POST /gamepad         -> {"type":"press"|"release","btn":N}
-- POST /gamepad/tap     -> {"btn":N} (press + release apos 120 ms)
+- POST /gamepad/tap     -> {"btn":N} (press + release apos 150 ms)
 Somente 127.0.0.1. Uso: python -I scripts/preview-server.py [porta]
 """
 import json
@@ -37,7 +37,6 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Cache-Control", "no-store")
 
     def _json(self, obj, code=200):
         body = json.dumps(obj).encode()
@@ -47,6 +46,10 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -60,7 +63,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(STATE)
         if path in ("/", "/index.html", "/preview"):
             html = (ROOT / "index.bmo-next.html").read_text(encoding="utf-8")
-            tag = '<script src="/gamepad-inject.js"></script>'
+            ver = int((ROOT / "gamepad-inject.js").stat().st_mtime)  # evita cache do webview
+            tag = f'<script src="/gamepad-inject.js?v={ver}"></script>'
             html = html.replace("</head>", tag + "</head>", 1) if "</head>" in html else tag + html
             body = html.encode()
             self.send_response(200)
@@ -85,7 +89,7 @@ class Handler(SimpleHTTPRequestHandler):
             set_btn(btn, kind == "press")
         elif path == "/gamepad/tap":
             set_btn(btn, True)
-            threading.Timer(0.12, set_btn, (btn, False)).start()
+            threading.Timer(0.15, set_btn, (btn, False)).start()
         else:
             return self._json({"ok": False, "error": "rota"}, 404)
         return self._json({"ok": True})

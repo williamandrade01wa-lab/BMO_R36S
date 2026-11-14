@@ -306,7 +306,7 @@
 
 <script>
 // ── HTTP relay (cross-portal via local server) ────────────────────
-const RELAY = 'http://localhost:8360/gamepad';
+const RELAY = '/gamepad';
 const dot = document.getElementById('dot');
 const statusLabel = document.getElementById('status-label');
 const logEl = document.getElementById('log');
@@ -318,7 +318,7 @@ function log(msg) {
 // Heartbeat: poll /gamepad-state to confirm server is up
 let connected = false;
 function ping() {
-  fetch('http://localhost:8360/gamepad-state', { cache: 'no-store' })
+  fetch('/gamepad-state', { cache: 'no-store' })
     .then(r => r.json())
     .then(() => {
       if (!connected) {
