@@ -1,5 +1,17 @@
 # BMO R36S — Worklog
 
+## 2026-11-14 — Retomada e falha de boot ainda sem causa identificada
+
+- Fase: Gate 5, persistência do boot e Wi-Fi 5 GHz; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `682a84b`.
+- Objetivo: verificar se BMO, SSH e 5 GHz retornaram após ligar o R36S.
+- Ações: confirmei árvore Git limpa e HEAD local/remoto `682a84b`; GitHub Actions não apresentou runs para esta branch. Fiz somente leituras de rede/SSH, sem comando executado no aparelho. A porta 22 inicialmente aceitou TCP e fechou antes do banner SSH; API/UI não responderam. O usuário relatou tela preta com X, reiniciou forçadamente por iniciativa própria e depois relatou tela preta sem X. No IP anterior, SSH passou a expirar. O cartão voltou ao PC como F: inacessível, volume 0, apesar de o dispositivo USB 2 de 57.671.680.000 bytes estar online. Com UAC, leitura somente do setor físico 0 retornou 512 bytes `FF`, inclusive assinatura/entradas MBR. Uma nova tentativa elevada de amostrar outros setores foi cancelada pelo usuário. O usuário decidiu gravar outro microSD. Hash SHA256 da raw local de 12.884.901.888 bytes foi recalculado e coincide com o manifesto: `11cda8721d2e731da176e3b8616e55dfbb648a3b502994b3ce3958592a3fcbc4`.
+- Arquivos alterados: `docs/WORKLOG.md`, `docs/PROJECT-CONTINUITY.md`.
+- Resultado esperado: BMO e SSH retornarem com conexão 5 GHz. Resultado obtido: sem acesso remoto e sem boot visível confirmado; setor 0 do cartão não contém MBR válido. A causa do padrão `FF` ainda é indeterminada. O sucesso anterior em 5240 MHz não prova persistência neste boot.
+- Validação: tentativas SSH, checagem TCP, relatos visuais do usuário, leitura física somente do setor 0 e SHA256 da imagem raw no PC. Nenhum log do sistema ou demais setores do cartão foi lido nesta etapa.
+- `R36S_REQUIRED=YES` para testar o novo cartão e diagnosticar o atual; `R36S_REQUIRED=NO` para revisar artefato e documentação no PC.
+- Pendência/risco: possível falha da mídia ou do leitor; ambas ainda compatíveis com o padrão `FF`. Preservar o cartão atual. A raw do PC tem manifesto e arquivos SHA256 próprios; a síntese histórica da continuidade cita hash de revisão anterior.
+- Próximo passo exato: conferir hash da raw local, gravá-la em microSD extra, preparar BOOT, testar BMO/SSH/IP; se repetir tela preta, desligar e ler diagnósticos da BOOT/ext4 do cartão sem alterar a mídia.
+
 ## 2026-11-14 — 5 GHz e GitHub confirmados; pausa a pedido do usuário
 
 - Fase: Gate 5, Wi-Fi 5 GHz e SSH; branch `fix/rtl8811cu-ready-wifi5-beta`, HEAD inicial `689333d`.
