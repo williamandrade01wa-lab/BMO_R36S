@@ -1,3 +1,17 @@
+
+function Get-BmoScannedWifi{
+     = @()
+    try {
+         = netsh wlan show networks 2>
+        foreach( in ){
+            if( -match '^\s*SSID\s+\d+\s*:\s*(.+)$'){
+                 = [1].Trim()
+                if( -and -not ( -contains )){  += @() }
+            }
+        }
+    } catch {}
+    return 
+}
 ﻿[CmdletBinding()]
 param([switch]$SelfTest,[switch]$SmokeTest,[string]$PreviewPath)
 Set-StrictMode -Version 2.0
