@@ -1,5 +1,15 @@
 # BMO R36S
 
+> [!IMPORTANT]
+> **Aviso Legal e Direitos Autorais (Disclaimer de Propriedade Intelectual):**
+> Este projeto é de código aberto, sem fins lucrativos, desenvolvido por entusiastas para fins estritamente educacionais e de estudo de sistemas embarcados. O visual e a interface são **inspirados na estética do personagem BMO**, porém todo o código, arte gráfica gerada e scripts deste repositório são implementações originais e independentes. Nenhuma marca registrada, ativo proprietário ou código de detentores de direitos autorais foi copiado ou infringido. O projeto não possui vínculo, patrocínio ou afiliação oficial com os criadores ou detentores da marca *Hora de Aventura / Adventure Time*.
+
+> [!CAUTION]
+> **Política Rigorosa sobre Jogos e Arquivos Protegidos (Zero ROMs / Zero ISOs):**
+> Este repositório e suas imagens de instalação **NÃO CONTÊM NENHUMA ROM, ISO, BIOS, JOGO OU ARQUIVO PROTEGIDO POR DIREITOS AUTORAIS**.
+> O usuário é integralmente e exclusivamente responsável por qualquer arquivo de mídia ou jogo que decidir transferir para seu próprio aparelho, devendo respeitar a legislação de direitos autorais vigente no seu país.
+
+
 > [!WARNING]
 > ### ⚠️ AVISO IMPORTANTE: PROJETO EXPERIMENTAL & CUIDADOS COM O R36S
 > - **Desenvolvimento Amador & Entusiasta:** Este projeto é desenvolvido por um entusiasta explorando os limites de hardware do console R36S. Não é um produto comercial nem uma firmware oficial.
@@ -219,3 +229,13 @@ A distribuição pública deverá usar Git/HTTPS sem segredo embutido na imagem.
 - [`docs/BMO-LINUX-BASE-DESIGN.md`](docs/BMO-LINUX-BASE-DESIGN.md) — arquitetura técnica da imagem;
 - [`docs/BMO-CI-ARCHITECTURE.md`](docs/BMO-CI-ARCHITECTURE.md) — CI em camadas;
 - [`CREDITS.md`](CREDITS.md) e [`THIRD_PARTY.md`](THIRD_PARTY.md) — origem e dependências externas.
+
+
+## Créditos da Imagem Linux Base (Pure)
+
+A base do sistema operacional Linux utilizada no R36S é de código aberto e crédito integral dos desenvolvedores da comunidade:
+- **Armbian Trixie para R36S**: Mantido por [ohjhas/armbian-r36s](https://github.com/ohjhas/armbian-r36s) (Release ).
+- **Projeto Base Original**: Baseado no fork de [EatPrilosec/R36S-Armbian](https://github.com/EatPrilosec/R36S-Armbian) e no ecossistema [Armbian Linux](https://github.com/armbian/build).
+- **Suporte de Painéis e Telas**: Árvore de dispositivos e drivers da comunidade [R36S-Stuff](https://github.com/R36S-Stuff).
+
+*O projeto deste repositório desenvolve exclusivamente a camada de interface/automação BMO e reconhece com gratidão o trabalho das equipes upstream.*
