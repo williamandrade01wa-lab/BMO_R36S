@@ -911,11 +911,20 @@
       display: grid;
 
       grid-template-columns:
-        repeat(4, 1fr);
+        repeat(6, 1fr);
 
-      gap: 5px;
+      gap: 3px;
 
       margin-top: 7px;
+    }
+
+    .wifi-kb-status {
+      min-height: 14px;
+      margin-top: 4px;
+      color: #d7ffec;
+      font-size: 9px;
+      font-weight: 800;
+      text-align: center;
     }
 
     .wifi-kb-action {
@@ -1164,6 +1173,151 @@
   align-items: center;
   justify-content: center;
 }
+
+
+
+    /* =========================================================
+       BMO CONTROL - MINIMALISTA & VERDE BMO PASTEL NATIVO
+       ========================================================= */
+
+    #bmoControlApp {
+      background: #AEE8CA !important;
+      color: #0E362F !important;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+
+    #bmoControlApp .ctl-wrap {
+      width: 100%;
+      height: 100%;
+      padding: 16px 20px 12px 20px;
+      display: flex;
+      flex-direction: column;
+      background: #AEE8CA;
+    }
+
+    #bmoControlApp .ctl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid rgba(14, 54, 47, 0.2);
+      padding-bottom: 8px;
+    }
+
+    #bmoControlApp .ctl-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-subtitle {
+      margin-top: 2px;
+      font-size: 11px;
+      opacity: 0.7;
+      letter-spacing: 0.12em;
+      color: #0E362F;
+      font-weight: 700;
+    }
+
+    #bmoControlApp .ctl-status {
+      padding: 5px 12px;
+      border: 2px solid #0E362F;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      background: rgba(14, 54, 47, 0.08);
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      flex: 1;
+    }
+
+    #bmoControlApp .ctl-card {
+      min-height: 110px;
+      border: 2px solid rgba(14, 54, 47, 0.18);
+      border-radius: 16px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.35);
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(14, 54, 47, 0.05);
+    }
+
+    #bmoControlApp .ctl-card.selected {
+      border: 2.5px solid #0E362F;
+      background: #FFFFFF;
+      transform: scale(1.03);
+      box-shadow: 0 6px 14px rgba(14, 54, 47, 0.15);
+    }
+
+    #bmoControlApp .ctl-icon {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-label {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-value {
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: 700;
+      color: rgba(14, 54, 47, 0.75);
+    }
+
+    #bmoControlApp .ctl-footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 8px;
+      margin-top: auto;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(14, 54, 47, 0.6);
+      letter-spacing: 0.04em;
+    }
+
+    #bmoControlApp .ctl-network {
+      background: rgba(255, 255, 255, 0.35);
+      border: 1.5px solid rgba(14, 54, 47, 0.18);
+      color: #0E362F;
+      border-radius: 10px;
+    }
+
+    #bmoControlApp .ctl-network.selected {
+      border: 2px solid #0E362F !important;
+      background: #FFFFFF !important;
+    }
+
+    #bmoControlApp .ctl-action {
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid rgba(14, 54, 47, 0.2);
+      color: #0E362F;
+      border-radius: 10px;
+      font-weight: 900;
+    }
+
+    #bmoControlApp .ctl-action.selected {
+      border-color: #0E362F;
+      background: #FFFFFF;
+    }
 
 </style>
 
@@ -5615,23 +5769,41 @@
 
       showPassword: false,
 
+      status: '',
+
+      connecting: false,
+
       index: 0,
 
+      page: 'upper',
 
-      chars: [
-        'A','B','C','D','E','F','G','H','I','J',
-        'K','L','M','N','O','P','Q','R','S','T',
-        'U','V','W','X','Y','Z','0','1','2','3',
-        '4','5','6','7','8','9','@','#','$','%',
-        '-','_','.','!','?','+','=','/','(',')'
-      ],
+      letterPage: 'upper',
+
+      get chars() {
+        if (this.page === 'symbols') {
+          const punctuation = Array.from(
+            { length: 95 },
+            (_, i) => String.fromCharCode(i + 32)
+          ).filter(c => !/[A-Za-z0-9]/.test(c));
+          return [...punctuation, ...'0123456789@#$%&*!'];
+        }
+
+        const letters = this.page === 'lower'
+          ? 'abcdefghijklmnopqrstuvwxyz'
+          : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        return [
+          ...letters,
+          ...'0123456789',
+          '@','#','$','%','-','_','.','!','?','+','=','/','(',')'
+        ];
+      },
 
 
       get totalKeys() {
 
         return (
           this.chars.length +
-          4
+          6
         );
       },
 
@@ -5661,7 +5833,15 @@
         this.showPassword =
           false;
 
+        this.status = '';
+
+        this.connecting = false;
+
         this.index = 0;
+
+        this.page = 'upper';
+
+        this.letterPage = 'upper';
 
 
         document
@@ -5716,6 +5896,14 @@
         this.showPassword =
           false;
 
+        this.status = '';
+
+        this.connecting = false;
+
+        this.page = 'upper';
+
+        this.letterPage = 'upper';
+
         BMO_CONTROL.render();
       },
 
@@ -5745,7 +5933,7 @@
                   }
                 "
               >
-                ${BMO_CONTROL.escape(c)}
+                ${c === ' ' ? 'ESP' : BMO_CONTROL.escape(c)}
               </div>
             `
           ).join('');
@@ -5755,6 +5943,16 @@
           document.querySelectorAll(
             '#wifiKbActions .wifi-kb-action'
           );
+
+        if (actions[0]) {
+          actions[0].textContent =
+            this.letterPage === 'upper' ? 'abc' : 'ABC';
+        }
+
+        if (actions[1]) {
+          actions[1].textContent =
+            this.page === 'symbols' ? 'LETRAS' : 'SÍMBOLOS';
+        }
 
 
         actions.forEach(
@@ -5801,6 +5999,9 @@
               '_'
             );
         }
+
+        const status = document.getElementById('wifiKbStatus');
+        if (status) status.textContent = this.status;
       },
 
 
@@ -5843,10 +6044,7 @@
 
           this.index =
             40 +
-            Math.min(
-              9,
-              actionCol * 3
-            );
+            Math.round(actionCol * 9 / 5);
         }
 
 
@@ -5883,28 +6081,9 @@
             cols;
 
 
-          let action = 0;
-
-          if (col >= 8) {
-            action = 3;
-          }
-
-          else if (
-            col >= 5
-          ) {
-            action = 2;
-          }
-
-          else if (
-            col >= 3
-          ) {
-            action = 1;
-          }
-
-
           this.index =
             this.chars.length +
-            action;
+            Math.round(col * 5 / 9);
         }
 
 
@@ -5958,10 +6137,10 @@
             (
               a -
               1 +
-              4
+              6
             )
             %
-            4;
+            6;
 
 
           this.index =
@@ -6021,7 +6200,7 @@
               1
             )
             %
-            4;
+            6;
 
 
           this.index =
@@ -6036,15 +6215,16 @@
 
       async connect() {
 
+        if (this.connecting) return;
+
         const ssid =
           this.network?.ssid;
 
 
         if (!ssid) {
 
-          BMO_CONTROL.toast(
-            'REDE INVALIDA'
-          );
+          this.status = 'REDE INVÁLIDA';
+          this.render();
 
           return;
         }
@@ -6063,17 +6243,16 @@
           this.value.length < 8
         ) {
 
-          BMO_CONTROL.toast(
-            'SENHA MUITO CURTA'
-          );
+          this.status = 'SENHA MUITO CURTA';
+          this.render();
 
           return;
         }
 
 
-        BMO_CONTROL.toast(
-          'CONECTANDO...'
-        );
+        this.connecting = true;
+        this.status = 'CONECTANDO... AGUARDE ATÉ 35 S';
+        this.render();
 
 
         try {
@@ -6103,7 +6282,10 @@
                       ssid,
 
                     password:
-                      this.value
+                      this.value,
+
+                    band:
+                      this.network?.band || null
                   })
               }
             );
@@ -6154,15 +6336,16 @@
 
         catch (err) {
 
-          console.error(
-            '[BMO WIFI CONNECT]',
-            err
-          );
+          const message = String(err?.message || '');
+          this.status = /secret|password|senha/i.test(message)
+            ? 'NÃO CONECTOU · CONFIRA A SENHA'
+            : 'NÃO CONECTOU · TENTE NOVAMENTE';
+          this.render();
+        }
 
-
-          BMO_CONTROL.toast(
-            'FALHA AO CONECTAR'
-          );
+        finally {
+          this.connecting = false;
+          if (this.visible) this.render();
         }
       },
 
@@ -6172,6 +6355,8 @@
         if (!this.visible) {
           return;
         }
+
+        if (this.connecting) return;
 
 
         /*
@@ -6192,6 +6377,7 @@
               this.chars[
                 this.index
               ];
+            this.status = '';
           }
 
 
@@ -6206,12 +6392,32 @@
           this.chars.length;
 
 
-        /*
-          MOSTRAR
-        */
-
         if (
           action === 0
+        ) {
+
+          this.letterPage =
+            this.letterPage === 'upper' ? 'lower' : 'upper';
+
+          this.page = this.letterPage;
+
+          this.render();
+        }
+
+        else if (
+          action === 1
+        ) {
+
+          this.page = this.page === 'symbols'
+            ? this.letterPage
+            : 'symbols';
+
+          this.render();
+        }
+
+        /* MOSTRAR */
+        else if (
+          action === 2
         ) {
 
           this.showPassword =
@@ -6226,7 +6432,7 @@
         */
 
         else if (
-          action === 1
+          action === 3
         ) {
 
           this.value =
@@ -6234,6 +6440,8 @@
               0,
               -1
             );
+
+          this.status = '';
 
           this.render();
         }
@@ -6244,7 +6452,7 @@
         */
 
         else if (
-          action === 2
+          action === 4
         ) {
 
           this.connect();
@@ -6256,7 +6464,7 @@
         */
 
         else if (
-          action === 3
+          action === 5
         ) {
 
           this.close();
@@ -9582,7 +9790,16 @@
             if (pressed && !this.previous[index]) {
               const action = this.actions[index];
 
-              if (SYSTEM_PANEL.visible) {
+              // The Wi-Fi keyboard can outlive the CONTROL view if another
+              // button changes APPS.current. Keep its exit path independent.
+              if (BMO_WIFI_KEYBOARD.visible) {
+                if (index === 0 || index === 8) BMO_WIFI_KEYBOARD.close();
+                else if (index === 1) BMO_WIFI_KEYBOARD.activate();
+                else if (index === 13) BMO_WIFI_KEYBOARD.up();
+                else if (index === 14) BMO_WIFI_KEYBOARD.down();
+                else if (index === 15) BMO_WIFI_KEYBOARD.left();
+                else if (index === 16) BMO_WIFI_KEYBOARD.right();
+              } else if (SYSTEM_PANEL.visible) {
                 if ([0, 8, 9].includes(index) && action) action();
               } else if (APPS.current === 'control') {
                 if (
@@ -10909,9 +11126,19 @@ window.stopBmoSleepMode =
         id="wifiKbGrid">
       </div>
 
+      <div class="wifi-kb-status" id="wifiKbStatus" role="status"></div>
+
       <div
         class="wifi-kb-actions"
         id="wifiKbActions">
+
+        <div class="wifi-kb-action">
+          abc
+        </div>
+
+        <div class="wifi-kb-action">
+          SÍMBOLOS
+        </div>
 
         <div class="wifi-kb-action">
           MOSTRAR
