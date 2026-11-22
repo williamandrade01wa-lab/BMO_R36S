@@ -1,4 +1,4 @@
-# BMO R36S
+# LMO R36S (Little-MO)
 
 > [!IMPORTANT]
 > **Aviso Legal e Direitos Autorais (Disclaimer de Propriedade Intelectual):**
@@ -17,13 +17,13 @@
 > - **NÃO USE O CARTÃO SD ORIGINAL:** O cartão microSD genérico que acompanha o console de fábrica é de baixíssima qualidade e corrompe com facilidade. **Faça backup completo** de todos os arquivos, ROMs e bios que vieram nele para o seu computador. Adquira um cartão confiável de marca (SanDisk, Samsung, Kingston original) e instale o BMO nele!
 
 
-BMO é um sistema dedicado para transformar o R36S em uma experiência simples de jogos, streaming e gerenciamento, sem exigir que o usuário conheça Linux, Git ou a história técnica do projeto.
+LMO (Little-MO) é um sistema dedicado para transformar o R36S em uma experiência simples de jogos, streaming e gerenciamento, sem exigir que o usuário conheça Linux, Git ou a história técnica do projeto.
 
 > **Objetivo principal do projeto:** uma pessoa deve conseguir **baixar, gravar, configurar e rodar o BMO** seguindo poucos passos claros e reproduzíveis.
 
 ## Estado atual
 
-O projeto ainda está em desenvolvimento. A **BMO Linux Base** própria está sendo construída e validada antes de uma distribuição pública estável.
+O projeto ainda está em desenvolvimento. A **LMO Linux Base** própria está sendo construída e validada antes de uma distribuição pública estável.
 
 Por isso, este README descreve primeiro a experiência final que estamos construindo. O estado técnico exato, bloqueios e próximo passo ficam versionados em [`docs/PROJECT-CONTINUITY.md`](docs/PROJECT-CONTINUITY.md).
 
@@ -32,7 +32,7 @@ Por isso, este README descreve primeiro a experiência final que estamos constru
 O usuário comum não deverá precisar clonar repositório, configurar chave SSH ou executar vários scripts manualmente.
 
 ```text
-1. Baixar BMO Linux Base
+1. Baixar LMO Linux Base
         ↓
 2. Gravar no microSD
         ↓
@@ -52,7 +52,7 @@ O usuário comum não deverá precisar clonar repositório, configurar chave SSH
 
 Quando o fluxo estiver suficientemente estável, uma variante futura poderá permitir instalação automática, mas o caminho manual `bmo install` será mantido como opção recuperável e didática.
 
-## O que a BMO Linux Base deve entregar
+## O que a LMO Linux Base deve entregar
 
 A imagem base deve ser pequena e previsível. Ela contém somente o necessário para:
 
@@ -159,7 +159,7 @@ A responsabilidade de cada área está definida em [`docs/PROJECT-STRUCTURE.md`]
 Resumo:
 
 ```text
-image/       geração da BMO Linux Base e contrato da imagem
+image/       geração da LMO Linux Base e contrato da imagem
 bootstrap/   referência histórica e ferramentas de bootstrap
 install/     instalação do BMO completo e dependências
 frontend/    interface/kiosk
@@ -188,7 +188,7 @@ Consulte [`docs/CHECKPOINTS.md`](docs/CHECKPOINTS.md) para saber:
 
 ## Desenvolvimento
 
-A branch atual da BMO Linux Base é:
+A branch atual da LMO Linux Base é:
 
 ```text
 feat/bmo-linux-base-v1
