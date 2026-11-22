@@ -1,5 +1,12 @@
 # BMO R36S
 
+> [!WARNING]
+> ### ⚠️ AVISO IMPORTANTE: PROJETO EXPERIMENTAL & CUIDADOS COM O R36S
+> - **Desenvolvimento Amador & Entusiasta:** Este projeto é desenvolvido por um entusiasta explorando os limites de hardware do console R36S. Não é um produto comercial nem uma firmware oficial.
+> - **Compatibilidade:** Desenvolvido e testado exclusivamente para o **R36S ORIGINAL** (placa-mãe e tela autênticas). Não há garantia de funcionamento em clones ou variantes com telas não suportadas. *(Link de referência do modelo original adquirido no AliExpress será incluído em breve).*
+> - **NÃO USE O CARTÃO SD ORIGINAL:** O cartão microSD genérico que acompanha o console de fábrica é de baixíssima qualidade e corrompe com facilidade. **Faça backup completo** de todos os arquivos, ROMs e bios que vieram nele para o seu computador. Adquira um cartão confiável de marca (SanDisk, Samsung, Kingston original) e instale o BMO nele!
+
+
 BMO é um sistema dedicado para transformar o R36S em uma experiência simples de jogos, streaming e gerenciamento, sem exigir que o usuário conheça Linux, Git ou a história técnica do projeto.
 
 > **Objetivo principal do projeto:** uma pessoa deve conseguir **baixar, gravar, configurar e rodar o BMO** seguindo poucos passos claros e reproduzíveis.
