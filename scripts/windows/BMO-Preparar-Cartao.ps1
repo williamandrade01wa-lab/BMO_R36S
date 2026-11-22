@@ -365,11 +365,11 @@ function Show-BmoStep([string]$Step){
             $u.Choices.SelectedIndex=$index
         }
         network{
-            $question='Como o R36S vai se conectar?';$hint='IP automatico. Para Wi-Fi, prefira 2,4 GHz; 5 GHz exige adaptador compativel.';$u.Field.Visible=$false;$u.Choices.Visible=$true
+            $question='Como o R36S vai se conectar?';$hint='Redes 2.4 GHz e 5 GHz suportadas. Analise qual seu adaptador reconhece; na duvida, use 2.4 GHz agora e altere depois no BMO.';$u.Field.Visible=$false;$u.Choices.Visible=$true
             foreach($label in @('Wi-Fi com senha','Wi-Fi sem senha (rede aberta)','Cabo / adaptador Ethernet USB','Sem rede por enquanto')){[void]$u.Choices.Items.Add($label)}
             $u.Choices.SelectedIndex=@('wifi','open','cable','offline').IndexOf($s.Mode)
         }
-        ssid{$question='Qual e o nome do seu Wi-Fi?';$hint='Prefira uma rede de 2,4 GHz. Confira se o adaptador do R36S suporta 5 GHz. Digite o nome sem aspas.';$u.Field.Text=$s.SSID}
+        ssid{$question='Qual e o nome do seu Wi-Fi?';$hint='Suporta 2.4 GHz e 5 GHz. Verifique seu dongle Wi-Fi. Na duvida, escolha 2.4 GHz e troque depois dentro do BMO.';$u.Field.Text=$s.SSID}
         wifiPass{$question='Qual e a senha desse Wi-Fi?';$hint='Sem aspas. Ela fica escondida e nao aparece no resumo.';$u.Field.Text=$s.WifiPassword;$u.Field.UseSystemPasswordChar=$true;$u.Reveal.Visible=$true}
         userPass{$question='Crie uma senha para entrar no R36S.';$hint='Guarde com voce. Para SSH, use uma senha diferente de r36s.';$u.Field.Text=$s.UserPassword;$u.Field.UseSystemPasswordChar=$true;$u.Reveal.Visible=$true}
         confirmPass{$question='Repita a senha do R36S.';$hint='Isso evita gravar uma senha digitada sem querer.';$u.Field.Text='';$u.Field.UseSystemPasswordChar=$true;$u.Reveal.Visible=$true}

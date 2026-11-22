@@ -204,6 +204,13 @@ recuperar → validar → editar → revisar diff → candidate → teste físic
 
 Para continuar o projeto em outro chat/agente, leia primeiro [`AGENTS.md`](AGENTS.md).
 
+
+> [!TIP]
+> **Compatibilidade Wi-Fi (2.4 GHz vs 5 GHz):**
+> O sistema possui suporte tanto para redes **2.4 GHz** quanto **5 GHz** (com dongles compatíveis como RTL8811CU).
+> - **Recomendação:** Verifique qual frequência seu adaptador USB reconhece.
+> - **Na dúvida na primeira instalação:** Conecte em uma rede **2.4 GHz** para garantir a detecção inicial. Você pode alternar facilmente para 5 GHz posteriormente dentro do menu de configurações do BMO.
+
 ## Segurança
 
 Nunca commitar:
