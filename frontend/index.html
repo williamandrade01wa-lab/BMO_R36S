@@ -1174,6 +1174,151 @@
   justify-content: center;
 }
 
+
+
+    /* =========================================================
+       BMO CONTROL - MINIMALISTA & VERDE BMO PASTEL NATIVO
+       ========================================================= */
+
+    #bmoControlApp {
+      background: #AEE8CA !important;
+      color: #0E362F !important;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+
+    #bmoControlApp .ctl-wrap {
+      width: 100%;
+      height: 100%;
+      padding: 16px 20px 12px 20px;
+      display: flex;
+      flex-direction: column;
+      background: #AEE8CA;
+    }
+
+    #bmoControlApp .ctl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid rgba(14, 54, 47, 0.2);
+      padding-bottom: 8px;
+    }
+
+    #bmoControlApp .ctl-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-subtitle {
+      margin-top: 2px;
+      font-size: 11px;
+      opacity: 0.7;
+      letter-spacing: 0.12em;
+      color: #0E362F;
+      font-weight: 700;
+    }
+
+    #bmoControlApp .ctl-status {
+      padding: 5px 12px;
+      border: 2px solid #0E362F;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      background: rgba(14, 54, 47, 0.08);
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      flex: 1;
+    }
+
+    #bmoControlApp .ctl-card {
+      min-height: 110px;
+      border: 2px solid rgba(14, 54, 47, 0.18);
+      border-radius: 16px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.35);
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(14, 54, 47, 0.05);
+    }
+
+    #bmoControlApp .ctl-card.selected {
+      border: 2.5px solid #0E362F;
+      background: #FFFFFF;
+      transform: scale(1.03);
+      box-shadow: 0 6px 14px rgba(14, 54, 47, 0.15);
+    }
+
+    #bmoControlApp .ctl-icon {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-label {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      color: #0E362F;
+    }
+
+    #bmoControlApp .ctl-value {
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: 700;
+      color: rgba(14, 54, 47, 0.75);
+    }
+
+    #bmoControlApp .ctl-footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 8px;
+      margin-top: auto;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(14, 54, 47, 0.6);
+      letter-spacing: 0.04em;
+    }
+
+    #bmoControlApp .ctl-network {
+      background: rgba(255, 255, 255, 0.35);
+      border: 1.5px solid rgba(14, 54, 47, 0.18);
+      color: #0E362F;
+      border-radius: 10px;
+    }
+
+    #bmoControlApp .ctl-network.selected {
+      border: 2px solid #0E362F !important;
+      background: #FFFFFF !important;
+    }
+
+    #bmoControlApp .ctl-action {
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid rgba(14, 54, 47, 0.2);
+      color: #0E362F;
+      border-radius: 10px;
+      font-weight: 900;
+    }
+
+    #bmoControlApp .ctl-action.selected {
+      border-color: #0E362F;
+      background: #FFFFFF;
+    }
+
 </style>
 
 <style id="bmo-sleep-style">
